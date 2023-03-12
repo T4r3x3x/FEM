@@ -2,27 +2,27 @@
 using System.IO;
 
 namespace HelloWorld
-{
+{ 
     class umf2
     {
-        static double a, c, d, e, q = 2, lamda = 1, gamma = 1, eps = 1e-20, delta = 1e-33, result, w = 1, h;
+        static double a, c, d, e, q = 2, lamda = 1, gamma = 1, eps = 1e-20, delta = 1e-33, result, w = 1,h;
         static int n = 0, m = 0, grid_type, iter_count = 0, max_iter_count = 10000;
         static double[] b, temp, b0, XW, YW, t;
         static double[][] A, B, L, U, u, uk;
         static int leftBoundary, rightBoundary;
-        static int size;
+        static int size;        
         static double max_diff;
         static double temper;
         static int[][] areas;
-        static List<double> x, y, hy, hx;
+        static List<double> x,y,hy,hx;
         static List<int> IX, IY;
         static Dictionary<int, int> W; // структура которая ассоциирует глобальный номер узла и номер подобласти
-                                       // static double[] Gx, Gy, Mx, My;
+            // static double[] Gx, Gy, Mx, My;
 
 
-        static double Func(double x, double y) => x + y;
+        static double Func(double x, double y) => x+y;
         static double DivFunc(double x, double y) => 1;
-        static double F(double x, double y) => x + y;
+        static double F(double x, double y) =>  x+y;
 
 
         static double G(double h, int i, int j)
@@ -89,7 +89,9 @@ namespace HelloWorld
             IX = new List<int>();
             IY = new List<int>();
 
+
             ReadData2();
+
 
             n = x.Count();
             m = y.Count();
@@ -110,10 +112,10 @@ namespace HelloWorld
             for (int i = 0; i < areas.Length; i++) //по всем подобластям
             {
                 Console.WriteLine(IX[areas[i][1]]);
-                W.Add(IX[areas[i][0]] + IY[areas[i][2]] * n, i);//глобальный номер левой нижней точки
-                W.Add(IX[areas[i][1]] + IY[areas[i][2]] * n - 1, i);//номер х правой границы
+                W.Add(IX[areas[i][0]] + IY[areas[i][2]] *n,i);//глобальный номер левой нижней точки
+                W.Add(IX[areas[i][1]] + IY[areas[i][2]] * n-1, i);//номер х правой границы
                 W.Add(IX[areas[i][0]] + IY[areas[i][3]] * n, i);//номер y вверхней границы
-                W.Add(IX[areas[i][1]] + IY[areas[i][3]] * n - 1, i);//номер y нижней границы
+                W.Add(IX[areas[i][1]] + IY[areas[i][3]] * n-1, i);//номер y нижней границы
             }
             W.OrderBy(x => x.Key);
 
@@ -125,30 +127,20 @@ namespace HelloWorld
                 u[i] = new double[size];
                 uk[i] = new double[size];
             }
-
+            
             temp = new double[size];
+                       
 
+            MakeGrid();
             MakeSLau();
             GetBoundaryConditions();
             PrintGrid();
             PrintTimeGrid();
             Console.WriteLine("\n--------------------------------------------------------------------\n");
-            //   PrintSLAU();
-            for (int i = 0; i < t.Length; i++)
-            {
-                SolveSlau();
-                SwapSolves();
-            }
-
+         //   PrintSLAU();
+            SolveSlau();
             PrintResult();
             #endregion
-        }
-
-        private static void SwapSolves()
-        {
-            temp = u[0];
-            u[0] = u[1];
-            u[1] = temp;
         }
 
         private static void PrintTimeGrid()
@@ -194,6 +186,29 @@ namespace HelloWorld
             return Math.Sqrt(result);
         }
 
+        static void ReadData()
+        {
+            using (StreamReader sr = new StreamReader("input.txt"))
+            {
+                string[] data = sr.ReadLine().Split(' ');
+                a = double.Parse(data[0]);
+                c = double.Parse(data[1]);
+                n = int.Parse(data[2]);
+
+
+                d = double.Parse(data[3]);
+                e = double.Parse(data[4]);
+                m = int.Parse(data[5]);
+
+                size = n * m;
+
+                grid_type = int.Parse(data[6]);
+                leftBoundary = int.Parse(data[7]);
+                rightBoundary = int.Parse(data[8]);
+            }
+        }
+
+
         static void ReadData2()
         {
             using (StreamReader sr = new StreamReader("domain.txt"))
@@ -204,7 +219,9 @@ namespace HelloWorld
 
                 data = sr.ReadLine().Split(' ');
                 for (int i = 0; i < n; i++)
+                {
                     XW[i] = double.Parse(data[i]);
+                }
 
                 data = sr.ReadLine().Split(' ');
                 m = int.Parse(data[0]);
@@ -212,19 +229,28 @@ namespace HelloWorld
 
                 data = sr.ReadLine().Split(' ');
                 for (int i = 0; i < m; i++)
+                {
                     YW[i] = double.Parse(data[i]);
+                }
 
                 data = sr.ReadLine().Split(' ');
                 areas = new int[int.Parse(data[0])][];
                 for (int i = 0; i < areas.Length; i++)
+                {
                     areas[i] = new int[4];
+                }
 
                 for (int i = 0; i < areas.Length; i++)
                 {
                     data = sr.ReadLine().Split(' ');
                     for (int j = 0; j < 4; j++)
+                    {
                         areas[i][j] = int.Parse(data[j]);
+                    }
+
                 }
+
+
             }
 
             using (StreamReader sr = new StreamReader("mesh.txt"))
@@ -272,28 +298,25 @@ namespace HelloWorld
                 int layersCount = int.Parse(data[0]);
                 t = new double[layersCount];
                 t[0] = double.Parse(data[1]);
-                t[layersCount - 1] = double.Parse(data[2]);
+                t[layersCount-1] = double.Parse(data[2]);
                 q = double.Parse(data[3]);
 
                 if (q == 1)
-                    h = (t[layersCount - 1] - t[0]) / n;
+                    h = (t[layersCount-1] - t[0]) / n;
                 else
-                    h = (t[layersCount - 1] - t[0]) * (q - 1) / (Math.Pow(q, layersCount - 1) - 1);
+                    h = (t[layersCount - 1] - t[0]) * (q - 1) / (Math.Pow(q, layersCount-1) - 1);
 
-                for (int i = 1; i < layersCount; i++)
-                {
+                for (int i = 1; i < layersCount-1; i++)
                     t[i] = t[i - 1] + h;
-                    h *= q;
-                }
             }
         }
 
-        static void MakeArea(double h, List<double> points, List<double> steps, int n, double q)//режим область на части и записываем в массив, h - шаг,  j - номер подобласти
+        static void MakeArea(double h, List<double> points, List<double> steps,int n, double q)//режим область на части и записываем в массив, h - шаг,  j - номер подобласти
         {
             int size = points.Count();
-            for (int j = size; j < n + size; j++)
+            for (int j = size; j < n+size; j++)
             {
-                points.Add(points[j - 1] + h);
+                points.Add(points[j-1]+ h);
                 steps.Add(h);
                 h *= q;
             }
@@ -341,7 +364,7 @@ namespace HelloWorld
                 for (int i = 1; i < n; i++)
                 {
                     x[i] = x[i - 1] + hx[i - 1];
-
+                   
                     hx[i] = q * hx[i - 1];
                 }
 
@@ -356,7 +379,7 @@ namespace HelloWorld
         static int mu(int i) => ((i) % 2);
         static int nu(int i) => ((i) / 2);
 
-        static double[][] GetLocalMatrix(double hx, double hy)// m - номер кэ 
+        static double[][] GetMatrix(double hx, double hy)// m - номер кэ 
         {
             //матрица жесткости
             double[][] result = new double[4][];
@@ -365,7 +388,7 @@ namespace HelloWorld
 
             for (int i = 0; i < result.Length; i++)
                 for (int j = 0; j < result.Length; j++)
-                    result[i][j] = lamda * (G(hx, mu(i), mu(j)) * M(hy, nu(i), nu(j)) + M(hx, mu(i), mu(j)) * G(hy, nu(i), nu(j))); //матрица жётскости
+                    result[i][j] = lamda* (G(hx, mu(i), mu(j)) * M(hy, nu(i), nu(j)) + M(hx, mu(i), mu(j)) * G(hy, nu(i), nu(j))); //матрица жётскости
 
 
             for (int i = 0; i < result.Length; i++)
@@ -387,24 +410,27 @@ namespace HelloWorld
 
         static void MakeSLau()
         {
-            double[][] localMatrix;
-            for (int j = 0; j < m - 1; j++)
-                for (int i = 0; i < n - 1; i++) // проходим по КЭ 
+            double[][] matrix;
+            for (int j = 0; j < m-1; j++)
+            {
+                for (int i = 0; i < n-1; i++) // проходим по КЭ 
                 {
-                    localMatrix = GetLocalMatrix(hx[i], hy[j]);
 
-                    for (int k = 0; k < localMatrix.Length; k++)
-                        for (int p = 0; p < localMatrix[0].Length; p++)
-                            A[i + j * n + k / 2 * n + k % 2][i + j * n + p / 2 * n + p % 2] += localMatrix[k][p];
+                    matrix = GetMatrix(hx[i], hy[j]);
 
+                    for (int k = 0; k < matrix.Length; k++)
+                        for (int p = 0; p < matrix[0].Length; p++) 
+                            A[i + j * n + k / 2 * n + k % 2][i + j * n + p / 2 * n + p % 2] += matrix[k][p];
+                      
 
-                    b[i + j * n]           += hx[i] * hy[j] / 36 * ( 4 * F(x[i], y[j]) + 2 * F(x[i + 1], y[j]) + 2 * F(x[i], y[j + 1]) +     F(x[i + 1], y[j + 1]) );
-                    b[i + j * n + 1]       += hx[i] * hy[j] / 36 * ( 2 * F(x[i], y[j]) + 4 * F(x[i + 1], y[j]) +     F(x[i], y[j + 1]) + 2 * F(x[i + 1], y[j + 1]) );
-                    b[i + (j + 1) * n]     += hx[i] * hy[j] / 36 * ( 2 * F(x[i], y[j]) +     F(x[i + 1], y[j]) + 4 * F(x[i], y[j + 1]) + 2 * F(x[i + 1], y[j + 1]) );
-                    b[i + (j + 1) * n + 1] += hx[i] * hy[j] / 36 * (     F(x[i], y[j]) + 2 * F(x[i + 1], y[j]) + 2 * F(x[i], y[j + 1]) + 4 * F(x[i + 1], y[j + 1]) );
+                    b[i + j * n] += (4 * F(x[i], y[j]) + 2 * F(x[i + 1], y[j]) + 2 * F(x[i], y[j + 1]) + F(x[i + 1], y[j + 1]))* hx[i] * hy[j] / 36;
+                    b[i + j * n + 1] += (2 * F(x[i], y[j]) + 4 * F(x[i + 1], y[j]) + F(x[i], y[j + 1]) + 2 * F(x[i + 1], y[j + 1]))*hx[i] * hy[j] / 36;
+                    b[i + (j+1) * n ] += (2 * F(x[i], y[j]) + F(x[i + 1], y[j]) + 4 * F(x[i], y[j + 1]) + 2 * F(x[i + 1], y[j + 1]))*hx[i] * hy[j] / 36;
+                    b[i + (j+1) * n + 1] += (F(x[i], y[j]) + 2 * F(x[i + 1], y[j]) + 2 * F(x[i], y[j + 1]) + 4 * F(x[i + 1], y[j + 1]))*hx[i] * hy[j] / 36;
 
 
                 }
+            }
         }
 
         static void GetBoundaryConditions()
@@ -419,33 +445,33 @@ namespace HelloWorld
                 b[i] = Func(x[i], y[0]);
             }
 
-            for (int i = A.Length - 1; i > A.Length - m - 1; i--)//верхняя граница
+            for (int i = A.Length-1; i > A.Length - m-1; i--)//верхняя граница
             {
                 for (int j = 0; j < A[0].Length; j++)
                 {
                     A[i][j] = 0;
                 }
                 A[i][i] = 1;
-                b[i] = Func(x[i % n], y[m - 1]);
+                b[i] = Func(x[i%n], y[m-1]);
             }
 
-            for (int i = n; i < A.Length - m - 1; i += n)//левая гравнь
+            for (int i = n; i < A.Length - m - 1; i+=n)//левая гравнь
             {
                 for (int j = 0; j < A[0].Length; j++)
                 {
                     A[i][j] = 0;
                 }
                 A[i][i] = 1;
-                b[i] = Func(x[0], y[i / m]);
+                b[i] = Func(x[0], y[i/m]);
             }
-            for (int i = 2 * n - 1; i < A.Length; i += n)//правая граница
+            for (int i = 2*n-1; i < A.Length; i += n)//правая граница
             {
                 for (int j = 0; j < A[0].Length; j++)
                 {
                     A[i][j] = 0;
                 }
                 A[i][i] = 1;
-                b[i] = Func(x[n - 1], y[i / m]);
+                b[i] = Func(x[n-1], y[i/m]);
             }
         }
         static void SolveSlau()
@@ -473,7 +499,7 @@ namespace HelloWorld
                 u[u.Length - 1][i] = temp[i];
                 for (int j = size - 1; j > i; j--)
                 {
-                    u[u.Length - 1][i] -= U[i][j] * u[u.Length - 1][j];
+                    u[u.Length-1][i] -= U[i][j] * u[u.Length - 1][j];
                 }
                 u[u.Length - 1][i] /= U[i][i];
             }
@@ -551,7 +577,7 @@ namespace HelloWorld
             {
                 for (int j = 0; j < n; j++)
                 {
-                    uk[uk.Length - 1][i * n + j] = Func(x[j], y[i]);
+                    uk[uk.Length - 1][i * n + j] = Func(x[j],y[i]);
                 }
             }
 
@@ -561,7 +587,7 @@ namespace HelloWorld
                 //      Console.WriteLine("u{0} = {1} | u*{0} = {3} | {4}", i + 1, u[i],i+1,uk[i],u[i]-uk[i]);
                 Console.WriteLine("u{0} = {1}", i + 1, u[u.Length - 1][i]);
             }
-            Console.WriteLine("Относительная погрешность: " + GetSolveDifference(u[u.Length - 1], uk[uk.Length - 1]));
+            Console.WriteLine("Относительная погрешность: " + GetSolveDifference(u[u.Length-1], uk[uk.Length-1]));
         }
         static double[] MultitplyMatrixOnVector(double[][] A, double[] u)
         {
