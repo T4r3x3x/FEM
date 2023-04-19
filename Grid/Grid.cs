@@ -96,12 +96,12 @@
                     m = int.Parse(data[i]);
                     q = double.Parse(data[i + 1]);
                     if (q == 1)
-                        h = (YW[i / 2 + 1] - YW[i / 2]) / (n - 1);
+                        h = (YW[i / 2 + 1] - YW[i / 2]) / (m - 1);
                     else
                     {
-                        h = (YW[i / 2 + 1] - YW[i / 2]) * (q - 1) / (Math.Pow(q, n - 1) - 1);
+                        h = (YW[i / 2 + 1] - YW[i / 2]) * (q - 1) / (Math.Pow(q, m - 1) - 1);
                     }
-                    MakeArea(h, y, hy, n, q);
+                    MakeArea(h, y, hy, m, q);
                     IY.Add(y.Count() - 1);
                 }
             }
@@ -153,6 +153,25 @@
                 }
             }
             return -1;
+        }
+
+        public static void WriteGrid()
+        {
+            using (StreamWriter sw = new StreamWriter("grid.txt"))
+            {
+                sw.WriteLine(x.Count());
+                sw.WriteLine(y.Count());
+                //  sw.WriteLine("Hello World!!");
+                for (int i = 0; i < x.Count(); i++)
+                {
+                    sw.WriteLine(x[i].ToString().Replace(",","."));
+                }
+                for (int i = 0; i < y.Count(); i++)
+                {
+                    sw.WriteLine(y[i].ToString().Replace(",", "."));
+                }
+                sw.Close();
+            }
         }
        public  static void PrintPartialGrid()
         {

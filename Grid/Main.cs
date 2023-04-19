@@ -5,6 +5,8 @@ namespace ResearchPaper
 {
     class Master
     {
+        static double ro, fita, K, nu,mu;
+       
         public static double Lamda = 1, Gamma = 1, Sigma = 1;//Sigma в массе масс вместо гаммы для времени     
         public static SLAU Slau;
         public static int[] boundaryConditions = new int[4] {1,1,1,1};
@@ -31,30 +33,28 @@ namespace ResearchPaper
             sw.Start();
             Solver solver = new();
             Grid.ReadData();
-            Grid.PrintPartialGrid();
-            Grid.PrintTimeGrid();
-
+            //  Grid.PrintPartialGrid();
+            //   Grid.PrintTimeGrid();
+            Grid.WriteGrid();
             Slau = new SLAU(Grid.NodesCount, Grid.TimeLayersCount);
             Collector collector = new(Grid.NodesCount);
 
             collector.Collect();
-            Slau.p = solver.Solve(Slau.b, Slau.A);
-
+            Slau.p = solver.Solve(Slau.A, Slau.b);
             Slau.PrintResult(-1, false);
-            //     GetV(1, 1, 2, 1, 2, 1.0694318442029738, 0.06943184420297371, 1, 1).Print();
             collector.GetMatrixH();
-            //   GetV(4,1,2,1,2,1.5,1.5,1,1).Print();
-
+            collector.RebuildMatrix();
+            
             for (int i = 2; i < Grid.TimeLayersCount; i++)
             {
                 collector.Collect(i);
-                //   Slau.Print();
-                Slau.q[i] = solver.Solve(Slau.b, Slau.A);
-                //    Console.WriteLine("solving in proccess: {0} of {1} time layers...", i+1, Grid.TimeLayersCount);
+                //  ;
+                Slau.q[i] = solver.Solve(Slau.A, Slau.b);
+                //Console.WriteLine("solving in proccess: {0} of {1} time layers...", i+1, Grid.TimeLayersCount);
             }
-            Slau.PrintResult(2, true);
+            Slau.PrintResult(2, false);
             sw.Stop();
-            //  Console.WriteLine(sw.ElapsedMilliseconds);
+            Console.WriteLine(sw.ElapsedMilliseconds);
         }
     }
 }

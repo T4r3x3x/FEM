@@ -16,48 +16,48 @@ namespace ReaserchPaper
 
 
 
-        public static Point GetV(int elemNumber, double xLeft, double xRight, double yLower, double yUpper, double x, double y, double hx, double hy)
+        public static Point GetV(int elemNumber, Point xBoundaries, Point yBoundaries, Point point, double hx, double hy)
         {
             double _x, _y;
-            _x = -Master.Slau.p.Elements[elemNumber] * Y1(y, yUpper, hy) / hx + Master.Slau.p.Elements[elemNumber + 1] * Y1(y, yUpper, hy) / hx
-            - Master.Slau.p.Elements[elemNumber + Grid.N] * Y2(y, yLower, hy) / hx + Master.Slau.p.Elements[elemNumber + Grid.N + 1] * Y2(y, yLower, hy) / hx;
-            _y = -Master.Slau.p.Elements[elemNumber] * X1(x, xRight, hx) / hy - Master.Slau.p.Elements[elemNumber + 1] * X2(x, xLeft, hx) / hy
-            + Master.Slau.p.Elements[elemNumber + Grid.N] * X1(x, xRight, hx) / hy + Master.Slau.p.Elements[elemNumber + Grid.N + 1] * X2(x, xLeft, hx) / hy;
+            _x = -Master.Slau.p.Elements[elemNumber] * Y1(point.y, yBoundaries.y, hy) / hx + Master.Slau.p.Elements[elemNumber + 1] * Y1(point.y, yBoundaries.y, hy) / hx
+            - Master.Slau.p.Elements[elemNumber + Grid.N] * Y2(point.y, yBoundaries.x, hy) / hx + Master.Slau.p.Elements[elemNumber + Grid.N + 1] * Y2(point.y, yBoundaries.x, hy) / hx;
+            _y = -Master.Slau.p.Elements[elemNumber] * X1(point.x, xBoundaries.y, hx) / hy - Master.Slau.p.Elements[elemNumber + 1] * X2(point.x, xBoundaries.x, hx) / hy
+            + Master.Slau.p.Elements[elemNumber + Grid.N] * X1(point.x, xBoundaries.y, hx) / hy + Master.Slau.p.Elements[elemNumber + Grid.N + 1] * X2(point.x, xBoundaries.x, hx) / hy;
             return new Point(-_x, -_y);
         }
 
-        public static double VGradP(int elemNumber, int i, int j, double xLeft, double xRight, double yLower, double yUpper, double x, double y, double hx, double hy)
+        public static double VGradP(int elemNumber, int i, int j, Point xBoundaries, Point yBoundaries, Point point, double hx, double hy)
         {
             double result = 0;
-            Point V = GetV(elemNumber, xLeft, xRight, yLower, yUpper, x, y, hx, hy);
+            Point V = GetV(elemNumber, xBoundaries,yBoundaries, point, hx, hy);
             switch (j)
             {
                 case 0:
-                    result += (-V.x * Y1(y, yUpper, hy) / hx - V.y * X1(x, xRight, hx) / hy);
+                    result += (-V.x * Y1(point.y, yBoundaries.y, hy) / hx - V.y * X1(point.x, xBoundaries.y, hx) / hy);
                     break;
                 case 1:
-                    result += (V.x * Y1(y, yUpper, hy) / hx - V.y * X2(x, xLeft, hx) / hy);
+                    result += (V.x * Y1(point.y, yBoundaries.y, hy) / hx - V.y * X2(point.x, xBoundaries.x, hx) / hy);
                     break;
                 case 2:
-                    result += (-V.x * Y2(y, yLower, hy) / hx + V.y * X1(x, xRight, hx) / hy);
+                    result += (-V.x * Y2(point.y, yBoundaries.x, hy) / hx + V.y * X1(point.x, xBoundaries.y, hx) / hy);
                     break;
                 case 3:
-                    result += (V.x * Y2(y, yLower, hy) / hx + V.y * X2(x, xLeft, hx) / hy);
+                    result += (V.x * Y2(point.y, yBoundaries.x, hy) / hx + V.y * X2(point.x, xBoundaries.x, hx) / hy);
                     break;
             }
             switch (i)
             {
                 case 0:
-                    result *= Y1(y, yUpper, hy) * X1(x, xRight, hx);
+                    result *= Y1(point.y, yBoundaries.y, hy) * X1(point.x, xBoundaries.y, hx);
                     break;
                 case 1:
-                    result *= Y1(y, yUpper, hy) * X2(x, xLeft, hx);
+                    result *= Y1(point.y, yBoundaries.y, hy) * X2(point.x, xBoundaries.x, hx);
                     break;
                 case 2:
-                    result *= Y2(y, yLower, hy) * X1(x, xRight, hx);
+                    result *= Y2(point.y, yBoundaries.x, hy) * X1(point.x, xBoundaries.y, hx);
                     break;
                 case 3:
-                    result *= Y2(y, yLower, hy) * X2(x, xLeft, hx);
+                    result *= Y2(point.y, yBoundaries.x, hy) * X2(point.x, xBoundaries.x, hx);
                     break;
             }
             return result;

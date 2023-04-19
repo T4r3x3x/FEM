@@ -18,19 +18,15 @@ namespace ResearchPaper
         static Vector r, z, p;
         static Vector D, L, U;
 
-        public enum SolverType
-        {
-            ILU, LOS,
-        }
+        
 
-
-        public Vector Solve(Vector f, Matrix A)
+        public Vector Solve(Matrix A, Vector f)
         {
-            return LOSLU(Master.Slau.b,Master.Slau.A);
+            return LOSLU(A,f);
         }
 
       
-        static Vector LOSLU(Vector f, Matrix A)
+        static Vector LOSLU(Matrix A, Vector f)
         {
             Vector solve = new Vector(Grid.NodesCount);
             r = new Vector(Grid.NodesCount);
@@ -80,8 +76,6 @@ namespace ResearchPaper
         static void ILUsqModi(Matrix A)
         {
             int i;
-            int i0, i1, ki, kj;
-            double suml, sumu, sumd;
          
             D = new Vector(A.Size);
             L = new Vector(A.al.Count());

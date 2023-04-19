@@ -23,12 +23,12 @@ namespace ResearchPaper
 
       
 
-        int GetNodeNumber(int localNumber,int elemNumber)
+        int GetNodeNumber(int nodelocalNumber,int elemNumber)
         {
             int yLine = elemNumber / (Grid.N - 1);//в каком ряду по у находится кэ 
             int xLine = elemNumber - yLine * (Grid.N-1);//в каком ряду по x находится кэ 
             int xOffset = 0, yOffset = 0;
-            switch (localNumber)
+            switch (nodelocalNumber)
             {
                 case 1:
                     xOffset = 1;
@@ -220,6 +220,22 @@ namespace ResearchPaper
 
             for (int i = 0; i < a.al.Count(); i++)
                 result.al[i] = a.al[i] + b.al[i];
+
+            return result;
+        }
+
+        public static Matrix operator -(Matrix a, Matrix b)
+        {
+            Matrix result = new Matrix(a.Size);
+
+            for (int i = 0; i < a.Size; i++)
+                result.di[i] = a.di[i] - b.di[i];
+
+            for (int i = 0; i < a.au.Count(); i++)
+                result.au[i] = a.au[i] - b.au[i];
+
+            for (int i = 0; i < a.al.Count(); i++)
+                result.al[i] = a.al[i] - b.al[i];
 
             return result;
         }

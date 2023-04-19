@@ -13,6 +13,7 @@ namespace ReaserchPaper
     internal class Collector
     {
         static Matrix _M, _G, _H;
+        static double timeCoef;
 
         static double G(double h, int i, int j)
         {
@@ -94,9 +95,14 @@ namespace ReaserchPaper
 
         public void Collect(int timeLayer)
         {
-            ResetSlau();
+            SubstractM();
             MakeSLau(timeLayer);
             GetBoundaryConditions(timeLayer);
+        }
+
+        static void SubstractM()
+        {
+            Master.Slau.A -= _M * timeCoef;
         }
 
         static void ResetSlau()
@@ -105,11 +111,15 @@ namespace ReaserchPaper
             Master.Slau.b.Reset();
         }
 
+        public void RebuildMatrix()
+        {
+            ResetSlau();
+            Master.Slau.A +=  _G * Master.Sigma + _H;
+        }
+
         private void GetMatrixesMG()
         {
             double[][] localMatrix;
-            int index1;
-            int index2;
             for (int j = 0; j < Grid.M - 1; j++)
                 for (int i = 0; i < Grid.N - 1; i++) // проходим по КЭ 
                 {
@@ -123,8 +133,6 @@ namespace ReaserchPaper
         public void GetMatrixH()
         {
             double[][] localMatrix;
-            int index1;
-            int index2;
             for (int j = 0; j < Grid.M - 1; j++)
                 for (int i = 0; i < Grid.N - 1; i++) // проходим по КЭ 
                 {
@@ -154,7 +162,6 @@ namespace ReaserchPaper
                 }
             }
         }
-
         static int BinarySearch(List<int> list, int value, int l, int r)
         {
             while (l != r)
@@ -169,7 +176,6 @@ namespace ReaserchPaper
 
             return (list[l] == value) ? l : -1;
         }
-
         private static void GetTimeConditions()
         {
             for (int p = 0; p < 2; p++) //записываем в [1] и в [2] так как потом в цикле вызовется SwapSolves и значение перезапишутся в [0] и [1] соотвественно.     
@@ -232,8 +238,10 @@ namespace ReaserchPaper
             Vector vector1 = _M * Master.Slau.q[timeLayer - 2];
             Vector vector2 = _M * Master.Slau.q[timeLayer - 1];
 
+            timeCoef = ((deltaT + deltaT0) / (deltaT * deltaT0)) * Master.Lamda;
+
             Master.Slau.b += -(deltaT0 / (deltaT * deltaT1)) * vector1 + deltaT / (deltaT1 * deltaT0) * vector2;
-            Master.Slau.A += _M * ((deltaT + deltaT0) / (deltaT * deltaT0)) * Master.Lamda + _G * Master.Sigma + _H;
+            Master.Slau.A += _M * timeCoef;
 
             for (int j = 0; j < Grid.M - 1; j++)
                 for (int i = 0; i < Grid.N - 1; i++) // проходим по КЭ 
@@ -286,7 +294,7 @@ namespace ReaserchPaper
                 }
 
             if (Master.boundaryConditions[2] == 1)//верхняя граница
-                for (int i = Master.Slau.A.Size - 1; i > Master.Slau.A.Size - Grid.M - 1; i--)
+                for (int i = Master.Slau.A.Size - 1; i > Master.Slau.A.Size - Grid.N - 1; i--)
                 {
                     ZeroingRow(i);
                     Master.Slau.A.di[i] = 1;
@@ -300,11 +308,11 @@ namespace ReaserchPaper
                 }
 
             if (Master.boundaryConditions[3] == 1)//левая гравнь
-                for (int i = Grid.N; i < Master.Slau.A.Size - Grid.M - 1; i += Grid.N)
+                for (int i = Grid.N; i < Master.Slau.A.Size - Grid.N - 1; i += Grid.N)
                 {
                     ZeroingRow(i);
                     Master.Slau.A.di[i] = 1;
-                    Master.Slau.b.Elements[i] = Master.Func1(Grid.x[0], Grid.y[i / Grid.M]);
+                    Master.Slau.b.Elements[i] = Master.Func1(Grid.x[0], Grid.y[i / Grid.N]);
                 }
             else
                 for (int i = 0; i < Grid.N - 1; i++)
@@ -318,7 +326,7 @@ namespace ReaserchPaper
                 {
                     ZeroingRow(i);
                     Master.Slau.A.di[i] = 1;
-                    Master.Slau.b.Elements[i] = Master.Func1(Grid.x[Grid.N - 1], Grid.y[i / Grid.M]);
+                    Master.Slau.b.Elements[i] = Master.Func1(Grid.x[Grid.N - 1], Grid.y[i / Grid.N]);
                 }
             else
                 for (int i = 0; i < Grid.N - 1; i++)
@@ -347,7 +355,7 @@ namespace ReaserchPaper
                 }
 
             if (Master.boundaryConditions[2] == 1)//верхняя граница
-                for (int i = Master.Slau.A.Size - 1; i > Master.Slau.A.Size - Grid.M - 1; i--)
+                for (int i = Master.Slau.A.Size - 1; i > Master.Slau.A.Size - Grid.N - 1; i--)
                 {
                     ZeroingRow(i);
                     Master.Slau.A.di[i] = 1;
@@ -361,11 +369,11 @@ namespace ReaserchPaper
                 }
 
             if (Master.boundaryConditions[3] == 1)//левая гравнь
-                for (int i = Grid.N; i < Master.Slau.A.Size - Grid.M - 1; i += Grid.N)
+                for (int i = Grid.N; i < Master.Slau.A.Size - Grid.N - 1; i += Grid.N)
                 {
                     ZeroingRow(i);
                     Master.Slau.A.di[i] = 1;
-                    Master.Slau.b.Elements[i] = Master.Func2(Grid.x[0], Grid.y[i / Grid.M], Grid.t[timeLayer]);
+                    Master.Slau.b.Elements[i] = Master.Func2(Grid.x[0], Grid.y[i / Grid.N], Grid.t[timeLayer]);
                 }
             else
                 for (int i = 0; i < Grid.N - 1; i++)
@@ -379,7 +387,7 @@ namespace ReaserchPaper
                 {
                     ZeroingRow(i);
                     Master.Slau.A.di[i] = 1;
-                    Master.Slau.b.Elements[i] = Master.Func2(Grid.x[Grid.N - 1], Grid.y[i / Grid.M], Grid.t[timeLayer]);
+                    Master.Slau.b.Elements[i] = Master.Func2(Grid.x[Grid.N - 1], Grid.y[i / Grid.N], Grid.t[timeLayer]);
                 }
             else
                 for (int i = 0; i < Grid.N - 1; i++)
@@ -390,15 +398,17 @@ namespace ReaserchPaper
         }
 
 
-        static double[][] GetGradTMatrix(int elemNumber, double hx, double hy, double xLeft, double yUpper)
+        static double[][] GetGradTMatrix(int elemNumber, double hx, double hy, double xLeft, double yLower)
         {
             double[][] matrix = new double[4][];
+            Point xBoundaries = new Point(xLeft, xLeft + hx);
+            Point yBoundaries = new Point(yLower, yLower + hy);
 
             for (int i = 0; i < 4; i++)
             {
                 matrix[i] = new double[4];
                 for (int j = 0; j < 4; j++)
-                    matrix[i][j] = NumericalMethods.GaussIntegration(elemNumber, i, j, xLeft, xLeft + hx, yUpper, yUpper + hy, hx, hy);                
+                    matrix[i][j] = NumericalMethods.GaussIntegration(elemNumber, i, j, xBoundaries, yBoundaries, hx, hy);                
             }
 
             return matrix;
