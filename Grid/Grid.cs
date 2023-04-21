@@ -1,4 +1,6 @@
-﻿namespace ReaserchPaper
+﻿using ResearchPaper;
+
+namespace ReaserchPaper
 {
     internal class Grid
     {
@@ -105,6 +107,9 @@
                     IY.Add(y.Count() - 1);
                 }
             }
+            n = x.Count();
+            m = y.Count();
+
 
             using (StreamReader sr = new StreamReader("timeGrid.txt"))
             {
@@ -140,13 +145,13 @@
         }
 
         //                  y      x
-        public int GetAreaNumber(int _i, int _j)
+        public static int GetAreaNumber(int _i, int _j)
         {
-            for (int i = 0; i < areas.Length; i++)
+            for (int i = areas.Length-1; i >=0 ; i--)//идём в обратном порядке чтобы не было бага, когда в качестве подобласти возвращается 0 (0 - вся расчётная область, которая уже вкл. подобласти)
             {
                 if (IY[areas[i][2]] <= _i && _i <= IY[areas[i][3]])
                 {
-                    if (IY[areas[i][0]] <= _j && _j <= IY[areas[i][1]])
+                    if (IX[areas[i][0]] <= _j && _j <= IX[areas[i][1]])
                     {
                         return i;
                     }
@@ -159,6 +164,11 @@
         {
             using (StreamWriter sw = new StreamWriter("grid.txt"))
             {
+                sw.WriteLine("{0} {1} {2} {3}", x[Master.borehole[0]].ToString().Replace(",", "."), x[Master.borehole[1]].ToString().Replace(",", "."),
+                    y[Master.borehole[2]].ToString().Replace(",", "."), y[Master.borehole[3]].ToString().Replace(",", "."));
+                sw.WriteLine("{0} {1} {2} {3}", x[0].ToString().Replace(",", "."), x[x.Count()-1].ToString().Replace(",", "."),
+                    y[0].ToString().Replace(",", "."), y[y.Count() - 1].ToString().Replace(",", "."));
+
                 sw.WriteLine(x.Count());
                 sw.WriteLine(y.Count());
                 //  sw.WriteLine("Hello World!!");
@@ -170,6 +180,9 @@
                 {
                     sw.WriteLine(y[i].ToString().Replace(",", "."));
                 }
+                sw.WriteLine(areas.Length);
+                foreach (var area in areas)
+                    sw.WriteLine("{0} {1} {2} {3}", XW[area[0]], XW[area[1]], YW[area[2]], YW[area[3]]);
                 sw.Close();
             }
         }

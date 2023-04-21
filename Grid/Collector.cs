@@ -88,7 +88,7 @@ namespace ReaserchPaper
         public void Collect()
         {
             ResetSlau();
-            MakeSLau();
+            MakeSLau();          
             GetBoundaryConditions();
         }
 
