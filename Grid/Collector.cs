@@ -130,8 +130,8 @@ namespace ReaserchPaper
                     AddLocalMatrix(_G, localMatrix, i, j);
                 }
 
-
-            for (int i = 1; i < Grid.N - 1; i++) //все кэ справа от скважины (в той же "строке")
+          
+            for (int i = 0; i < Master.borehole[0]; i++) //все кэ справа от скважины (в той же "строке")
                 {
                     localMatrix = GetMassMatrix(Grid.hx[i], Grid.hy[Master.borehole[2]]);
                     AddLocalMatrix(_M, localMatrix, i, Master.borehole[2]);
@@ -140,6 +140,14 @@ namespace ReaserchPaper
                     AddLocalMatrix(_G, localMatrix, i, Master.borehole[2]);
                 }
 
+            for (int i = Master.borehole[1]; i < Grid.N - 1; i++) //все кэ справа от скважины (в той же "строке")
+            {
+                localMatrix = GetMassMatrix(Grid.hx[i], Grid.hy[Master.borehole[2]]);
+                AddLocalMatrix(_M, localMatrix, i, Master.borehole[2]);
+
+                localMatrix = GetStiffnessMatrix(Grid.hx[i], Grid.hy[Master.borehole[2]]);
+                AddLocalMatrix(_G, localMatrix, i, Master.borehole[2]);
+            }
 
             for (int j = Master.borehole[2] + 1; j < Grid.M - 1; j++)//все кэ над скважиной
                     for (int i = 0; i < Grid.N - 1; i++) // проходим по КЭ 
@@ -244,20 +252,24 @@ namespace ReaserchPaper
         static void MakeSLau()
         {
             Master.Slau.A +=  _M * Master.Lamda + _G * Master.Gamma;
-
+            //for (int j = 0; j < Grid.M - 1; j++) //все кэ под скважиной
+            //    for (int i = 0; i < Grid.N - 1; i++) // проходим по КЭ 
+            //        AddLocalB(i, j);
             for (int j = 0; j < Master.borehole[2]; j++) //все кэ под скважиной
                 for (int i = 0; i < Grid.N - 1; i++) // проходим по КЭ 
                     AddLocalB(i, j);
 
 
-           for (int i = 1; i < Grid.N - 1; i++) //все кэ справа от скважины (в той же "строке")
-                    AddLocalB(i, Master.borehole[2]);
+            for (int i = 0; i < Master.borehole[0]; i++) //все кэ справа от скважины (в той же "строке")
+                AddLocalB(i, Master.borehole[2]);
 
+            for (int i = Master.borehole[1]; i < Grid.N-1; i++) //все кэ справа от скважины (в той же "строке")
+                AddLocalB(i, Master.borehole[2]);
 
-            for (int j = Master.borehole[2]+1; j < Grid.M - 1; j++)//все кэ над скважиной
+            for (int j = Master.borehole[2] + 1; j < Grid.M - 1; j++)//все кэ над скважиной
                 for (int i = 0; i < Grid.N - 1; i++) // проходим по КЭ 
                     AddLocalB(i, j);
-
+        //    AddLocalB(1, 1);
         }
 
         static void MakeSLau(int timeLayer)
@@ -309,6 +321,24 @@ namespace ReaserchPaper
 
         static void GetBoundaryConditions()
         {
+           // Master.Slau.Print();
+            //нижняя граница скважины
+            int index = Master.borehole[2] * Grid.N+1;
+            Master.Slau.b.Elements[index] -= Master.Lamda * Grid.hx[1] / 6 * (2 * Master.DivFuncY1(Grid.x[Master.borehole[0]], Grid.y[Master.borehole[2]]) + Master.DivFuncY1(Grid.x[Master.borehole[1]], Grid.y[Master.borehole[2]]));
+            Master.Slau.b.Elements[index + 1] -= Master.Lamda * Grid.hx[1] / 6 * ( Master.DivFuncY1(Grid.x[Master.borehole[0]], Grid.y[Master.borehole[2]]) + 2* Master.DivFuncY1(Grid.x[Master.borehole[1]], Grid.y[Master.borehole[2]]));
+            //вверхняя граница скважины
+            index = Master.borehole[3] * Grid.N+1;
+            Master.Slau.b.Elements[index] += Master.Lamda * Grid.hx[1] / 6 * (2 * Master.DivFuncY1(Grid.x[Master.borehole[0]], Grid.y[Master.borehole[3]]) + Master.DivFuncY1(Grid.x[Master.borehole[1]], Grid.y[Master.borehole[3]]));
+            Master.Slau.b.Elements[index + 1] += Master.Lamda * Grid.hx[1] / 6 * (Master.DivFuncY1(Grid.x[Master.borehole[0]], Grid.y[Master.borehole[3]]) +2* Master.DivFuncY1(Grid.x[Master.borehole[1]], Grid.y[Master.borehole[3]]));
+            //правая граница скважины
+            index = Master.borehole[2] * Grid.N + 2;
+            Master.Slau.b.Elements[index] += Grid.hy[Master.borehole[2]] * Master.Lamda / 6 * (2 * Master.DivFuncX1(Grid.x[Master.borehole[0]], Grid.y[Master.borehole[2]]) + Master.DivFuncX1(Grid.x[Master.borehole[1]], Grid.y[Master.borehole[3]]));
+            Master.Slau.b.Elements[index + Grid.N] += Grid.hy[Master.borehole[2]] * Master.Lamda / 6 * (Master.DivFuncX1(Grid.x[Master.borehole[0]], Grid.y[Master.borehole[2]]) + 2 * Master.DivFuncX1(Grid.x[Master.borehole[1]], Grid.y[Master.borehole[3]]));
+            //левая граница скважины
+            index = Master.borehole[2] * Grid.N+1;
+            Master.Slau.b.Elements[index] -= Grid.hy[Master.borehole[2]] * Master.Lamda / 6 * (2 * Master.DivFuncX1(Grid.x[Master.borehole[0]], Grid.y[Master.borehole[2]]) + Master.DivFuncX1(Grid.x[Master.borehole[1]], Grid.y[Master.borehole[3]]));
+            Master.Slau.b.Elements[index + Grid.N] -= Grid.hy[Master.borehole[2]] * Master.Lamda / 6 * (Master.DivFuncX1(Grid.x[Master.borehole[0]], Grid.y[Master.borehole[2]]) + 2 * Master.DivFuncX1(Grid.x[Master.borehole[1]], Grid.y[Master.borehole[3]]));
+
             //нижняя граница
             if (Master.boundaryConditions[0] == 1)//первое краевое
                 for (int i = 0; i < Grid.N; i++)
@@ -321,7 +351,7 @@ namespace ReaserchPaper
                 for (int i = 0; i < Grid.N - 1; i++)
                 {
                     Master.Slau.b.Elements[i] -= Master.Lamda * Grid.hx[i] / 6 * (2 * Master.DivFuncY1(Grid.x[i], Grid.y[0]) + Master.DivFuncY1(Grid.x[i + 1], Grid.y[0]));
-                    Master.Slau.b.Elements[i + 1] -= Master.Lamda * Grid.hx[i] / 6 * (2 * Master.DivFuncY1(Grid.x[i], Grid.y[0]) + Master.DivFuncY1(Grid.x[i + 1], Grid.y[0]));
+                    Master.Slau.b.Elements[i + 1] -= Master.Lamda * Grid.hx[i] / 6 * (Master.DivFuncY1(Grid.x[i], Grid.y[0]) +2* Master.DivFuncY1(Grid.x[i + 1], Grid.y[0]));
                 }
           
             if (Master.boundaryConditions[2] == 1)//верхняя граница
@@ -340,18 +370,24 @@ namespace ReaserchPaper
             
             if (Master.boundaryConditions[3] == 1)//левая гравнь
             {
-                for (int i = Grid.N; i < Master.borehole[2]; i += Grid.N)
+                for (int i = Grid.N; i < (Grid.M-1) * Grid.N; i += Grid.N)
                 {
                     ZeroingRow(i);
                     Master.Slau.A.di[i] = 1;
                     Master.Slau.b.Elements[i] = Master.Func1(Grid.x[0], Grid.y[i / Grid.N]);
                 }
-                for (int i = (Master.borehole[3]+1) * Grid.N; i < Master.Slau.A.Size - Grid.N - 1; i += Grid.N)
-                {
-                    ZeroingRow(i);
-                    Master.Slau.A.di[i] = 1;
-                    Master.Slau.b.Elements[i] = Master.Func1(Grid.x[0], Grid.y[i / Grid.N]);
-                }
+                //for (int i = Grid.N; i <= Master.borehole[2]*Grid.N; i += Grid.N)
+                //{
+                //    ZeroingRow(i);
+                //    Master.Slau.A.di[i] = 1;
+                //    Master.Slau.b.Elements[i] = Master.Func1(Grid.x[0], Grid.y[i / Grid.N]);
+                //}
+                //for (int i = (Master.borehole[3]) * Grid.N; i < Master.Slau.A.Size - Grid.N - 1; i += Grid.N)
+                //{
+                //    ZeroingRow(i);
+                //    Master.Slau.A.di[i] = 1;
+                //    Master.Slau.b.Elements[i] = Master.Func1(Grid.x[0], Grid.y[i / Grid.N]);
+                //}
             }
             else
                 for (int i = 0; i < Grid.N - 1; i++)
@@ -374,23 +410,8 @@ namespace ReaserchPaper
                     Master.Slau.b.Elements[Grid.N * (i + 1) - 1] += Grid.hy[i] * Master.Lamda / 6 * (2 * Master.DivFuncX1(Grid.x[Grid.N - 1], Grid.y[i]) + Master.DivFuncX1(Grid.x[0], Grid.y[i + 1]));
                     Master.Slau.b.Elements[Grid.N * (i + 2) - 1] += Grid.hy[i] * Master.Lamda / 6 * (Master.DivFuncX1(Grid.x[Grid.N - 1], Grid.y[i]) + 2 * Master.DivFuncX1(Grid.x[0], Grid.y[i + 1]));
                 }
-           
-            //нижняя граница скважины
-            int index = Master.borehole[2] * Grid.N;
-            Master.Slau.b.Elements[index] -= Master.Lamda * Grid.hx[0] / 6 * (2 * Master.DivFuncY1(Grid.x[0], Grid.y[Master.borehole[2]]) + Master.DivFuncY1(Grid.x[1], Grid.y[Master.borehole[2]]));
-            Master.Slau.b.Elements[index + 1] -= Master.Lamda * Grid.hx[0] / 6 * (2 * Master.DivFuncY1(Grid.x[0], Grid.y[Master.borehole[2]]) + Master.DivFuncY1(Grid.x[1], Grid.y[Master.borehole[2]]));
-            //вверхняя граница скважины
-            index = Master.borehole[3] * Grid.N;
-            Master.Slau.b.Elements[index] += Master.Lamda * Grid.hx[0] / 6 * (2 * Master.DivFuncY1(Grid.x[0], Grid.y[Master.borehole[3]]) + Master.DivFuncY1(Grid.x[1], Grid.y[Master.borehole[3]]));
-            Master.Slau.b.Elements[index + 1] += Master.Lamda * Grid.hx[0] / 6 * (2 * Master.DivFuncY1(Grid.x[0], Grid.y[Master.borehole[3]]) + Master.DivFuncY1(Grid.x[1], Grid.y[Master.borehole[3]]));
-            //правая граница скважины
-            index = Master.borehole[2] * Grid.N + 1;
-            Master.Slau.b.Elements[index] += Grid.hy[Master.borehole[2]] * Master.Lamda / 6 * (2 * Master.DivFuncX1(Grid.x[1], Grid.y[Master.borehole[2]]) + Master.DivFuncX1(Grid.x[1], Grid.y[Master.borehole[3]]));
-            Master.Slau.b.Elements[index + Grid.N] += Grid.hy[Master.borehole[2]] * Master.Lamda / 6 * (Master.DivFuncX1(Grid.x[1], Grid.y[Master.borehole[2]]) + 2 * Master.DivFuncX1(Grid.x[1], Grid.y[Master.borehole[3]]));
-            //левая граница скважины
-            index = Master.borehole[2] * Grid.N;
-            Master.Slau.b.Elements[index] -= Grid.hy[Master.borehole[2]] * Master.Lamda / 6 * (2 * Master.DivFuncX1(Grid.x[0], Grid.y[Master.borehole[2]]) + Master.DivFuncX1(Grid.x[1], Grid.y[Master.borehole[3]]));
-            Master.Slau.b.Elements[index + Grid.N] -= Grid.hy[Master.borehole[2]] * Master.Lamda / 6 * (Master.DivFuncX1(Grid.x[0], Grid.y[Master.borehole[2]]) + 2 * Master.DivFuncX1(Grid.x[1], Grid.y[Master.borehole[3]]));
+
+
         }
         static void GetBoundaryConditions(int timeLayer)
         {
