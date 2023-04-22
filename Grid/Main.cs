@@ -14,8 +14,8 @@ namespace ResearchPaper
         public static int[] borehole = new int[4] {0,1,1,2 }; //индексы x0 x1 y0 y1
 
         public static double Func1(double x, double y) => x+y;
-        public static double DivFuncX1(double x, double y) => 0;
-        public static double DivFuncY1(double x, double y) => 0;
+        public static double DivFuncX1(double x, double y) => 1;
+        public static double DivFuncY1(double x, double y) => 1;
         public static double F1(double x, double y) => x + y;
 
 
@@ -53,7 +53,7 @@ namespace ResearchPaper
             collector.Collect();
             Slau.p = solver.Solve(Slau.A, Slau.b);
             Master.Slau.Print();
-            Slau.PrintResult(-1, false);
+            Slau.PrintResult(-1, true);
             collector.GetMatrixH();
             collector.RebuildMatrix();
       
@@ -64,7 +64,7 @@ namespace ResearchPaper
                 Slau.q[i] = solver.Solve(Slau.A, Slau.b);
                 //Console.WriteLine("solving in proccess: {0} of {1} time layers...", i+1, Grid.TimeLayersCount);
             }
-            Slau.PrintResult(1, true);
+        //    Slau.PrintResult(1, false);
             sw.Stop();
             Slau.WriteSolves();
             Console.WriteLine(sw.ElapsedMilliseconds);
