@@ -82,6 +82,20 @@ namespace ReaserchPaper
 
             return result;
         }
+        public static Vector operator *(double[][] matrix, Vector vector)
+        {
+            Vector result = new Vector(vector.Length, null);
+
+            for (int i = 0; i < matrix.Length; i++)
+            {
+                for (int j = 0; j < matrix.Length; j++)
+                {
+                    result.Elements[i] = matrix[i][j] * vector.Elements[j];
+                }
+            }
+
+            return result;
+        }
 
         public void Print()
         {

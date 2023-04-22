@@ -61,8 +61,8 @@ namespace ResearchPaper
                 p = LAUr + b * p;
                
             } while (r * r > eps && k <= maxItCount);
-            //   Console.WriteLine("iter counts: " + k);
-            //   Console.WriteLine("disperancy: " + r * r);
+               Console.WriteLine("iter counts: " + k);
+               Console.WriteLine("disperancy: " + r * r);
             return solve;
         }
         static double GetCoefficent(Vector a1, Vector b1, Vector a2, Vector b2)

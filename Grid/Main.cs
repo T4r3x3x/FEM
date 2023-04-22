@@ -8,14 +8,14 @@ namespace ResearchPaper
     {
         static double ro, fita, K, nu,mu;
        
-        public static double Lamda = 0.2 * 0.4e-3 / 5e-3, Gamma = 0, Sigma = 1;//Sigma в массе масс вместо гаммы для времени     
+        public static double Lamda = 0.2*0.4/0.005, Gamma = 0, Sigma = 1;//Sigma в массе масс вместо гаммы для времени     
         public static SLAU Slau;
         public static int[] boundaryConditions = new int[4] {1,1,1,1};
-        public static int[] borehole = new int[4] {14,15,14,15 }; //индексы x0 x1 y0 y1
+        public static int[] borehole = new int[4] { 24, 25, 2, 3 }; //индексы x0 x1 y0 y1
 
-        public static double Func1(double x, double y) => 131;
-        public static double DivFuncX1(double x, double y) => +6.9e+4;
-        public static double DivFuncY1(double x, double y) => +6.9e+4;
+        public static double Func1(double x, double y) => 13172250;
+        public static double DivFuncX1(double x, double y) => +6.9e-4;
+        public static double DivFuncY1(double x, double y) => +6.9e-4;
         public static double F1(double x, double y) => 0;
 
 
@@ -53,19 +53,19 @@ namespace ResearchPaper
             collector.Collect();
             Slau.p = solver.Solve(Slau.A, Slau.b);
            // Master.Slau.Print();
-            Slau.PrintResult(-1, true);
-      //      collector.GetMatrixH();
-      //      collector.RebuildMatrix();
-      
-      //      for (int i = 2; i < Grid.TimeLayersCount; i++)
+           // Slau.PrintResult(-1, true);
+            collector.GetMatrixH();
+           collector.RebuildMatrix();
+
+            for (int i = 2; i < Grid.TimeLayersCount; i++)
             {
-     //           collector.Collect(i);
-                //  ;
-     //           Slau.q[i] = solver.Solve(Slau.A, Slau.b);
-                //Console.WriteLine("solving in proccess: {0} of {1} time layers...", i+1, Grid.TimeLayersCount);
+                collector.Collect(i);
+                ;
+                Slau.q[i] = solver.Solve(Slau.A, Slau.b);
+                Console.WriteLine("solving in proccess: {0} of {1} time layers...", i + 1, Grid.TimeLayersCount);
             }
-        //    Slau.PrintResult(1, false);
-            
+           // Slau.PrintResult(1, false);
+
             Slau.WriteSolves();
             Console.WriteLine(sw.ElapsedMilliseconds);
             ExecuteCommand("python func.py");
