@@ -95,7 +95,7 @@ namespace ReaserchPaper
 
         public void Collect(int timeLayer)
         {
-            SubstractM();
+            ResetSlauOptimized();
             MakeSLau(timeLayer);
             GetBoundaryConditions(timeLayer);
         }
@@ -103,6 +103,12 @@ namespace ReaserchPaper
         static void SubstractM()
         {
             Master.Slau.A -= _M * timeCoef;
+        }
+
+        static void ResetSlauOptimized()
+        {
+            SubstractM();
+            Master.Slau.b.Reset();
         }
 
         static void ResetSlau()
@@ -222,7 +228,7 @@ namespace ReaserchPaper
 
         static void MakeSLau()
         {
-            Master.Slau.A +=  _M * Master.Lamda + _G * Master.Gamma;
+            Master.Slau.A +=  _M * Master.Gamma + _G * Master.Lamda;
 
             for (int j = 0; j < Grid.M - 1; j++)
                 for (int i = 0; i < Grid.N - 1; i++) // проходим по КЭ 
@@ -235,8 +241,8 @@ namespace ReaserchPaper
             double deltaT1 = Grid.t[timeLayer - 1] - Grid.t[timeLayer - 2];
             double deltaT0 = Grid.t[timeLayer] - Grid.t[timeLayer - 1];
 
-            Vector vector1 = _M * Master.Slau.q[timeLayer - 2];
-            Vector vector2 = _M * Master.Slau.q[timeLayer - 1];
+            Vector vector1 = _M * Master.Sigma * Master.Slau.q[timeLayer - 2];
+            Vector vector2 = _M * Master.Sigma * Master.Slau.q[timeLayer - 1];
 
             timeCoef = ((deltaT + deltaT0) / (deltaT * deltaT0)) * Master.Sigma;
 

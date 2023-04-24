@@ -8,7 +8,7 @@ namespace ResearchPaper
     {
         static double ro, fita, K, nu,mu;
        
-        public static double Lamda = 4, Gamma = 1, Sigma = 2;//Sigma в массе масс вместо гаммы для времени     
+        public static double Lamda = 1, Gamma = 1, Sigma = 2;//Sigma в массе масс вместо гаммы для времени     
         public static SLAU Slau;
         public static int[] boundaryConditions = new int[4] {1,1,1,1};
         public static int[] borehole = new int[4] {0,1,1,2 }; //индексы x0 x1 y0 y1
@@ -63,8 +63,9 @@ namespace ResearchPaper
                 //  ;
                 Slau.q[i] = solver.Solve(Slau.A, Slau.b);
                 //Console.WriteLine("solving in proccess: {0} of {1} time layers...", i+1, Grid.TimeLayersCount);
+                Slau.PrintResult(i, false);
             }
-            Slau.PrintResult(1, true);
+           
             sw.Stop();
             Slau.WriteSolves();
             Console.WriteLine(sw.ElapsedMilliseconds);
