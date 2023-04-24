@@ -73,8 +73,8 @@ namespace ReaserchPaper
             _G = new Matrix(nodesCount);
             _H = new Matrix(nodesCount);
             GetMatrixesMG();
-          // _M.Print();
-          //  _G.Print(); 
+            // _M.Print();
+            //  _G.Print(); 
             //        _H.Print();
             GetTimeConditions();
         }
@@ -89,7 +89,7 @@ namespace ReaserchPaper
         public void Collect()
         {
             ResetSlau();
-            MakeSLau();          
+            MakeSLau();
             GetBoundaryConditions();
         }
 
@@ -115,13 +115,13 @@ namespace ReaserchPaper
         public void RebuildMatrix()
         {
             ResetSlau();
-            Master.Slau.A +=  _G * Master.Sigma + _H;
+            Master.Slau.A += _G * Master.Lamda2 + _H;
         }
 
         private void GetMatrixesMG()
         {
             double[][] localMatrix;
-            for (int j = 0; j < Grid.M-1; j++) //все кэ под скважиной
+            for (int j = 0; j < Grid.M - 1; j++) //все кэ под скважиной
                 for (int i = 0; i < Grid.N - 1; i++) // проходим по КЭ 
                 {
                     localMatrix = GetMassMatrix(Grid.hx[i], Grid.hy[j]);
@@ -131,7 +131,7 @@ namespace ReaserchPaper
                     AddLocalMatrix(_G, localMatrix, i, j);
                 }
 
-          
+
             //for (int i = 0; i < Master.borehole[0]; i++) //все кэ справа от скважины (в той же "строке")
             //    {
             //        localMatrix = GetMassMatrix(Grid.hx[i], Grid.hy[Master.borehole[2]]);
@@ -208,14 +208,14 @@ namespace ReaserchPaper
         }
         private static void GetTimeConditions()
         {
-            for (int p = 0; p < 2; p++)  
+            for (int p = 0; p < 2; p++)
                 for (int j = 0; j < Grid.M - 1; j++)
                     for (int i = 0; i < Grid.N - 1; i++) // проходим по КЭ 
                     {
-                        Master.Slau.q[p].Elements[i + j * Grid.N] = Master.Func2(Grid.x[i], Grid.y[j], Grid.t[p]);
-                        Master.Slau.q[p].Elements[i + j * Grid.N + 1] = Master.Func2(Grid.x[i + 1], Grid.y[j], Grid.t[p]);
-                        Master.Slau.q[p].Elements[i + (j + 1) * Grid.N] = Master.Func2(Grid.x[i], Grid.y[j + 1], Grid.t[p]);
-                        Master.Slau.q[p].Elements[i + (j + 1) * Grid.N + 1] = Master.Func2(Grid.x[i + 1], Grid.y[j + 1], Grid.t[p]);
+                        Master.Slau.q[p].Elements[i + j * Grid.N] = Master.TemperatureInReservoir();
+                        Master.Slau.q[p].Elements[i + j * Grid.N + 1] = Master.TemperatureInReservoir();
+                        Master.Slau.q[p].Elements[i + (j + 1) * Grid.N] = Master.TemperatureInReservoir();
+                        Master.Slau.q[p].Elements[i + (j + 1) * Grid.N + 1] = Master.TemperatureInReservoir();
                     }
         }
         static int mu(int i) => ((i) % 2);
@@ -252,7 +252,7 @@ namespace ReaserchPaper
 
         static void MakeSLau()
         {
-            Master.Slau.A +=  _M * Master.Gamma+ _G * Master.Lamda;
+            Master.Slau.A += _M * Master.Gamma + _G * Master.Lamda;
             for (int j = 0; j < Grid.M - 1; j++) //все кэ под скважиной
                 for (int i = 0; i < Grid.N - 1; i++) // проходим по КЭ 
                     AddLocalB(i, j);
@@ -282,7 +282,7 @@ namespace ReaserchPaper
             Vector vector1 = _M * Master.Slau.q[timeLayer - 2];
             Vector vector2 = _M * Master.Slau.q[timeLayer - 1];
 
-            timeCoef = ((deltaT + deltaT0) / (deltaT * deltaT0)) * Master.Lamda;
+            timeCoef = ((deltaT + deltaT0) / (deltaT * deltaT0)) * Master.Sigma;
 
             Master.Slau.b += -(deltaT0 / (deltaT * deltaT1)) * vector1 + deltaT / (deltaT1 * deltaT0) * vector2;
             Master.Slau.A += _M * timeCoef;
@@ -322,8 +322,8 @@ namespace ReaserchPaper
 
         static void GetBoundaryConditions()
         {
-        //    Master.Slau.Print();
-            double _temp = 2 * Master.DivFuncX1(0, 0) * (Grid.hx[Master.borehole[0]] + Grid.hx[Master.borehole[2]]) / (Grid.hx[Master.borehole[0]] * Grid.hx[Master.borehole[2]]);
+            //    Master.Slau.Print();
+            double _temp = 2 * Master.BoreholePower() * (Grid.hx[Master.borehole[0]] + Grid.hx[Master.borehole[2]]) / (Grid.hx[Master.borehole[0]] * Grid.hx[Master.borehole[2]]);
             Vector temp = new Vector(4, Enumerable.Repeat(_temp, 4).ToArray());
             double[][] local = GetMassMatrix(Grid.hx[Master.borehole[0]], Grid.hx[Master.borehole[2]]);
             temp = local * temp;
@@ -333,84 +333,67 @@ namespace ReaserchPaper
             Master.Slau.b.Elements[Master.borehole[3] * Grid.N + Master.borehole[1]] = temp.Elements[3];
 
             //нижняя граница
-            if (Master.boundaryConditions[0] == 1)//первое краевое
-                for (int i = 0; i < Grid.N; i++)
-                {
-                    ZeroingRow(i);
-                    Master.Slau.A.di[i] = 1;
-                    Master.Slau.b.Elements[i] = Master.Func1(Grid.x[i], Grid.y[0]);
-                }    
-            else //второе краевое            
-                for (int i = 0; i < Grid.N - 1; i++)
-                {
-                    Master.Slau.b.Elements[i] -= Master.Lamda * Grid.hx[i] / 6 * (2 * Master.DivFuncY1(Grid.x[i], Grid.y[0]) + Master.DivFuncY1(Grid.x[i + 1], Grid.y[0]));
-                    Master.Slau.b.Elements[i + 1] -= Master.Lamda * Grid.hx[i] / 6 * (Master.DivFuncY1(Grid.x[i], Grid.y[0]) +2* Master.DivFuncY1(Grid.x[i + 1], Grid.y[0]));
-                }
-          
-            if (Master.boundaryConditions[2] == 1)//верхняя граница
-                for (int i = Master.Slau.A.Size - 1; i > Master.Slau.A.Size - Grid.N - 1; i--)
-                {
-                    ZeroingRow(i);
-                    Master.Slau.A.di[i] = 1;
-                    Master.Slau.b.Elements[i] = Master.Func1(Grid.x[i % Grid.N], Grid.y[Grid.M - 1]);
-                }
-            else
-                for (int i = 0; i < Grid.N - 1; i++)
-                {
-                    Master.Slau.b.Elements[Grid.N * (Grid.M - 1) + i] += Master.Lamda * Grid.hx[i] / 6 * (2 * Master.DivFuncY1(Grid.x[i], Grid.y[Grid.M - 1]) + Master.DivFuncY1(Grid.x[i + 1], Grid.y[Grid.M - 1]));
-                    Master.Slau.b.Elements[Grid.N * (Grid.M - 1) + i + 1] += Master.Lamda * Grid.hx[i] / 6 * (Master.DivFuncY1(Grid.x[i], Grid.y[Grid.M - 1]) + 2 * Master.DivFuncY1(Grid.x[i + 1], Grid.y[Grid.M - 1]));
-                }
-            
-            if (Master.boundaryConditions[3] == 1)//левая гравнь
-            {
-                for (int i = Grid.N; i < (Grid.M-1) * Grid.N; i += Grid.N)
-                {
-                    ZeroingRow(i);
-                    Master.Slau.A.di[i] = 1;
-                    Master.Slau.b.Elements[i] = Master.Func1(Grid.x[0], Grid.y[i / Grid.N]);
-                }
-            }
-            else
-                for (int i = 0; i < Grid.N - 1; i++)
-                {
 
-                    Master.Slau.b.Elements[Grid.N * i] -= Grid.hy[i] * Master.Lamda / 6 * (2 * Master.DivFuncX1(Grid.x[0], Grid.y[i]) + Master.DivFuncX1(Grid.x[0], Grid.y[i + 1]));
-                    Master.Slau.b.Elements[Grid.N * (i + 1)] -= Grid.hy[i] * Master.Lamda / 6 * (Master.DivFuncX1(Grid.x[0], Grid.y[i]) + 2 * Master.DivFuncX1(Grid.x[0], Grid.y[i + 1]));
-                }
-         
-            if (Master.boundaryConditions[1] == 1)//правая граница
-                for (int i = 2 * Grid.N - 1; i < Master.Slau.A.Size - 1; i += Grid.N)
-                {
-                    ZeroingRow(i);
-                    Master.Slau.A.di[i] = 1;
-                    Master.Slau.b.Elements[i] = Master.Func1(Grid.x[Grid.N - 1], Grid.y[i / Grid.N]);
-                }
-            else
-                for (int i = 0; i < Grid.N - 1; i++)
-                {
-                    Master.Slau.b.Elements[Grid.N * (i + 1) - 1] += Grid.hy[i] * Master.Lamda / 6 * (2 * Master.DivFuncX1(Grid.x[Grid.N - 1], Grid.y[i]) + Master.DivFuncX1(Grid.x[0], Grid.y[i + 1]));
-                    Master.Slau.b.Elements[Grid.N * (i + 2) - 1] += Grid.hy[i] * Master.Lamda / 6 * (Master.DivFuncX1(Grid.x[Grid.N - 1], Grid.y[i]) + 2 * Master.DivFuncX1(Grid.x[0], Grid.y[i + 1]));
-                }
+            for (int i = 0; i < Grid.N; i++)
+            {
+                ZeroingRow(i);
+                Master.Slau.A.di[i] = 1;
+                Master.Slau.b.Elements[i] = Master.PressuereInReservoir(Grid.x[i], Grid.y[0]);
+            }
+
+            //верхняя граница
+            for (int i = Master.Slau.A.Size - 1; i > Master.Slau.A.Size - Grid.N - 1; i--)
+            {
+                ZeroingRow(i);
+                Master.Slau.A.di[i] = 1;
+                Master.Slau.b.Elements[i] = Master.PressuereInReservoir(Grid.x[i % Grid.N], Grid.y[Grid.M - 1]);
+            }
+
+            //левая граница
+            for (int i = Grid.N; i < (Grid.M - 1) * Grid.N; i += Grid.N)
+            {
+                ZeroingRow(i);
+                Master.Slau.A.di[i] = 1;
+                Master.Slau.b.Elements[i] = Master.PressuereInReservoir(Grid.x[0], Grid.y[i / Grid.N]);
+            }
+
+            //правая граница
+            for (int i = 2 * Grid.N - 1; i < Master.Slau.A.Size - 1; i += Grid.N)
+            {
+                ZeroingRow(i);
+                Master.Slau.A.di[i] = 1;
+                Master.Slau.b.Elements[i] = Master.PressuereInReservoir(Grid.x[Grid.N - 1], Grid.y[i / Grid.N]);
+            }
 
 
         }
         static void GetBoundaryConditions(int timeLayer)
         {
+            double _temp = 2 * Master.TemperatureInBorehole() * (Grid.hx[Master.borehole[0]] + Grid.hx[Master.borehole[2]]) / (Grid.hx[Master.borehole[0]] * Grid.hx[Master.borehole[2]]);
+            Vector temp = new Vector(4, Enumerable.Repeat(_temp, 4).ToArray());
+            double[][] local = GetMassMatrix(Grid.hx[Master.borehole[0]], Grid.hx[Master.borehole[2]]);
+            temp = local * temp;
+            Master.Slau.b.Elements[Master.borehole[2] * Grid.N + Master.borehole[0]] = temp.Elements[0];
+            Master.Slau.b.Elements[Master.borehole[2] * Grid.N + Master.borehole[1]] = temp.Elements[1];
+            Master.Slau.b.Elements[Master.borehole[3] * Grid.N + Master.borehole[0]] = temp.Elements[2];
+            Master.Slau.b.Elements[Master.borehole[3] * Grid.N + Master.borehole[1]] = temp.Elements[3];
+
+
             //нижняя граница
             if (Master.boundaryConditions[0] == 1)//первое краевое
                 for (int i = 0; i < Grid.N; i++)
                 {
                     ZeroingRow(i);
                     Master.Slau.A.di[i] = 1;
-                    Master.Slau.b.Elements[i] = Master.Func2(Grid.x[i], Grid.y[0], Grid.t[timeLayer]);
+                    Master.Slau.b.Elements[i] = Master.TemperatureInReservoir();
                     //  Master.Slau.A.di[i] = C;
                     //   Master.Slau.b.Elements[i] = C * Master.Func2(Grid.x[i], Grid.y[0], Grid.t[timeLayer]);
                 }
             else //второе краевое            
                 for (int i = 0; i < Grid.N - 1; i++)
                 {
-                    Master.Slau.b.Elements[i] -= Master.Lamda * Grid.hx[i] / 6 * (2 * Master.DivFuncY2(Grid.x[i], Grid.y[0], Grid.t[timeLayer]) + Master.DivFuncY2(Grid.x[i + 1], Grid.y[0], Grid.t[timeLayer]));
-                    Master.Slau.b.Elements[i + 1] -= Master.Lamda * Grid.hx[i] / 6 * (Master.DivFuncY2(Grid.x[i], Grid.y[0], Grid.t[timeLayer]) + 2 * Master.DivFuncY2(Grid.x[i + 1], Grid.y[0], Grid.t[timeLayer]));
+                    Master.Slau.b.Elements[i] += Master.Lamda * Grid.hx[i] / 6 * (2 * Master.TemperatureInReservoir() + Master.TemperatureInReservoir());
+                    Master.Slau.b.Elements[i + 1] += Master.Lamda * Grid.hx[i] / 6 * (Master.TemperatureInReservoir() + 2 * Master.TemperatureInReservoir());
                 }
 
             if (Master.boundaryConditions[2] == 1)//верхняя граница
@@ -418,13 +401,13 @@ namespace ReaserchPaper
                 {
                     ZeroingRow(i);
                     Master.Slau.A.di[i] = 1;
-                    Master.Slau.b.Elements[i] = Master.Func2(Grid.x[i % Grid.N], Grid.y[Grid.M - 1], Grid.t[timeLayer]);
+                    Master.Slau.b.Elements[i] = Master.TemperatureInReservoir();
                 }
             else
                 for (int i = 0; i < Grid.N - 1; i++)
                 {
-                    Master.Slau.b.Elements[Grid.N * (Grid.M - 1) + i] += Master.Lamda * Grid.hx[i] / 6 * (2 * Master.DivFuncY2(Grid.x[i], Grid.y[Grid.M - 1], Grid.t[timeLayer]) + Master.DivFuncY2(Grid.x[i + 1], Grid.y[Grid.M - 1], Grid.t[timeLayer]));
-                    Master.Slau.b.Elements[Grid.N * (Grid.M - 1) + i + 1] += Master.Lamda * Grid.hx[i] / 6 * (Master.DivFuncY2(Grid.x[i], Grid.y[Grid.M - 1], Grid.t[timeLayer]) + 2 * Master.DivFuncY2(Grid.x[i + 1], Grid.y[Grid.M - 1], Grid.t[timeLayer]));
+                    Master.Slau.b.Elements[Grid.N * (Grid.M - 1) + i] += Master.Lamda * Grid.hx[i] / 6 * (2 * Master.TemperatureInReservoir() + Master.TemperatureInReservoir());
+                    Master.Slau.b.Elements[Grid.N * (Grid.M - 1) + i + 1] += Master.Lamda * Grid.hx[i] / 6 * (Master.TemperatureInReservoir() + 2 * Master.TemperatureInReservoir());
                 }
 
             if (Master.boundaryConditions[3] == 1)//левая гравнь
@@ -432,13 +415,13 @@ namespace ReaserchPaper
                 {
                     ZeroingRow(i);
                     Master.Slau.A.di[i] = 1;
-                    Master.Slau.b.Elements[i] = Master.Func2(Grid.x[0], Grid.y[i / Grid.N], Grid.t[timeLayer]);
+                    Master.Slau.b.Elements[i] = Master.TemperatureInReservoir();
                 }
             else
                 for (int i = 0; i < Grid.N - 1; i++)
                 {
-                    Master.Slau.b.Elements[Grid.N * i] -= Grid.hy[i] * Master.Lamda / 6 * (2 * Master.DivFuncX2(Grid.x[0], Grid.y[i], Grid.t[timeLayer]) + Master.DivFuncX2(Grid.x[0], Grid.y[i + 1], Grid.t[timeLayer]));
-                    Master.Slau.b.Elements[Grid.N * (i + 1)] -= Grid.hy[i] * Master.Lamda / 6 * (Master.DivFuncX2(Grid.x[0], Grid.y[i], Grid.t[timeLayer]) + 2 * Master.DivFuncX2(Grid.x[0], Grid.y[i + 1], Grid.t[timeLayer]));
+                    Master.Slau.b.Elements[Grid.N * i] += Grid.hy[i] * Master.Lamda / 6 * (2 * Master.TemperatureInReservoir() + Master.TemperatureInReservoir());
+                    Master.Slau.b.Elements[Grid.N * (i + 1)] += Grid.hy[i] * Master.Lamda / 6 * (Master.TemperatureInReservoir() + 2 * Master.TemperatureInReservoir());
                 }
 
             if (Master.boundaryConditions[1] == 1)//правая граница
@@ -446,13 +429,13 @@ namespace ReaserchPaper
                 {
                     ZeroingRow(i);
                     Master.Slau.A.di[i] = 1;
-                    Master.Slau.b.Elements[i] = Master.Func2(Grid.x[Grid.N - 1], Grid.y[i / Grid.N], Grid.t[timeLayer]);
+                    Master.Slau.b.Elements[i] = Master.TemperatureInReservoir();
                 }
             else
                 for (int i = 0; i < Grid.N - 1; i++)
                 {
-                    Master.Slau.b.Elements[Grid.N * (i + 1) - 1] += Grid.hy[i] * Master.Lamda / 6 * (2 * Master.DivFuncX2(Grid.x[Grid.N - 1], Grid.y[i], Grid.t[timeLayer]) + Master.DivFuncX2(Grid.x[0], Grid.y[i + 1], Grid.t[timeLayer]));
-                    Master.Slau.b.Elements[Grid.N * (i + 2) - 1] += Grid.hy[i] * Master.Lamda / 6 * (Master.DivFuncX2(Grid.x[Grid.N - 1], Grid.y[i], Grid.t[timeLayer]) + 2 * Master.DivFuncX2(Grid.x[0], Grid.y[i + 1], Grid.t[timeLayer]));
+                    Master.Slau.b.Elements[Grid.N * (i + 1) - 1] += Grid.hy[i] * Master.Lamda / 6 * (2 * Master.TemperatureInReservoir() + Master.TemperatureInReservoir());
+                    Master.Slau.b.Elements[Grid.N * (i + 2) - 1] += Grid.hy[i] * Master.Lamda / 6 * (Master.TemperatureInReservoir() + 2 * Master.TemperatureInReservoir());
                 }
         }
 
@@ -467,7 +450,7 @@ namespace ReaserchPaper
             {
                 matrix[i] = new double[4];
                 for (int j = 0; j < 4; j++)
-                    matrix[i][j] = NumericalMethods.GaussIntegration(elemNumber, i, j, xBoundaries, yBoundaries, hx, hy);                
+                    matrix[i][j] = NumericalMethods.GaussIntegration(elemNumber, i, j, xBoundaries, yBoundaries, hx, hy);
             }
 
             return matrix;

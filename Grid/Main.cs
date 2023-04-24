@@ -6,23 +6,21 @@ namespace ResearchPaper
 {
     class Master
     {
-        static double ro, fita, K, nu,mu;
-       
-        public static double Lamda = 0.2*0.4/0.005, Gamma = 0, Sigma = 1;//Sigma в массе масс вместо гаммы для времени     
+        static double ro = 730, fita = 1.7e+3, K, nu,mu;
+
+        public static double Lamda = 0.2 * 0.4 / 0.005, Gamma = 0, Sigma = 1;//Sigma в массе масс вместо гаммы для времени     
+        public static double Lamda2 = 0.01;
         public static SLAU Slau;
         public static int[] boundaryConditions = new int[4] {1,1,1,1};
-        public static int[] borehole = new int[4] { 24, 25, 2, 3 }; //индексы x0 x1 y0 y1
+        public static int[] borehole = new int[4] { 22, 23, 22, 23 }; //индексы x0 x1 y0 y1
 
-        public static double Func1(double x, double y) => 13172250;
-        public static double DivFuncX1(double x, double y) => +6.9e-4;
-        public static double DivFuncY1(double x, double y) => +6.9e-4;
+        public static double PressuereInReservoir(double x, double y) => 13172250;
+        public static double BoreholePower() => +6.9e-4;
         public static double F1(double x, double y) => 0;
 
-
-        public static double Func2(double x, double y, double t) => x*y*t;
-        public static double DivFuncX2(double x, double y, double t) => y * t;
-        public static double DivFuncY2(double x, double y, double t) => x * t;
-        public static double F2(double x, double y, double t) => x*y -x*t -y*t;
+        public static double TemperatureInReservoir() => 0;
+        public static double TemperatureInBorehole() => 10;
+        public static double F2(double x, double y, double t) => 0;
 
 
         static void ExecuteCommand(string command)
@@ -56,6 +54,9 @@ namespace ResearchPaper
            // Slau.PrintResult(-1, true);
             collector.GetMatrixH();
            collector.RebuildMatrix();
+            boundaryConditions = new int[4] { 2,2,2,2};
+
+
 
             for (int i = 2; i < Grid.TimeLayersCount; i++)
             {

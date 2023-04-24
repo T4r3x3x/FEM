@@ -37,9 +37,9 @@ namespace ResearchPaper
             }
             if (timeLayer == -1)
             {
-                for (int i = 0; i < Grid.M; i++)
-                    for (int j = 0; j < Grid.N; j++)
-                        exactSolution.Elements[i * Grid.N + j] = Master.Func1(Grid.x[j], Grid.y[i]);
+              //  for (int i = 0; i < Grid.M; i++)
+                 //   for (int j = 0; j < Grid.N; j++)
+          //              exactSolution.Elements[i * Grid.N + j] = Master.Func1(Grid.x[j], Grid.y[i]);
 
                 if (isPrint)
                     for (int i = 0; i < A.Size; i++)                  
@@ -49,9 +49,9 @@ namespace ResearchPaper
             }
             else
             {              
-                for (int i = 0; i < Grid.M; i++)
-                    for (int j = 0; j < Grid.N; j++)
-                        exactSolution.Elements[i * Grid.N + j] = Master.Func2(Grid.x[j], Grid.y[i], Grid.t[timeLayer]);
+             //   for (int i = 0; i < Grid.M; i++)
+                //    for (int j = 0; j < Grid.N; j++)
+                  //      exactSolution.Elements[i * Grid.N + j] = Master.Func2(Grid.x[j], Grid.y[i], Grid.t[timeLayer]);
 
                 if (isPrint)
                     for (int i = 0; i < A.Size; i++)
