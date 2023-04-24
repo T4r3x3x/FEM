@@ -8,7 +8,7 @@ namespace ResearchPaper
     {
         static double ro, fita, K, nu,mu;
        
-        public static double Lamda = 1, Gamma = 1, Sigma = 1;//Sigma в массе масс вместо гаммы для времени     
+        public static double Lamda = 4, Gamma = 1, Sigma = 2;//Sigma в массе масс вместо гаммы для времени     
         public static SLAU Slau;
         public static int[] boundaryConditions = new int[4] {1,1,1,1};
         public static int[] borehole = new int[4] {0,1,1,2 }; //индексы x0 x1 y0 y1
@@ -22,7 +22,7 @@ namespace ResearchPaper
         public static double Func2(double x, double y, double t) => x*y*t;
         public static double DivFuncX2(double x, double y, double t) => y * t;
         public static double DivFuncY2(double x, double y, double t) => x * t;
-        public static double F2(double x, double y, double t) => x*y -x*t -y*t;
+        public static double F2(double x, double y, double t) => 2*x*y -x*t -y*t;
 
 
         static void ExecuteCommand(string command)
@@ -52,7 +52,7 @@ namespace ResearchPaper
             Collector collector = new(Grid.NodesCount);
             collector.Collect();
             Slau.p = solver.Solve(Slau.A, Slau.b);
-            Master.Slau.Print();
+          //  Master.Slau.Print();
             Slau.PrintResult(-1, false);
             collector.GetMatrixH();
             collector.RebuildMatrix();

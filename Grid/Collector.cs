@@ -114,7 +114,7 @@ namespace ReaserchPaper
         public void RebuildMatrix()
         {
             ResetSlau();
-            Master.Slau.A +=  _G * Master.Sigma + _H;
+            Master.Slau.A +=  _G * Master.Lamda + _H;
         }
 
         private void GetMatrixesMG()
@@ -238,7 +238,7 @@ namespace ReaserchPaper
             Vector vector1 = _M * Master.Slau.q[timeLayer - 2];
             Vector vector2 = _M * Master.Slau.q[timeLayer - 1];
 
-            timeCoef = ((deltaT + deltaT0) / (deltaT * deltaT0)) * Master.Lamda;
+            timeCoef = ((deltaT + deltaT0) / (deltaT * deltaT0)) * Master.Sigma;
 
             Master.Slau.b += -(deltaT0 / (deltaT * deltaT1)) * vector1 + deltaT / (deltaT1 * deltaT0) * vector2;
             Master.Slau.A += _M * timeCoef;
