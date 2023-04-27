@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,6 +16,8 @@ namespace ReaserchPaper
     {
         static Matrix _M, _G, _H;
         static double timeCoef;
+        static double[] deltaTimes = new double[3];
+        static Vector[] MQs = new Vector[2];
 
         static double G(double h, int i, int j)
         {
@@ -96,7 +99,7 @@ namespace ReaserchPaper
 
         public void Collect(int timeLayer)
         {
-            SubstractM();
+            ResetSlauOptimized();
             MakeSLau(timeLayer);
             GetBoundaryConditions(timeLayer);
         }
@@ -104,6 +107,12 @@ namespace ReaserchPaper
         static void SubstractM()
         {
             Master.Slau.A -= _M * timeCoef;
+        }
+
+        static void ResetSlauOptimized()
+        {
+            SubstractM();
+            Master.Slau.b.Reset();
         }
 
         static void ResetSlau()
@@ -115,7 +124,15 @@ namespace ReaserchPaper
         public void RebuildMatrix()
         {
             ResetSlau();
+            _M *= Master.Sigma;
             Master.Slau.A += _G * Master.Lamda2 + _H;
+
+            deltaTimes[2] = Grid.t[2] - Grid.t[0];
+            deltaTimes[1] = Grid.t[1] - Grid.t[0];
+            deltaTimes[0] = Grid.t[2] - Grid.t[1];
+
+            MQs[0] = _M * Master.Slau.q[0];
+            MQs[1] = _M * Master.Slau.q[1];
         }
 
         private void GetMatrixesMG()
@@ -212,10 +229,10 @@ namespace ReaserchPaper
                 for (int j = 0; j < Grid.M - 1; j++)
                     for (int i = 0; i < Grid.N - 1; i++) // проходим по КЭ 
                     {
-                        Master.Slau.q[p].Elements[i + j * Grid.N] = Master.TemperatureInReservoir();
-                        Master.Slau.q[p].Elements[i + j * Grid.N + 1] = Master.TemperatureInReservoir();
-                        Master.Slau.q[p].Elements[i + (j + 1) * Grid.N] = Master.TemperatureInReservoir();
-                        Master.Slau.q[p].Elements[i + (j + 1) * Grid.N + 1] = Master.TemperatureInReservoir();
+                        Master.Slau.q[p].Elements[i + j * Grid.N] = Master.TemperatureAtBegin();
+                        Master.Slau.q[p].Elements[i + j * Grid.N + 1] = Master.TemperatureAtBegin();
+                        Master.Slau.q[p].Elements[i + (j + 1) * Grid.N] = Master.TemperatureAtBegin();
+                        Master.Slau.q[p].Elements[i + (j + 1) * Grid.N + 1] = Master.TemperatureAtBegin();
                     }
         }
         static int mu(int i) => ((i) % 2);
@@ -275,21 +292,21 @@ namespace ReaserchPaper
 
         static void MakeSLau(int timeLayer)
         {
-            double deltaT = Grid.t[timeLayer] - Grid.t[timeLayer - 2];
-            double deltaT1 = Grid.t[timeLayer - 1] - Grid.t[timeLayer - 2];
-            double deltaT0 = Grid.t[timeLayer] - Grid.t[timeLayer - 1];
+            deltaTimes[1] = deltaTimes[0];
+            deltaTimes[0] = Grid.t[timeLayer] - Grid.t[timeLayer - 1];
+            deltaTimes[2] = Grid.t[timeLayer] - Grid.t[timeLayer - 2];
 
-            Vector vector1 = _M * Master.Slau.q[timeLayer - 2];
-            Vector vector2 = _M * Master.Slau.q[timeLayer - 1];
+            MQs[0] = MQs[1];
+            MQs[1] = _M * Master.Slau.q[timeLayer - 1];
 
-            timeCoef = ((deltaT + deltaT0) / (deltaT * deltaT0)) * Master.Sigma;
+            timeCoef = ((deltaTimes[2] + deltaTimes[0]) / (deltaTimes[2] * deltaTimes[0])) ;
 
-            Master.Slau.b += -(deltaT0 / (deltaT * deltaT1)) * vector1 + deltaT / (deltaT1 * deltaT0) * vector2;
+            Master.Slau.b += -(deltaTimes[0] / (deltaTimes[2] * deltaTimes[1])) * MQs[0] + deltaTimes[2] / (deltaTimes[1] * deltaTimes[0]) * MQs[1];
             Master.Slau.A += _M * timeCoef;
 
-            for (int j = 0; j < Grid.M - 1; j++)
-                for (int i = 0; i < Grid.N - 1; i++) // проходим по КЭ 
-                    AddLocalB(i, j, timeLayer);
+        //  for (int j = 0; j < Grid.M - 1; j++)
+          //      for (int i = 0; i < Grid.N - 1; i++) // проходим по КЭ 
+           //         AddLocalB(i, j, timeLayer);
         }
         static void AddLocalB(int i, int j)
         {
@@ -385,15 +402,15 @@ namespace ReaserchPaper
                 {
                     ZeroingRow(i);
                     Master.Slau.A.di[i] = 1;
-                    Master.Slau.b.Elements[i] = Master.TemperatureInReservoir();
+                    Master.Slau.b.Elements[i] = Master.TemperatureAtBoundary();
                     //  Master.Slau.A.di[i] = C;
                     //   Master.Slau.b.Elements[i] = C * Master.Func2(Grid.x[i], Grid.y[0], Grid.t[timeLayer]);
                 }
             else //второе краевое            
                 for (int i = 0; i < Grid.N - 1; i++)
                 {
-                    Master.Slau.b.Elements[i] += Master.Lamda * Grid.hx[i] / 6 * (2 * Master.TemperatureInReservoir() + Master.TemperatureInReservoir());
-                    Master.Slau.b.Elements[i + 1] += Master.Lamda * Grid.hx[i] / 6 * (Master.TemperatureInReservoir() + 2 * Master.TemperatureInReservoir());
+                    Master.Slau.b.Elements[i] += Master.Lamda * Grid.hx[i] / 6 * (2 * Master.TemperatureAtBoundary() + Master.TemperatureAtBoundary());
+                    Master.Slau.b.Elements[i + 1] += Master.Lamda * Grid.hx[i] / 6 * (Master.TemperatureAtBoundary() + 2 * Master.TemperatureAtBoundary());
                 }
 
             if (Master.boundaryConditions[2] == 1)//верхняя граница
@@ -401,13 +418,13 @@ namespace ReaserchPaper
                 {
                     ZeroingRow(i);
                     Master.Slau.A.di[i] = 1;
-                    Master.Slau.b.Elements[i] = Master.TemperatureInReservoir();
+                    Master.Slau.b.Elements[i] = Master.TemperatureAtBoundary();
                 }
             else
                 for (int i = 0; i < Grid.N - 1; i++)
                 {
-                    Master.Slau.b.Elements[Grid.N * (Grid.M - 1) + i] += Master.Lamda * Grid.hx[i] / 6 * (2 * Master.TemperatureInReservoir() + Master.TemperatureInReservoir());
-                    Master.Slau.b.Elements[Grid.N * (Grid.M - 1) + i + 1] += Master.Lamda * Grid.hx[i] / 6 * (Master.TemperatureInReservoir() + 2 * Master.TemperatureInReservoir());
+                    Master.Slau.b.Elements[Grid.N * (Grid.M - 1) + i] += Master.Lamda * Grid.hx[i] / 6 * (2 * Master.TemperatureAtBoundary() + Master.TemperatureAtBoundary());
+                    Master.Slau.b.Elements[Grid.N * (Grid.M - 1) + i + 1] += Master.Lamda * Grid.hx[i] / 6 * (Master.TemperatureAtBoundary() + 2 * Master.TemperatureAtBoundary());
                 }
 
             if (Master.boundaryConditions[3] == 1)//левая гравнь
@@ -415,13 +432,13 @@ namespace ReaserchPaper
                 {
                     ZeroingRow(i);
                     Master.Slau.A.di[i] = 1;
-                    Master.Slau.b.Elements[i] = Master.TemperatureInReservoir();
+                    Master.Slau.b.Elements[i] = Master.TemperatureAtBoundary();
                 }
             else
                 for (int i = 0; i < Grid.N - 1; i++)
                 {
-                    Master.Slau.b.Elements[Grid.N * i] += Grid.hy[i] * Master.Lamda / 6 * (2 * Master.TemperatureInReservoir() + Master.TemperatureInReservoir());
-                    Master.Slau.b.Elements[Grid.N * (i + 1)] += Grid.hy[i] * Master.Lamda / 6 * (Master.TemperatureInReservoir() + 2 * Master.TemperatureInReservoir());
+                    Master.Slau.b.Elements[Grid.N * i] += Grid.hy[i] * Master.Lamda / 6 * (2 * Master.TemperatureAtBoundary() + Master.TemperatureAtBoundary());
+                    Master.Slau.b.Elements[Grid.N * (i + 1)] += Grid.hy[i] * Master.Lamda / 6 * (Master.TemperatureAtBoundary() + 2 * Master.TemperatureAtBoundary());
                 }
 
             if (Master.boundaryConditions[1] == 1)//правая граница
@@ -429,13 +446,13 @@ namespace ReaserchPaper
                 {
                     ZeroingRow(i);
                     Master.Slau.A.di[i] = 1;
-                    Master.Slau.b.Elements[i] = Master.TemperatureInReservoir();
+                    Master.Slau.b.Elements[i] = Master.TemperatureAtBoundary();
                 }
             else
                 for (int i = 0; i < Grid.N - 1; i++)
                 {
-                    Master.Slau.b.Elements[Grid.N * (i + 1) - 1] += Grid.hy[i] * Master.Lamda / 6 * (2 * Master.TemperatureInReservoir() + Master.TemperatureInReservoir());
-                    Master.Slau.b.Elements[Grid.N * (i + 2) - 1] += Grid.hy[i] * Master.Lamda / 6 * (Master.TemperatureInReservoir() + 2 * Master.TemperatureInReservoir());
+                    Master.Slau.b.Elements[Grid.N * (i + 1) - 1] += Grid.hy[i] * Master.Lamda / 6 * (2 * Master.TemperatureAtBoundary() + Master.TemperatureAtBoundary());
+                    Master.Slau.b.Elements[Grid.N * (i + 2) - 1] += Grid.hy[i] * Master.Lamda / 6 * (Master.TemperatureAtBoundary() + 2 * Master.TemperatureAtBoundary());
                 }
         }
 
