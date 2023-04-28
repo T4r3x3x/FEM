@@ -121,10 +121,12 @@ namespace ReaserchPaper
             Master.Slau.b.Reset();
         }
 
-        public void SwitchTask()
+        public void SwitchTask(Solver solver)
         {
             ResetSlau();
             _M *= Master.Sigma;
+            SolveSecondTimeLayer(solver);
+            ResetSlau();
             Master.Slau.A += _G * Master.Lamda2 + _H;
 
             deltaTimes[2] = Grid.t[2] - Grid.t[0];
@@ -133,6 +135,15 @@ namespace ReaserchPaper
 
             MQs[0] = _M * Master.Slau.q[0];
             MQs[1] = _M * Master.Slau.q[1];
+        }
+
+        private void SolveSecondTimeLayer(Solver solver)
+        {
+            double deltaT = Grid.t[1] - Grid.t[0];
+            Master.Slau.A = _M * 1/deltaT + _G + _H;
+            Master.Slau.b = _M * 1/deltaT * Master.Slau.q[0];
+            GetBoundaryConditions(1);
+            Master.Slau.q[1]=solver.Solve(Master.Slau.A,Master.Slau.b);
         }
 
         private void GetMatrixesMG()
@@ -384,11 +395,9 @@ namespace ReaserchPaper
 
 
         }
+
         static void GetBoundaryConditions(int timeLayer)
         {
-
-
-
             //нижняя граница
             if (Master.boundaryConditions[0] == 1)//первое краевое
                 for (int i = 0; i < Grid.N; i++)
@@ -448,6 +457,11 @@ namespace ReaserchPaper
                     Master.Slau.b.Elements[Grid.N * (i + 2) - 1] += Grid.hy[i] * Master.Lamda / 6 * (Master.TemperatureAtBoundary() + 2 * Master.TemperatureAtBoundary());
                 }
 
+            AccountingBoreholes();
+        }
+
+        static void AccountingBoreholes()
+        {
             double _temp = 2 * Master.TemperatureInBorehole() * (Grid.hx[Master.borehole[0]] + Grid.hx[Master.borehole[2]]) / (Grid.hx[Master.borehole[0]] * Grid.hx[Master.borehole[2]]);
             Vector temp = new Vector(4, Enumerable.Repeat(_temp, 4).ToArray());
             double[][] local = GetMassMatrix(Grid.hx[Master.borehole[0]], Grid.hx[Master.borehole[2]]);
