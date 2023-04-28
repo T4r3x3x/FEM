@@ -121,7 +121,7 @@ namespace ReaserchPaper
             Master.Slau.b.Reset();
         }
 
-        public void RebuildMatrix()
+        public void SwitchTask()
         {
             ResetSlau();
             _M *= Master.Sigma;
@@ -386,14 +386,7 @@ namespace ReaserchPaper
         }
         static void GetBoundaryConditions(int timeLayer)
         {
-            double _temp = 2 * Master.TemperatureInBorehole() * (Grid.hx[Master.borehole[0]] + Grid.hx[Master.borehole[2]]) / (Grid.hx[Master.borehole[0]] * Grid.hx[Master.borehole[2]]);
-            Vector temp = new Vector(4, Enumerable.Repeat(_temp, 4).ToArray());
-            double[][] local = GetMassMatrix(Grid.hx[Master.borehole[0]], Grid.hx[Master.borehole[2]]);
-            temp = local * temp;
-            Master.Slau.b.Elements[Master.borehole[2] * Grid.N + Master.borehole[0]] = temp.Elements[0];
-            Master.Slau.b.Elements[Master.borehole[2] * Grid.N + Master.borehole[1]] = temp.Elements[1];
-            Master.Slau.b.Elements[Master.borehole[3] * Grid.N + Master.borehole[0]] = temp.Elements[2];
-            Master.Slau.b.Elements[Master.borehole[3] * Grid.N + Master.borehole[1]] = temp.Elements[3];
+
 
 
             //нижняя граница
@@ -454,6 +447,15 @@ namespace ReaserchPaper
                     Master.Slau.b.Elements[Grid.N * (i + 1) - 1] += Grid.hy[i] * Master.Lamda / 6 * (2 * Master.TemperatureAtBoundary() + Master.TemperatureAtBoundary());
                     Master.Slau.b.Elements[Grid.N * (i + 2) - 1] += Grid.hy[i] * Master.Lamda / 6 * (Master.TemperatureAtBoundary() + 2 * Master.TemperatureAtBoundary());
                 }
+
+            double _temp = 2 * Master.TemperatureInBorehole() * (Grid.hx[Master.borehole[0]] + Grid.hx[Master.borehole[2]]) / (Grid.hx[Master.borehole[0]] * Grid.hx[Master.borehole[2]]);
+            Vector temp = new Vector(4, Enumerable.Repeat(_temp, 4).ToArray());
+            double[][] local = GetMassMatrix(Grid.hx[Master.borehole[0]], Grid.hx[Master.borehole[2]]);
+            temp = local * temp;
+            Master.Slau.b.Elements[Master.borehole[2] * Grid.N + Master.borehole[0]] = temp.Elements[0];
+            Master.Slau.b.Elements[Master.borehole[2] * Grid.N + Master.borehole[1]] = temp.Elements[1];
+            Master.Slau.b.Elements[Master.borehole[3] * Grid.N + Master.borehole[0]] = temp.Elements[2];
+            Master.Slau.b.Elements[Master.borehole[3] * Grid.N + Master.borehole[1]] = temp.Elements[3];
         }
 
 
