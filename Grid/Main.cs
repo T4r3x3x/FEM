@@ -53,9 +53,9 @@ namespace ResearchPaper
             collector.Collect();
             Slau.p = solver.Solve(Slau.A, Slau.b);
           //  Master.Slau.Print();
-            Slau.PrintResult(-1, false);
+            Slau.PrintResult(1, false);
             collector.GetMatrixH();
-            collector.RebuildMatrix();
+            collector.SwitchTask(solver);
       
             for (int i = 2; i < Grid.TimeLayersCount; i++)
             {

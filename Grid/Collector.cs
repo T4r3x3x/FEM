@@ -117,10 +117,28 @@ namespace ReaserchPaper
             Master.Slau.b.Reset();
         }
 
-        public void RebuildMatrix()
+        public void SwitchTask(Solver solver)
         {
             ResetSlau();
-            Master.Slau.A +=  _G * Master.Lamda + _H;
+            _M *= Master.Sigma;
+            SolveSecondTimeLayer(solver);
+            ResetSlau();
+            Master.Slau.A += _G * Master.Lamda + _H;
+        }
+
+        private void SolveSecondTimeLayer(Solver solver)
+        {
+            double deltaT = Grid.t[1] - Grid.t[0];
+
+            Master.Slau.A = _M * 1 / deltaT + _G * Master.Lamda + _H;
+            for (int j = 0; j < Grid.M - 1; j++)
+                for (int i = 0; i < Grid.N - 1; i++) // проходим по КЭ 
+                    AddLocalB(i, j, 1);
+
+            Master.Slau.b += _M * (1 / deltaT) * Master.Slau.q[0];
+            GetBoundaryConditions(1);
+           
+            Master.Slau.q[1] = solver.Solve(Master.Slau.A, Master.Slau.b);
         }
 
         private void GetMatrixesMG()
@@ -241,10 +259,10 @@ namespace ReaserchPaper
             double deltaT1 = Grid.t[timeLayer - 1] - Grid.t[timeLayer - 2];
             double deltaT0 = Grid.t[timeLayer] - Grid.t[timeLayer - 1];
 
-            Vector vector1 = _M * Master.Sigma * Master.Slau.q[timeLayer - 2];
-            Vector vector2 = _M * Master.Sigma * Master.Slau.q[timeLayer - 1];
+            Vector vector1 = _M * Master.Slau.q[timeLayer - 2];
+            Vector vector2 = _M * Master.Slau.q[timeLayer - 1];
 
-            timeCoef = ((deltaT + deltaT0) / (deltaT * deltaT0)) * Master.Sigma;
+            timeCoef = ((deltaT + deltaT0) / (deltaT * deltaT0));
 
             Master.Slau.b += -(deltaT0 / (deltaT * deltaT1)) * vector1 + deltaT / (deltaT1 * deltaT0) * vector2;
             Master.Slau.A += _M * timeCoef;
