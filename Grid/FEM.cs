@@ -23,7 +23,9 @@ namespace ReaserchPaper
             - Master.Slau.p.Elements[elemNumber + Grid.N] * Y2(point.y, yBoundaries.x, hy) / hx + Master.Slau.p.Elements[elemNumber + Grid.N + 1] * Y2(point.y, yBoundaries.x, hy) / hx;
             _y = -Master.Slau.p.Elements[elemNumber] * X1(point.x, xBoundaries.y, hx) / hy - Master.Slau.p.Elements[elemNumber + 1] * X2(point.x, xBoundaries.x, hx) / hy
             + Master.Slau.p.Elements[elemNumber + Grid.N] * X1(point.x, xBoundaries.y, hx) / hy + Master.Slau.p.Elements[elemNumber + Grid.N + 1] * X2(point.x, xBoundaries.x, hx) / hy;
-            return new Point(-_x, -_y);
+            Point result = new Point(-_x, -_y);
+            result *= Master.Lamda;
+            return result;
         }
 
         public static double VGradP(int elemNumber, int i, int j, Point xBoundaries, Point yBoundaries, Point point, double hx, double hy)

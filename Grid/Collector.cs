@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace ReaserchPaper
 {
@@ -398,6 +399,8 @@ namespace ReaserchPaper
 
         static void GetBoundaryConditions(int timeLayer)
         {
+
+            AccountingBoreholes();
             //нижняя граница
             if (Master.boundaryConditions[0] == 1)//первое краевое
                 for (int i = 0; i < Grid.N; i++)
@@ -456,20 +459,22 @@ namespace ReaserchPaper
                     Master.Slau.b.Elements[Grid.N * (i + 1) - 1] += Grid.hy[i] * Master.Lamda / 6 * (2 * Master.TemperatureAtBoundary() + Master.TemperatureAtBoundary());
                     Master.Slau.b.Elements[Grid.N * (i + 2) - 1] += Grid.hy[i] * Master.Lamda / 6 * (Master.TemperatureAtBoundary() + 2 * Master.TemperatureAtBoundary());
                 }
-
-            AccountingBoreholes();
+           
         }
 
         static void AccountingBoreholes()
         {
-            double _temp = 2 * Master.TemperatureInBorehole() * (Grid.hx[Master.borehole[0]] + Grid.hx[Master.borehole[2]]) / (Grid.hx[Master.borehole[0]] * Grid.hx[Master.borehole[2]]);
-            Vector temp = new Vector(4, Enumerable.Repeat(_temp, 4).ToArray());
-            double[][] local = GetMassMatrix(Grid.hx[Master.borehole[0]], Grid.hx[Master.borehole[2]]);
-            temp = local * temp;
-            Master.Slau.b.Elements[Master.borehole[2] * Grid.N + Master.borehole[0]] = temp.Elements[0];
-            Master.Slau.b.Elements[Master.borehole[2] * Grid.N + Master.borehole[1]] = temp.Elements[1];
-            Master.Slau.b.Elements[Master.borehole[3] * Grid.N + Master.borehole[0]] = temp.Elements[2];
-            Master.Slau.b.Elements[Master.borehole[3] * Grid.N + Master.borehole[1]] = temp.Elements[3];
+            double hx = Grid.hx[Master.borehole[0]];
+            double hy = Grid.hx[Master.borehole[2]];
+
+            double _temp = 2 * (hx + hy) / (hx * hy) * Master.TemperatureInBorehole();
+            Vector localF = new Vector(4, Enumerable.Repeat(_temp, 4).ToArray());
+            double[][] local = GetMassMatrix(Grid.hx[Master.borehole[0]], Grid.hy[Master.borehole[2]]);
+            localF = local * localF;
+            Master.Slau.b.Elements[Master.borehole[2] * Grid.N + Master.borehole[0]] = localF.Elements[0];
+            Master.Slau.b.Elements[Master.borehole[2] * Grid.N + Master.borehole[1]] = localF.Elements[1];
+            Master.Slau.b.Elements[Master.borehole[3] * Grid.N + Master.borehole[0]] = localF.Elements[2];
+            Master.Slau.b.Elements[Master.borehole[3] * Grid.N + Master.borehole[1]] = localF.Elements[3];
         }
 
 

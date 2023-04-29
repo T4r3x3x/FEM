@@ -19,5 +19,15 @@ namespace ReaserchPaper
         {
             Console.WriteLine(x + " " +  y);
         }
+
+
+        public static Point operator *(Point point, double a)
+        {
+            Point result;
+
+            result = new Point(point.x*a, point.y*a);
+
+            return result;
+        }
     }
 }
