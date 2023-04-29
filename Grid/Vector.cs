@@ -90,7 +90,7 @@ namespace ReaserchPaper
             {
                 for (int j = 0; j < matrix.Length; j++)
                 {
-                    result.Elements[i] = matrix[i][j] * vector.Elements[j];
+                    result.Elements[i] += matrix[i][j] * vector.Elements[j];
                 }
             }
 
