@@ -1,5 +1,6 @@
 ﻿using ReaserchPaper;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Security.Principal;
 
 namespace ResearchPaper
@@ -12,15 +13,15 @@ namespace ResearchPaper
         public static double Lamda2 = 0.124;
         public static SLAU Slau;
         public static int[] boundaryConditions = new int[4] {1,1,1,1};
-        public static int[] borehole = new int[4] { 9, 10, 9, 10 }; //индексы x0 x1 y0 y1
+        public static int[] borehole = new int[4] { 14,15, 14, 15 }; //индексы x0 x1 y0 y1
 
         public static double PressuereInReservoir(double x, double y) => 13172250;
         public static double BoreholePower() => +6.9e-4;
         public static double F1(double x, double y) => 0;
 
 
-        public static double TemperatureAtBegin() => 0;
-        public static double TemperatureAtBoundary() => 0;
+        public static double TemperatureAtBegin() => 10;
+        public static double TemperatureAtBoundary() => 10;
         public static double TemperatureInBorehole() => 100;
         public static double F2(double x, double y, double t) => 0;
 
@@ -74,7 +75,8 @@ namespace ResearchPaper
                 Slau.q[i] = solver.Solve(Slau.A, Slau.b);
                 Console.WriteLine("solving in proccess: {0} of {1} time layers...", i + 1, Grid.TimeLayersCount);
             }
-           // Slau.PrintResult(1, false);
+          //  Slau.Print();
+           //Slau.PrintResult(1, false);
 
             Slau.WriteSolves();
             Console.WriteLine(sw.ElapsedMilliseconds);

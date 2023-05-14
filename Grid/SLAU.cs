@@ -78,6 +78,15 @@ namespace ResearchPaper
 
         public void WriteSolves()
         {
+            Vector exactSolution = new Vector(q[0].Length);
+            using (StreamWriter sw = new StreamWriter("pressure.csv"))
+            {
+                sw.WriteLine("полученное значение, точное значение, разница значений");
+                for (int i = 0; i < A.Size; i++)
+                    sw.WriteLine("{0:E16}, {1:E16}, {2:E16}", p.Elements[i].ToString("E16").Replace(",", "."), exactSolution.Elements[i].ToString("E16").Replace(",", "."), Math.Abs(exactSolution.Elements[i] - p.Elements[i]).ToString("E16").Replace(",", "."));
+            }
+
+
             using (StreamWriter sw = new StreamWriter("pressure.txt"))
                 for (int j = 0; j < Grid.M; j++)
                     for (int i = 0; i < Grid.N; i++)                    
