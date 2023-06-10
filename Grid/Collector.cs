@@ -14,6 +14,7 @@ namespace ReaserchPaper
     {
         static Matrix _M, _G, _H;
         static double timeCoef;
+        static int area = 0;
 
         static double G(double h, int i, int j)
         {
@@ -144,8 +145,8 @@ namespace ReaserchPaper
         private void GetMatrixesMG()
         {
             double[][] localMatrix;
-            for (int j = 0; j < Grid.M - 1; j++)
-                for (int i = 0; i < Grid.N - 1; i++) // проходим по КЭ 
+            for (int j = 0; j < Grid.M - 1; j++) //y
+                for (int i = 0; i < Grid.N - 1; i++) //x | проходим по КЭ 
                 {
                     localMatrix = GetMassMatrix(Grid.hx[i], Grid.hy[j]);
                     AddLocalMatrix(_M, localMatrix, i, j);
@@ -202,14 +203,16 @@ namespace ReaserchPaper
         }
         private static void GetTimeConditions()
         {
+            
             for (int p = 0; p < 2; p++) //записываем в [1] и в [2] так как потом в цикле вызовется SwapSolves и значение перезапишутся в [0] и [1] соотвественно.     
                 for (int j = 0; j < Grid.M - 1; j++)
                     for (int i = 0; i < Grid.N - 1; i++) // проходим по КЭ 
                     {
-                        Master.Slau.q[p].Elements[i + j * Grid.N] = Master.Func2(Grid.x[i], Grid.y[j], Grid.t[p]);
-                        Master.Slau.q[p].Elements[i + j * Grid.N + 1] = Master.Func2(Grid.x[i + 1], Grid.y[j], Grid.t[p]);
-                        Master.Slau.q[p].Elements[i + (j + 1) * Grid.N] = Master.Func2(Grid.x[i], Grid.y[j + 1], Grid.t[p]);
-                        Master.Slau.q[p].Elements[i + (j + 1) * Grid.N + 1] = Master.Func2(Grid.x[i + 1], Grid.y[j + 1], Grid.t[p]);
+                        area = Grid.GetAreaNumber(i, j);
+                        Master.Slau.q[p].Elements[i + j * Grid.N] = Master.Func2(Grid.x[i], Grid.y[j], Grid.t[p],area);
+                        Master.Slau.q[p].Elements[i + j * Grid.N + 1] = Master.Func2(Grid.x[i + 1], Grid.y[j], Grid.t[p], area);
+                        Master.Slau.q[p].Elements[i + (j + 1) * Grid.N] = Master.Func2(Grid.x[i], Grid.y[j + 1], Grid.t[p], area);
+                        Master.Slau.q[p].Elements[i + (j + 1) * Grid.N + 1] = Master.Func2(Grid.x[i + 1], Grid.y[j + 1], Grid.t[p], area);
                     }
         }
         static int mu(int i) => ((i) % 2);
@@ -273,17 +276,19 @@ namespace ReaserchPaper
         }
         static void AddLocalB(int i, int j)
         {
-            Master.Slau.b.Elements[i + j * Grid.N] += Grid.hx[i] * Grid.hy[j] / 36 * (4 * Master.F1(Grid.x[i], Grid.y[j]) + 2 * Master.F1(Grid.x[i + 1], Grid.y[j]) + 2 * Master.F1(Grid.x[i], Grid.y[j + 1]) + Master.F1(Grid.x[i + 1], Grid.y[j + 1]));
-            Master.Slau.b.Elements[i + j * Grid.N + 1] += Grid.hx[i] * Grid.hy[j] / 36 * (2 * Master.F1(Grid.x[i], Grid.y[j]) + 4 * Master.F1(Grid.x[i + 1], Grid.y[j]) + Master.F1(Grid.x[i], Grid.y[j + 1]) + 2 * Master.F1(Grid.x[i + 1], Grid.y[j + 1]));
-            Master.Slau.b.Elements[i + (j + 1) * Grid.N] += Grid.hx[i] * Grid.hy[j] / 36 * (2 * Master.F1(Grid.x[i], Grid.y[j]) + Master.F1(Grid.x[i + 1], Grid.y[j]) + 4 * Master.F1(Grid.x[i], Grid.y[j + 1]) + 2 * Master.F1(Grid.x[i + 1], Grid.y[j + 1]));
-            Master.Slau.b.Elements[i + (j + 1) * Grid.N + 1] += Grid.hx[i] * Grid.hy[j] / 36 * (Master.F1(Grid.x[i], Grid.y[j]) + 2 * Master.F1(Grid.x[i + 1], Grid.y[j]) + 2 * Master.F1(Grid.x[i], Grid.y[j + 1]) + 4 * Master.F1(Grid.x[i + 1], Grid.y[j + 1]));
+            area = Grid.GetAreaNumber(i, j);
+            Master.Slau.b.Elements[i + j * Grid.N] += Grid.hx[i] * Grid.hy[j] / 36 * (4 * Master.F1(Grid.x[i], Grid.y[j], area) + 2 * Master.F1(Grid.x[i + 1], Grid.y[j], area) + 2 * Master.F1(Grid.x[i], Grid.y[j + 1], area) + Master.F1(Grid.x[i + 1], Grid.y[j + 1], area));
+            Master.Slau.b.Elements[i + j * Grid.N + 1] += Grid.hx[i] * Grid.hy[j] / 36 * (2 * Master.F1(Grid.x[i], Grid.y[j], area) + 4 * Master.F1(Grid.x[i + 1], Grid.y[j], area) + Master.F1(Grid.x[i], Grid.y[j + 1], area) + 2 * Master.F1(Grid.x[i + 1], Grid.y[j + 1], area));
+            Master.Slau.b.Elements[i + (j + 1) * Grid.N] += Grid.hx[i] * Grid.hy[j] / 36 * (2 * Master.F1(Grid.x[i], Grid.y[j], area) + Master.F1(Grid.x[i + 1], Grid.y[j], area) + 4 * Master.F1(Grid.x[i], Grid.y[j + 1], area) + 2 * Master.F1(Grid.x[i + 1], Grid.y[j + 1], area));
+            Master.Slau.b.Elements[i + (j + 1) * Grid.N + 1] += Grid.hx[i] * Grid.hy[j] / 36 * (Master.F1(Grid.x[i], Grid.y[j],area) + 2 * Master.F1(Grid.x[i + 1], Grid.y[j], area) + 2 * Master.F1(Grid.x[i], Grid.y[j + 1], area) + 4 * Master.F1(Grid.x[i + 1], Grid.y[j + 1], area));
         }
         static void AddLocalB(int i, int j, int timeLayer)
         {
-            Master.Slau.b.Elements[i + j * Grid.N] += Grid.hx[i] * Grid.hy[j] / 36 * (4 * Master.F2(Grid.x[i], Grid.y[j], Grid.t[timeLayer]) + 2 * Master.F2(Grid.x[i + 1], Grid.y[j], Grid.t[timeLayer]) + 2 * Master.F2(Grid.x[i], Grid.y[j + 1], Grid.t[timeLayer]) + Master.F2(Grid.x[i + 1], Grid.y[j + 1], Grid.t[timeLayer]));
-            Master.Slau.b.Elements[i + j * Grid.N + 1] += Grid.hx[i] * Grid.hy[j] / 36 * (2 * Master.F2(Grid.x[i], Grid.y[j], Grid.t[timeLayer]) + 4 * Master.F2(Grid.x[i + 1], Grid.y[j], Grid.t[timeLayer]) + Master.F2(Grid.x[i], Grid.y[j + 1], Grid.t[timeLayer]) + 2 * Master.F2(Grid.x[i + 1], Grid.y[j + 1], Grid.t[timeLayer]));
-            Master.Slau.b.Elements[i + (j + 1) * Grid.N] += Grid.hx[i] * Grid.hy[j] / 36 * (2 * Master.F2(Grid.x[i], Grid.y[j], Grid.t[timeLayer]) + Master.F2(Grid.x[i + 1], Grid.y[j], Grid.t[timeLayer]) + 4 * Master.F2(Grid.x[i], Grid.y[j + 1], Grid.t[timeLayer]) + 2 * Master.F2(Grid.x[i + 1], Grid.y[j + 1], Grid.t[timeLayer]));
-            Master.Slau.b.Elements[i + (j + 1) * Grid.N + 1] += Grid.hx[i] * Grid.hy[j] / 36 * (Master.F2(Grid.x[i], Grid.y[j], Grid.t[timeLayer]) + 2 * Master.F2(Grid.x[i + 1], Grid.y[j], Grid.t[timeLayer]) + 2 * Master.F2(Grid.x[i], Grid.y[j + 1], Grid.t[timeLayer]) + 4 * Master.F2(Grid.x[i + 1], Grid.y[j + 1], Grid.t[timeLayer]));
+            area = Grid.GetAreaNumber(i, j);
+            Master.Slau.b.Elements[i + j * Grid.N] += Grid.hx[i] * Grid.hy[j] / 36 * (4 * Master.F2(Grid.x[i], Grid.y[j], Grid.t[timeLayer], area) + 2 * Master.F2(Grid.x[i + 1], Grid.y[j], Grid.t[timeLayer], area) + 2 * Master.F2(Grid.x[i], Grid.y[j + 1], Grid.t[timeLayer], area) + Master.F2(Grid.x[i + 1], Grid.y[j + 1], Grid.t[timeLayer], area));
+            Master.Slau.b.Elements[i + j * Grid.N + 1] += Grid.hx[i] * Grid.hy[j] / 36 * (2 * Master.F2(Grid.x[i], Grid.y[j], Grid.t[timeLayer], area) + 4 * Master.F2(Grid.x[i + 1], Grid.y[j], Grid.t[timeLayer], area) + Master.F2(Grid.x[i], Grid.y[j + 1], Grid.t[timeLayer], area) + 2 * Master.F2(Grid.x[i + 1], Grid.y[j + 1], Grid.t[timeLayer], area));
+            Master.Slau.b.Elements[i + (j + 1) * Grid.N] += Grid.hx[i] * Grid.hy[j] / 36 * (2 * Master.F2(Grid.x[i], Grid.y[j], Grid.t[timeLayer], area) + Master.F2(Grid.x[i + 1], Grid.y[j], Grid.t[timeLayer], area) + 4 * Master.F2(Grid.x[i], Grid.y[j + 1], Grid.t[timeLayer], area) + 2 * Master.F2(Grid.x[i + 1], Grid.y[j + 1], Grid.t[timeLayer], area));
+            Master.Slau.b.Elements[i + (j + 1) * Grid.N + 1] += Grid.hx[i] * Grid.hy[j] / 36 * (Master.F2(Grid.x[i], Grid.y[j], Grid.t[timeLayer], area) + 2 * Master.F2(Grid.x[i + 1], Grid.y[j], Grid.t[timeLayer], area) + 2 * Master.F2(Grid.x[i], Grid.y[j + 1], Grid.t[timeLayer], area) + 4 * Master.F2(Grid.x[i + 1], Grid.y[j + 1], Grid.t[timeLayer], area));
         }
         static void ZeroingRow(int row)
         {
@@ -306,57 +311,65 @@ namespace ReaserchPaper
             if (Master.boundaryConditions[0] == 1)//первое краевое
                 for (int i = 0; i < Grid.N; i++)
                 {
+                    area = Grid.GetAreaNumber(i, 0);
                     ZeroingRow(i);
                     Master.Slau.A.di[i] = 1;
-                    Master.Slau.b.Elements[i] = Master.Func1(Grid.x[i], Grid.y[0]);
+                    Master.Slau.b.Elements[i] = Master.Func1(Grid.x[i], Grid.y[0], area);
                 }
             else //второе краевое            
                 for (int i = 0; i < Grid.N - 1; i++)
                 {
-                    Master.Slau.b.Elements[i] -= Master.Lamda * Grid.hx[i] / 6 * (2 * Master.DivFuncY1(Grid.x[i], Grid.y[0]) + Master.DivFuncY1(Grid.x[i + 1], Grid.y[0]));
-                    Master.Slau.b.Elements[i + 1] -= Master.Lamda * Grid.hx[i] / 6 * (2 * Master.DivFuncY1(Grid.x[i], Grid.y[0]) + Master.DivFuncY1(Grid.x[i + 1], Grid.y[0]));
+                    area = Grid.GetAreaNumber(i, 0);
+                    Master.Slau.b.Elements[i] -= Master.Lamda * Grid.hx[i] / 6 * (2 * Master.DivFuncY1(Grid.x[i], Grid.y[0], area) + Master.DivFuncY1(Grid.x[i + 1], Grid.y[0], area));
+                    Master.Slau.b.Elements[i + 1] -= Master.Lamda * Grid.hx[i] / 6 * (2 * Master.DivFuncY1(Grid.x[i], Grid.y[0], area) + Master.DivFuncY1(Grid.x[i + 1], Grid.y[0], area));
                 }
 
             if (Master.boundaryConditions[2] == 1)//верхняя граница
                 for (int i = Master.Slau.A.Size - 1; i > Master.Slau.A.Size - Grid.N - 1; i--)
                 {
+                    area = Grid.GetAreaNumber(i % Grid.N, Grid.M - 1);
                     ZeroingRow(i);
                     Master.Slau.A.di[i] = 1;
-                    Master.Slau.b.Elements[i] = Master.Func1(Grid.x[i % Grid.N], Grid.y[Grid.M - 1]);
+                    Master.Slau.b.Elements[i] = Master.Func1(Grid.x[i % Grid.N], Grid.y[Grid.M - 1],area);
                 }
             else
                 for (int i = 0; i < Grid.N - 1; i++)
                 {
-                    Master.Slau.b.Elements[Grid.N * (Grid.M - 1) + i] += Master.Lamda * Grid.hx[i] / 6 * (2 * Master.DivFuncY1(Grid.x[i], Grid.y[Grid.M - 1]) + Master.DivFuncY1(Grid.x[i + 1], Grid.y[Grid.M - 1]));
-                    Master.Slau.b.Elements[Grid.N * (Grid.M - 1) + i + 1] += Master.Lamda * Grid.hx[i] / 6 * (Master.DivFuncY1(Grid.x[i], Grid.y[Grid.M - 1]) + 2 * Master.DivFuncY1(Grid.x[i + 1], Grid.y[Grid.M - 1]));
+                    area = Grid.GetAreaNumber(i, Grid.M - 1);
+                    Master.Slau.b.Elements[Grid.N * (Grid.M - 1) + i] += Master.Lamda * Grid.hx[i] / 6 * (2 * Master.DivFuncY1(Grid.x[i], Grid.y[Grid.M - 1], area) + Master.DivFuncY1(Grid.x[i + 1], Grid.y[Grid.M - 1], area));
+                    Master.Slau.b.Elements[Grid.N * (Grid.M - 1) + i + 1] += Master.Lamda * Grid.hx[i] / 6 * (Master.DivFuncY1(Grid.x[i], Grid.y[Grid.M - 1], area) + 2 * Master.DivFuncY1(Grid.x[i + 1], Grid.y[Grid.M - 1], area));
                 }
 
             if (Master.boundaryConditions[3] == 1)//левая гравнь
                 for (int i = Grid.N; i < Master.Slau.A.Size - Grid.N - 1; i += Grid.N)
                 {
+                    area = Grid.GetAreaNumber(0, i / Grid.N);
                     ZeroingRow(i);
                     Master.Slau.A.di[i] = 1;
-                    Master.Slau.b.Elements[i] = Master.Func1(Grid.x[0], Grid.y[i / Grid.N]);
+                    Master.Slau.b.Elements[i] = Master.Func1(Grid.x[0], Grid.y[i / Grid.N], area);
                 }
             else
                 for (int i = 0; i < Grid.N - 1; i++)
                 {
-                    Master.Slau.b.Elements[Grid.N * i] -= Grid.hy[i] * Master.Lamda / 6 * (2 * Master.DivFuncX1(Grid.x[0], Grid.y[i]) + Master.DivFuncX1(Grid.x[0], Grid.y[i + 1]));
-                    Master.Slau.b.Elements[Grid.N * (i + 1)] -= Grid.hy[i] * Master.Lamda / 6 * (Master.DivFuncX1(Grid.x[0], Grid.y[i]) + 2 * Master.DivFuncX1(Grid.x[0], Grid.y[i + 1]));
+                    area = Grid.GetAreaNumber(0, i);
+                    Master.Slau.b.Elements[Grid.N * i] -= Grid.hy[i] * Master.Lamda / 6 * (2 * Master.DivFuncX1(Grid.x[0], Grid.y[i], area) + Master.DivFuncX1(Grid.x[0], Grid.y[i + 1], area));
+                    Master.Slau.b.Elements[Grid.N * (i + 1)] -= Grid.hy[i] * Master.Lamda / 6 * (Master.DivFuncX1(Grid.x[0], Grid.y[i], area) + 2 * Master.DivFuncX1(Grid.x[0], Grid.y[i + 1], area));
                 }
 
             if (Master.boundaryConditions[1] == 1)//правая граница
                 for (int i = 2 * Grid.N - 1; i < Master.Slau.A.Size - 1; i += Grid.N)
                 {
+                    area = Grid.GetAreaNumber(Grid.N - 1, i / Grid.N);
                     ZeroingRow(i);
                     Master.Slau.A.di[i] = 1;
-                    Master.Slau.b.Elements[i] = Master.Func1(Grid.x[Grid.N - 1], Grid.y[i / Grid.N]);
+                    Master.Slau.b.Elements[i] = Master.Func1(Grid.x[Grid.N - 1], Grid.y[i / Grid.N], area);
                 }
             else
                 for (int i = 0; i < Grid.N - 1; i++)
                 {
-                    Master.Slau.b.Elements[Grid.N * (i + 1) - 1] += Grid.hy[i] * Master.Lamda / 6 * (2 * Master.DivFuncX1(Grid.x[Grid.N - 1], Grid.y[i]) + Master.DivFuncX1(Grid.x[0], Grid.y[i + 1]));
-                    Master.Slau.b.Elements[Grid.N * (i + 2) - 1] += Grid.hy[i] * Master.Lamda / 6 * (Master.DivFuncX1(Grid.x[Grid.N - 1], Grid.y[i]) + 2 * Master.DivFuncX1(Grid.x[0], Grid.y[i + 1]));
+                    area = Grid.GetAreaNumber(Grid.N - 1, i);
+                    Master.Slau.b.Elements[Grid.N * (i + 1) - 1] += Grid.hy[i] * Master.Lamda / 6 * (2 * Master.DivFuncX1(Grid.x[Grid.N - 1], Grid.y[i], area) + Master.DivFuncX1(Grid.x[0], Grid.y[i + 1], area));
+                    Master.Slau.b.Elements[Grid.N * (i + 2) - 1] += Grid.hy[i] * Master.Lamda / 6 * (Master.DivFuncX1(Grid.x[Grid.N - 1], Grid.y[i], area) + 2 * Master.DivFuncX1(Grid.x[0], Grid.y[i + 1], area));
                 }
         }
         static void GetBoundaryConditions(int timeLayer)
@@ -365,59 +378,67 @@ namespace ReaserchPaper
             if (Master.boundaryConditions[0] == 1)//первое краевое
                 for (int i = 0; i < Grid.N; i++)
                 {
+                    area = Grid.GetAreaNumber(i, 0);
                     ZeroingRow(i);
                     Master.Slau.A.di[i] = 1;
-                    Master.Slau.b.Elements[i] = Master.Func2(Grid.x[i], Grid.y[0], Grid.t[timeLayer]);
+                    Master.Slau.b.Elements[i] = Master.Func2(Grid.x[i], Grid.y[0], Grid.t[timeLayer], area);
                     //  Master.Slau.A.di[i] = C;
                     //   Master.Slau.b.Elements[i] = C * Master.Func2(Grid.x[i], Grid.y[0], Grid.t[timeLayer]);
                 }
             else //второе краевое            
                 for (int i = 0; i < Grid.N - 1; i++)
                 {
-                    Master.Slau.b.Elements[i] -= Master.Lamda * Grid.hx[i] / 6 * (2 * Master.DivFuncY2(Grid.x[i], Grid.y[0], Grid.t[timeLayer]) + Master.DivFuncY2(Grid.x[i + 1], Grid.y[0], Grid.t[timeLayer]));
-                    Master.Slau.b.Elements[i + 1] -= Master.Lamda * Grid.hx[i] / 6 * (Master.DivFuncY2(Grid.x[i], Grid.y[0], Grid.t[timeLayer]) + 2 * Master.DivFuncY2(Grid.x[i + 1], Grid.y[0], Grid.t[timeLayer]));
+                    area = Grid.GetAreaNumber(i, 0);
+                    Master.Slau.b.Elements[i] -= Master.Lamda * Grid.hx[i] / 6 * (2 * Master.DivFuncY2(Grid.x[i], Grid.y[0], Grid.t[timeLayer],area  ) + Master.DivFuncY2(Grid.x[i + 1], Grid.y[0], Grid.t[timeLayer], area));
+                    Master.Slau.b.Elements[i + 1] -= Master.Lamda * Grid.hx[i] / 6 * (Master.DivFuncY2(Grid.x[i], Grid.y[0], Grid.t[timeLayer], area) + 2 * Master.DivFuncY2(Grid.x[i + 1], Grid.y[0], Grid.t[timeLayer], area));
                 }
 
             if (Master.boundaryConditions[2] == 1)//верхняя граница
                 for (int i = Master.Slau.A.Size - 1; i > Master.Slau.A.Size - Grid.N - 1; i--)
                 {
+                    area = Grid.GetAreaNumber(i, Grid.M - 1);
                     ZeroingRow(i);
                     Master.Slau.A.di[i] = 1;
-                    Master.Slau.b.Elements[i] = Master.Func2(Grid.x[i % Grid.N], Grid.y[Grid.M - 1], Grid.t[timeLayer]);
+                    Master.Slau.b.Elements[i] = Master.Func2(Grid.x[i % Grid.N], Grid.y[Grid.M - 1], Grid.t[timeLayer], area);
                 }
             else
                 for (int i = 0; i < Grid.N - 1; i++)
                 {
-                    Master.Slau.b.Elements[Grid.N * (Grid.M - 1) + i] += Master.Lamda * Grid.hx[i] / 6 * (2 * Master.DivFuncY2(Grid.x[i], Grid.y[Grid.M - 1], Grid.t[timeLayer]) + Master.DivFuncY2(Grid.x[i + 1], Grid.y[Grid.M - 1], Grid.t[timeLayer]));
-                    Master.Slau.b.Elements[Grid.N * (Grid.M - 1) + i + 1] += Master.Lamda * Grid.hx[i] / 6 * (Master.DivFuncY2(Grid.x[i], Grid.y[Grid.M - 1], Grid.t[timeLayer]) + 2 * Master.DivFuncY2(Grid.x[i + 1], Grid.y[Grid.M - 1], Grid.t[timeLayer]));
+                    area = Grid.GetAreaNumber(i, Grid.M - 1);
+                    Master.Slau.b.Elements[Grid.N * (Grid.M - 1) + i] += Master.Lamda * Grid.hx[i] / 6 * (2 * Master.DivFuncY2(Grid.x[i], Grid.y[Grid.M - 1], Grid.t[timeLayer] , area) + Master.DivFuncY2(Grid.x[i + 1], Grid.y[Grid.M - 1], Grid.t[timeLayer], area));
+                    Master.Slau.b.Elements[Grid.N * (Grid.M - 1) + i + 1] += Master.Lamda * Grid.hx[i] / 6 * (Master.DivFuncY2(Grid.x[i], Grid.y[Grid.M - 1], Grid.t[timeLayer], area) + 2 * Master.DivFuncY2(Grid.x[i + 1], Grid.y[Grid.M - 1], Grid.t[timeLayer], area));
                 }
 
             if (Master.boundaryConditions[3] == 1)//левая гравнь
                 for (int i = Grid.N; i < Master.Slau.A.Size - Grid.N - 1; i += Grid.N)
                 {
+                    area = Grid.GetAreaNumber(0, i);
                     ZeroingRow(i);
                     Master.Slau.A.di[i] = 1;
-                    Master.Slau.b.Elements[i] = Master.Func2(Grid.x[0], Grid.y[i / Grid.N], Grid.t[timeLayer]);
+                    Master.Slau.b.Elements[i] = Master.Func2(Grid.x[0], Grid.y[i / Grid.N], Grid.t[timeLayer], area);
                 }
             else
                 for (int i = 0; i < Grid.N - 1; i++)
                 {
-                    Master.Slau.b.Elements[Grid.N * i] -= Grid.hy[i] * Master.Lamda / 6 * (2 * Master.DivFuncX2(Grid.x[0], Grid.y[i], Grid.t[timeLayer]) + Master.DivFuncX2(Grid.x[0], Grid.y[i + 1], Grid.t[timeLayer]));
-                    Master.Slau.b.Elements[Grid.N * (i + 1)] -= Grid.hy[i] * Master.Lamda / 6 * (Master.DivFuncX2(Grid.x[0], Grid.y[i], Grid.t[timeLayer]) + 2 * Master.DivFuncX2(Grid.x[0], Grid.y[i + 1], Grid.t[timeLayer]));
+                    area = Grid.GetAreaNumber(0, i);
+                    Master.Slau.b.Elements[Grid.N * i] -= Grid.hy[i] * Master.Lamda / 6 * (2 * Master.DivFuncX2(Grid.x[0], Grid.y[i], Grid.t[timeLayer], area) + Master.DivFuncX2(Grid.x[0], Grid.y[i + 1], Grid.t[timeLayer], area));
+                    Master.Slau.b.Elements[Grid.N * (i + 1)] -= Grid.hy[i] * Master.Lamda / 6 * (Master.DivFuncX2(Grid.x[0], Grid.y[i], Grid.t[timeLayer]   , area) + 2 * Master.DivFuncX2(Grid.x[0], Grid.y[i + 1], Grid.t[timeLayer], area));
                 }
 
             if (Master.boundaryConditions[1] == 1)//правая граница
                 for (int i = 2 * Grid.N - 1; i < Master.Slau.A.Size - 1; i += Grid.N)
                 {
+                    area = Grid.GetAreaNumber(Grid.N-1, i);
                     ZeroingRow(i);
                     Master.Slau.A.di[i] = 1;
-                    Master.Slau.b.Elements[i] = Master.Func2(Grid.x[Grid.N - 1], Grid.y[i / Grid.N], Grid.t[timeLayer]);
+                    Master.Slau.b.Elements[i] = Master.Func2(Grid.x[Grid.N - 1], Grid.y[i / Grid.N], Grid.t[timeLayer], area);
                 }
             else
                 for (int i = 0; i < Grid.N - 1; i++)
                 {
-                    Master.Slau.b.Elements[Grid.N * (i + 1) - 1] += Grid.hy[i] * Master.Lamda / 6 * (2 * Master.DivFuncX2(Grid.x[Grid.N - 1], Grid.y[i], Grid.t[timeLayer]) + Master.DivFuncX2(Grid.x[0], Grid.y[i + 1], Grid.t[timeLayer]));
-                    Master.Slau.b.Elements[Grid.N * (i + 2) - 1] += Grid.hy[i] * Master.Lamda / 6 * (Master.DivFuncX2(Grid.x[Grid.N - 1], Grid.y[i], Grid.t[timeLayer]) + 2 * Master.DivFuncX2(Grid.x[0], Grid.y[i + 1], Grid.t[timeLayer]));
+                    area = Grid.GetAreaNumber(Grid.N - 1, i);
+                    Master.Slau.b.Elements[Grid.N * (i + 1) - 1] += Grid.hy[i] * Master.Lamda / 6 * (2 * Master.DivFuncX2(Grid.x[Grid.N - 1], Grid.y[i], Grid.t[timeLayer], area) + Master.DivFuncX2(Grid.x[0], Grid.y[i + 1], Grid.t[timeLayer], area));
+                    Master.Slau.b.Elements[Grid.N * (i + 2) - 1] += Grid.hy[i] * Master.Lamda / 6 * (Master.DivFuncX2(Grid.x[Grid.N - 1], Grid.y[i], Grid.t[timeLayer], area) + 2 * Master.DivFuncX2(Grid.x[0], Grid.y[i + 1], Grid.t[timeLayer], area));
                 }
         }
 

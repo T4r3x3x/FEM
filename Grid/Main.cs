@@ -13,16 +13,71 @@ namespace ResearchPaper
         public static int[] boundaryConditions = new int[4] {1,1,1,1};
         public static int[] borehole = new int[4] {0,1,1,2 }; //индексы x0 x1 y0 y1
 
-        public static double Func1(double x, double y) => x+y;
-        public static double DivFuncX1(double x, double y) => 0;
-        public static double DivFuncY1(double x, double y) => 0;
-        public static double F1(double x, double y) => x + y;
+        public static double Func1(double x, double y, int area)
+        {
+            switch (area)
+            {
+                case 0: return x + y;
+                case 1: return -x - y;
+                default: return 0;
+            }
+        }
+
+        public static double DivFuncX1(double x, double y, int area)
+        {
+            switch (area)
+            {
+                default: return 0;
+            }
+        }
+        public static double DivFuncY1(double x, double y, int area)
+        {
+            switch (area)
+            {
+                default: return 0;
+            }
+        }
+        public static double F1(double x, double y, int area)
+        {
+            switch (area)
+            {
+                case 0: return x + y;
+                case 1: return -x - y;
+                default: return 0;
+            }
+        }
 
 
-        public static double Func2(double x, double y, double t) => x*y*t;
-        public static double DivFuncX2(double x, double y, double t) => y * t;
-        public static double DivFuncY2(double x, double y, double t) => x * t;
-        public static double F2(double x, double y, double t) => 2*x*y -x*t -y*t;
+        public static double Func2(double x, double y, double t, int area)
+        {
+            switch (area)
+            {
+                default: return x * y * t;
+            }
+        }
+        public static double DivFuncX2(double x, double y, double t, int area) {
+            switch (area)
+            {
+                default:
+                    return y * t;
+            }
+        }
+        public static double DivFuncY2(double x, double y, double t, int area) 
+        {
+            switch (area)
+            {
+                default:
+                    return x * t;
+            }
+        }
+        public static double F2(double x, double y, double t, int area)
+        {
+            switch (area)
+            {
+                default:
+                    return 2 * x * y - x * t - y * t;
+            }
+        }
 
 
         static void ExecuteCommand(string command)
@@ -53,7 +108,7 @@ namespace ResearchPaper
             collector.Collect();
             Slau.p = solver.Solve(Slau.A, Slau.b);
           //  Master.Slau.Print();
-            Slau.PrintResult(1, false);
+            Slau.PrintResult(1, true);
             collector.GetMatrixH();
             collector.SwitchTask(solver);
       

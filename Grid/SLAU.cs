@@ -39,7 +39,7 @@ namespace ResearchPaper
             {
                 for (int i = 0; i < Grid.M; i++)
                     for (int j = 0; j < Grid.N; j++)
-                        exactSolution.Elements[i * Grid.N + j] = Master.Func1(Grid.x[j], Grid.y[i]);
+                        exactSolution.Elements[i * Grid.N + j] = Master.Func1(Grid.x[j], Grid.y[i], Grid.GetAreaNumber(j, i));
 
                 if (isPrint)
                     for (int i = 0; i < A.Size; i++)                  
@@ -51,7 +51,7 @@ namespace ResearchPaper
             {              
                 for (int i = 0; i < Grid.M; i++)
                     for (int j = 0; j < Grid.N; j++)
-                        exactSolution.Elements[i * Grid.N + j] = Master.Func2(Grid.x[j], Grid.y[i], Grid.t[timeLayer]);
+                        exactSolution.Elements[i * Grid.N + j] = Master.Func2(Grid.x[j], Grid.y[i], Grid.t[timeLayer],Grid.GetAreaNumber(j,i));
 
                 if (isPrint)
                     for (int i = 0; i < A.Size; i++)
@@ -82,7 +82,7 @@ namespace ResearchPaper
                 for (int j = 0; j < Grid.M; j++)
                     for (int i = 0; i < Grid.N; i++)                    
                         sw.WriteLine(Grid.x[i].ToString().Replace(",", ".") + " " + Grid.y[j].ToString().Replace(",", ".") +
-                             " " + p.Elements[i*Grid.N + j].ToString().Replace(",", "."));
+                             " " + p.Elements[j*Grid.N + i].ToString().Replace(",", "."));
 
             using (StreamWriter sw = new StreamWriter("temperature.txt"))
             {
@@ -92,7 +92,7 @@ namespace ResearchPaper
                     for (int j = 0; j < Grid.M; j++)
                        for (int i = 0; i < Grid.N; i++)
                           sw.WriteLine(Grid.x[i].ToString().Replace(",", ".") + " " + Grid.y[j].ToString().Replace(",", ".") +
-                                " " + q[k].Elements[i * Grid.N + j].ToString().Replace(",", "."));
+                                " " + q[k].Elements[j * Grid.N + i].ToString().Replace(",", "."));
             }
         }
 

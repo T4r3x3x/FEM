@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace ReaserchPaper
 {
     delegate double Function(Point point);
-
+    
     internal class NumericalMethods
     {
         public static double FiniteDifferentiation(Point point, Function function, double h)
