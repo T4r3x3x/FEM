@@ -40,7 +40,8 @@ namespace ReaserchPaper
         }
         public static void ReadData()
         {
-            using (StreamReader sr = new StreamReader("domain.txt"))
+            double[] XW, YW;
+            using (StreamReader sr = new StreamReader(@"input\domain.txt"))
             {
                 string[] data = sr.ReadLine().Split(' ');
                 n = int.Parse(data[0]);
@@ -71,51 +72,104 @@ namespace ReaserchPaper
                 }
             }
 
-            using (StreamReader sr = new StreamReader("mesh.txt"))
+            using (StreamReader sr = new StreamReader(@"input\mesh.txt"))
             {
                 string[] data = sr.ReadLine().Split(' ');
-                x.Add(XW[0]);
-                IX.Add(0);
+                double[] q = new double[data.Length / 2];
+                List<int> xAreaLenghtes = new List<int>();
+                List<int> yAreaLenghtes = new List<int>();
+                //x.Add(XW[0]);
+                //IX.Add(0);
+                n = 0;
+                m = 0;
                 for (int i = 0; i < data.Length - 1; i += 2)
                 {
-                    n = int.Parse(data[i]);
-                    q = double.Parse(data[i + 1]);
-                    if (q == 1)
-                        h = (XW[i / 2 + 1] - XW[i / 2]) / (n - 1);
+                    xAreaLenghtes.Add(int.Parse(data[i]));
+                    n += int.Parse(data[i]) - 1;
+                    q[i / 2] = double.Parse(data[i + 1]);
+                }
+                n++;
+
+                x = new double[n];
+                x[0] = XW[0];
+                hx = new double[n - 1];
+                IX = new int[data.Length / 2 + 1];
+
+                int startPos = 0;
+                for (int i = 0; i < q.Length; i++)
+                {
+                    if (q[i] == 1)
+                        h = (XW[i + 1] - XW[i]) / (xAreaLenghtes[i] - 1);
                     else
                     {
-                        h = (XW[i / 2 + 1] - XW[i / 2]) * (q - 1) / (Math.Pow(q, n - 1) - 1);
+                        h = (XW[i + 1] - XW[i]) * (q[i] - 1) / (Math.Pow(q[i], xAreaLenghtes[i] - 1) - 1);
                     }
-                    MakeArea(h, x, hx, n, q);
-                    IX.Add(x.Count() - 1);
+
+                    MakeArea(h, x, hx, startPos, xAreaLenghtes[i], q[i]);
+                    x[startPos + xAreaLenghtes[i] - 1] = XW[i + 1];
+                    startPos += xAreaLenghtes[i] - 1;
+                    IX[i + 1] = IX[i] + xAreaLenghtes[i] - 1;
                 }
 
                 data = sr.ReadLine().Split(' ');
-                y.Add(YW[0]);
-                IY.Add(0);
+                q = new double[data.Length / 2];
+
                 for (int i = 0; i < data.Length - 1; i += 2)
                 {
-                    m = int.Parse(data[i]);
-                    q = double.Parse(data[i + 1]);
-                    if (q == 1)
-                        h = (YW[i / 2 + 1] - YW[i / 2]) / (m - 1);
+                    yAreaLenghtes.Add(int.Parse(data[i]));
+                    m += int.Parse(data[i]) - 1;
+                    q[i / 2] = double.Parse(data[i + 1]);
+                }
+                m++;
+                y = new double[m];
+                y[0] = YW[0];
+                hy = new double[m - 1];
+                IY = new int[data.Length / 2 + 1];
+
+                startPos = 0;
+                for (int i = 0; i < q.Length; i++)
+                {
+                    if (q[i] == 1)
+                        h = (YW[i + 1] - YW[i]) / (yAreaLenghtes[i] - 1);
                     else
                     {
-                        h = (YW[i / 2 + 1] - YW[i / 2]) * (q - 1) / (Math.Pow(q, m - 1) - 1);
+                        h = (YW[i + 1] - YW[i]) * (q[i] - 1) / (Math.Pow(q[i], yAreaLenghtes[i] - 1) - 1);
                     }
-                    MakeArea(h, y, hy, m, q);
-                    IY.Add(y.Count() - 1);
+                    MakeArea(h, y, hy, startPos, yAreaLenghtes[i], q[i]);
+                    y[startPos + yAreaLenghtes[i] - 1] = YW[i + 1];
+                    startPos += yAreaLenghtes[i] - 1;
+                    IY[i + 1] = IY[i] + yAreaLenghtes[i] - 1;
                 }
+
+
             }
-            n = x.Count();
-            m = y.Count();
+            if (new FileInfo(@"input\boreholes.txt").Length == 0)
+            {
+                boreholes = new int[0][];
+            }
+            else
+            {
+                using (StreamReader sr = new StreamReader(@"input\boreholes.txt"))
+                {
+                    string[] data = sr.ReadLine().Split(' ');
+                    boreholes = new int[int.Parse(data[0])][];
+                    for (int i = 0; i < boreholes.Length; i++)
+                    {
+                        boreholes[i] = new int[2];
+                        data = sr.ReadLine().Split(' ');
+                        boreholes[i][0] = int.Parse(data[0]);
+                        boreholes[i][1] = int.Parse(data[1]);
+                    }
+                }
 
+            }
 
-            using (StreamReader sr = new StreamReader("timeGrid.txt"))
+            using (StreamReader sr = new StreamReader(@"input\timeGrid.txt"))
             {
                 string[] data = sr.ReadLine().Split(' ');
                 int layersCount = int.Parse(data[0]);
                 t = new double[layersCount];
+                ht = new double[layersCount - 1];
                 t[0] = double.Parse(data[1]);
                 t[layersCount - 1] = double.Parse(data[2]);
                 q = double.Parse(data[3]);
@@ -128,19 +182,9 @@ namespace ReaserchPaper
                 for (int i = 1; i < layersCount; i++)
                 {
                     t[i] = t[i - 1] + h;
+                    ht[i - 1] = h;
                     h *= q;
                 }
-            }
-        }
-        static void MakeArea(double h, List<double> points, List<double> steps, int n, double q)//режим область на части и записываем в массив, h - шаг,  j - номер подобласти
-        {
-            n--;
-            int size = points.Count();
-            for (int j = size; j < n + size; j++)
-            {
-                points.Add(points[j - 1] + h);
-                steps.Add(h);
-                h *= q;
             }
         }
 
