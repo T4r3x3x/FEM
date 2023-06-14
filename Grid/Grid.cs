@@ -4,30 +4,21 @@ namespace ReaserchPaper
 {
     internal class Grid
     {
-        public static double[]  XW, YW, t;
+        public static double[] t;
         static int[][] areas;
-        public static List<double> x, y, hy, hx;
-        static List<int> IX, IY;
-        static double q,h;
-        static  int n, m;
+        public static double[] x, y, hy, hx, ht;
+        public static int[][] boreholes;
+        static int[] IX, IY;
+        static double q, h;
+        static int n, m;
 
         public static int TimeLayersCount => t.Length;
         public static int ElementsCount => (n - 1) * (m - 1);
-        public static int NodesCount => n*m;
+        public static int NodesCount => n * m;
         public static int N => n;
         public static int M => m;
 
 
-        static Grid()
-        {
-            x = new List<double>();
-            y = new List<double>();
-            hy = new List<double>();
-            hx = new List<double>();
-            IX = new List<int>();
-            IY = new List<int>();
-
-        }
 
         public static void PrintTimeGrid()
         {
