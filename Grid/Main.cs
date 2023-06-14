@@ -11,14 +11,14 @@ namespace ResearchPaper
         public static double Lamda = 1, Gamma = 1, Sigma = 2;//Sigma в массе масс вместо гаммы для времени     
         public static SLAU Slau;
         public static int[] boundaryConditions = new int[4] {1,1,1,1};
-        public static int[] borehole = new int[4] {0,1,1,2 }; //индексы x0 x1 y0 y1
+        
 
         public static double Func1(double x, double y, int area)
         {
             switch (area)
             {
                 case 0: return x + y;
-                case 1: return -x - y;
+                case 1: return x - y;
                 default: return 0;
             }
         }
@@ -42,7 +42,7 @@ namespace ResearchPaper
             switch (area)
             {
                 case 0: return x + y;
-                case 1: return -x - y;
+                case 1: return x - y;
                 default: return 0;
             }
         }
@@ -52,6 +52,8 @@ namespace ResearchPaper
         {
             switch (area)
             {
+                case 0: return -x * y * t;
+                case 1: return x * y * t;
                 default: return x * y * t;
             }
         }
@@ -74,8 +76,10 @@ namespace ResearchPaper
         {
             switch (area)
             {
+                case 0: return - 2 * x * y + y * t + x * t;
+                case 1: return 2 * x * y - y * t + x * t;
                 default:
-                    return 2 * x * y - x * t - y * t;
+                    return 2 * x * y - x * t + y * t;
             }
         }
 
@@ -88,10 +92,10 @@ namespace ResearchPaper
             start.UseShellExecute = false;
             start.RedirectStandardOutput = true;
             Process.Start(start);
-            start.Arguments = string.Format("C:\\Users\\hardb\\source\\repos\\Grid\\Grid\\bin\\Debug\\net6.0\\pressure.py");
-            Process.Start(start);
-            start.Arguments = string.Format("C:\\Users\\hardb\\source\\repos\\Grid\\Grid\\bin\\Debug\\net6.0\\temperature.py");
-            Process.Start(start);
+            //start.Arguments = string.Format("C:\\Users\\hardb\\source\\repos\\Grid\\Grid\\bin\\Debug\\net6.0\\pressure.py");
+            //Process.Start(start);
+            //start.Arguments = string.Format("C:\\Users\\hardb\\source\\repos\\Grid\\Grid\\bin\\Debug\\net6.0\\temperature.py");
+            //Process.Start(start);
         }
 
         static void Main(string[] args)
@@ -108,7 +112,8 @@ namespace ResearchPaper
             collector.Collect();
             Slau.p = solver.Solve(Slau.A, Slau.b);
           //  Master.Slau.Print();
-            Slau.PrintResult(1, true);
+
+            Slau.PrintResult(-1, false);
             collector.GetMatrixH();
             collector.SwitchTask(solver);
       
@@ -120,7 +125,7 @@ namespace ResearchPaper
                 //Console.WriteLine("solving in proccess: {0} of {1} time layers...", i+1, Grid.TimeLayersCount);
                 Slau.PrintResult(i, false);
             }
-           
+       //     Slau.PrintResult(Grid.TimeLayersCount - 1, true);
             sw.Stop();
             Slau.WriteSolves();
             Console.WriteLine(sw.ElapsedMilliseconds);

@@ -14,6 +14,7 @@ from matplotlib import colors
 from functools import partial
 import heapq
 import random
+import keyboard
 
 _x=[]
 _y=[]
@@ -75,5 +76,3 @@ elem_slider = Slider(
 elem_slider.on_changed(partial(set_slider, elem_slider))
 draw(0)
 plt.show()
-
-

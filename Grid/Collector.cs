@@ -16,56 +16,7 @@ namespace ReaserchPaper
         static double timeCoef;
         static int area = 0;
 
-        static double G(double h, int i, int j)
-        {
-            switch (i)
-            {
-                case 0:
-                    switch (j)
-                    {
-                        case 0:
-                            return 1 / h;
-                        case 1:
-                            return -1 / h;
-                    }
-                    break;
-                case 1:
-                    switch (j)
-                    {
-                        case 0:
-                            return -1 / h;
-                        case 1:
-                            return 1 / h;
-                    }
-                    break;
-            }
-            return 0;
-        }
-        static double M(double h, int i, int j)
-        {
-            switch (i)
-            {
-                case 0:
-                    switch (j)
-                    {
-                        case 0:
-                            return 2 * h / 6;
-                        case 1:
-                            return h / 6;
-                    }
-                    break;
-                case 1:
-                    switch (j)
-                    {
-                        case 0:
-                            return h / 6;
-                        case 1:
-                            return 2 * h / 6;
-                    }
-                    break;
-            }
-            return 0;
-        }
+     
 
         public Collector(int nodesCount)
         {
@@ -129,14 +80,14 @@ namespace ReaserchPaper
 
         private void SolveSecondTimeLayer(Solver solver)
         {
-            double deltaT = Grid.t[1] - Grid.t[0];
+         //   double deltaT = Grid.ht[0];//Grid.t[1] - Grid.t[0];
 
-            Master.Slau.A = _M * 1 / deltaT + _G * Master.Lamda + _H;
+            Master.Slau.A = _M * 1 / Grid.ht[0] + _G * Master.Lamda + _H;
             for (int j = 0; j < Grid.M - 1; j++)
                 for (int i = 0; i < Grid.N - 1; i++) // проходим по КЭ 
                     AddLocalB(i, j, 1);
 
-            Master.Slau.b += _M * (1 / deltaT) * Master.Slau.q[0];
+            Master.Slau.b += _M * (1 / Grid.ht[0]) * Master.Slau.q[0];
             GetBoundaryConditions(1);
            
             Master.Slau.q[1] = solver.Solve(Master.Slau.A, Master.Slau.b);
@@ -148,10 +99,10 @@ namespace ReaserchPaper
             for (int j = 0; j < Grid.M - 1; j++) //y
                 for (int i = 0; i < Grid.N - 1; i++) //x | проходим по КЭ 
                 {
-                    localMatrix = GetMassMatrix(Grid.hx[i], Grid.hy[j]);
+                    localMatrix = FEM.GetMassMatrix(Grid.hx[i], Grid.hy[j]);
                     AddLocalMatrix(_M, localMatrix, i, j);
 
-                    localMatrix = GetStiffnessMatrix(Grid.hx[i], Grid.hy[j]);
+                    localMatrix = FEM.GetStiffnessMatrix(Grid.hx[i], Grid.hy[j]);
                     AddLocalMatrix(_G, localMatrix, i, j);
                 }
         }
@@ -215,37 +166,7 @@ namespace ReaserchPaper
                         Master.Slau.q[p].Elements[i + (j + 1) * Grid.N + 1] = Master.Func2(Grid.x[i + 1], Grid.y[j + 1], Grid.t[p], area);
                     }
         }
-        static int mu(int i) => ((i) % 2);
-        static int nu(int i) => ((i) / 2);
-
-        static double[][] GetMassMatrix(double hx, double hy)// Grid.M - номер кэ 
-        {
-            // инициализация
-            double[][] result = new double[4][];
-            for (int i = 0; i < result.Length; i++)
-                result[i] = new double[result.Length];
-
-            //матрица масс
-            for (int i = 0; i < result.Length; i++)
-                for (int j = 0; j < result.Length; j++)
-                    result[i][j] += M(hx, mu(i), mu(j)) * M(hy, nu(i), nu(j));
-
-            return result;
-        }
-        static double[][] GetStiffnessMatrix(double hx, double hy)// Grid.M - номер кэ 
-        {
-            // инициализация
-            double[][] result = new double[4][];
-            for (int i = 0; i < result.Length; i++)
-                result[i] = new double[result.Length];
-
-            //матрица жесткости
-            for (int i = 0; i < result.Length; i++)
-                for (int j = 0; j < result.Length; j++)
-                    result[i][j] = (G(hx, mu(i), mu(j)) * M(hy, nu(i), nu(j)) + M(hx, mu(i), mu(j)) * G(hy, nu(i), nu(j))); //матрица жётскости
-
-            return result;
-        }
+        
 
         static void MakeSLau()
         {
@@ -258,9 +179,9 @@ namespace ReaserchPaper
 
         static void MakeSLau(int timeLayer)
         {
-            double deltaT = Grid.t[timeLayer] - Grid.t[timeLayer - 2];
-            double deltaT1 = Grid.t[timeLayer - 1] - Grid.t[timeLayer - 2];
-            double deltaT0 = Grid.t[timeLayer] - Grid.t[timeLayer - 1];
+            double deltaT = Grid.ht[timeLayer - 1] + Grid.ht[timeLayer - 2];//Grid.t[timeLayer] - Grid.t[timeLayer - 2];
+            double deltaT1 = Grid.ht[timeLayer - 2];//Grid.t[timeLayer - 1] - Grid.t[timeLayer - 2];
+            double deltaT0 = Grid.ht[timeLayer-1];//Grid.t[timeLayer] - Grid.t[timeLayer - 1];
 
             Vector vector1 = _M * Master.Slau.q[timeLayer - 2];
             Vector vector2 = _M * Master.Slau.q[timeLayer - 1];
@@ -396,7 +317,7 @@ namespace ReaserchPaper
             if (Master.boundaryConditions[2] == 1)//верхняя граница
                 for (int i = Master.Slau.A.Size - 1; i > Master.Slau.A.Size - Grid.N - 1; i--)
                 {
-                    area = Grid.GetAreaNumber(i, Grid.M - 1);
+                    area = Grid.GetAreaNumber(i % Grid.N, Grid.M - 1);
                     ZeroingRow(i);
                     Master.Slau.A.di[i] = 1;
                     Master.Slau.b.Elements[i] = Master.Func2(Grid.x[i % Grid.N], Grid.y[Grid.M - 1], Grid.t[timeLayer], area);
@@ -412,7 +333,7 @@ namespace ReaserchPaper
             if (Master.boundaryConditions[3] == 1)//левая гравнь
                 for (int i = Grid.N; i < Master.Slau.A.Size - Grid.N - 1; i += Grid.N)
                 {
-                    area = Grid.GetAreaNumber(0, i);
+                    area = Grid.GetAreaNumber(0, i / Grid.N);
                     ZeroingRow(i);
                     Master.Slau.A.di[i] = 1;
                     Master.Slau.b.Elements[i] = Master.Func2(Grid.x[0], Grid.y[i / Grid.N], Grid.t[timeLayer], area);
@@ -428,7 +349,7 @@ namespace ReaserchPaper
             if (Master.boundaryConditions[1] == 1)//правая граница
                 for (int i = 2 * Grid.N - 1; i < Master.Slau.A.Size - 1; i += Grid.N)
                 {
-                    area = Grid.GetAreaNumber(Grid.N-1, i);
+                    area = Grid.GetAreaNumber(Grid.N - 1, i / Grid.N);
                     ZeroingRow(i);
                     Master.Slau.A.di[i] = 1;
                     Master.Slau.b.Elements[i] = Master.Func2(Grid.x[Grid.N - 1], Grid.y[i / Grid.N], Grid.t[timeLayer], area);
