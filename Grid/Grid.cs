@@ -197,19 +197,24 @@ namespace ReaserchPaper
 
         public static void WriteGrid()
         {
-            using (StreamWriter sw = new StreamWriter("grid.txt"))
+            using (StreamWriter sw = new StreamWriter(@"output\grid.txt"))
             {
-                sw.WriteLine("{0} {1} {2} {3}", x[Master.borehole[0]].ToString().Replace(",", "."), x[Master.borehole[1]].ToString().Replace(",", "."),
-                    y[Master.borehole[2]].ToString().Replace(",", "."), y[Master.borehole[3]].ToString().Replace(",", "."));
-                sw.WriteLine("{0} {1} {2} {3}", x[0].ToString().Replace(",", "."), x[x.Count()-1].ToString().Replace(",", "."),
-                    y[0].ToString().Replace(",", "."), y[y.Count() - 1].ToString().Replace(",", "."));
+                sw.WriteLine(boreholes.Length);
+                for (int i = 0; i < boreholes.Length; i++)
+                {
+                    sw.WriteLine("{0} {1} {2} {3}", x[Grid.boreholes[i][0]].ToString().Replace(",", "."), x[Grid.boreholes[i][0] + 1].ToString().Replace(",", "."),
+                    y[Grid.boreholes[i][1]].ToString().Replace(",", "."), y[Grid.boreholes[i][1] + 1].ToString().Replace(",", "."));
+                }
+
+                sw.WriteLine("{0} {1} {2} {3}", x[0].ToString().Replace(",", "."), x[x.Count() - 1].ToString().Replace(",", "."),
+                         y[0].ToString().Replace(",", "."), y[y.Count() - 1].ToString().Replace(",", "."));
 
                 sw.WriteLine(x.Count());
                 sw.WriteLine(y.Count());
                 //  sw.WriteLine("Hello World!!");
                 for (int i = 0; i < x.Count(); i++)
                 {
-                    sw.WriteLine(x[i].ToString().Replace(",","."));
+                    sw.WriteLine(x[i].ToString().Replace(",", "."));
                 }
                 for (int i = 0; i < y.Count(); i++)
                 {
@@ -217,7 +222,7 @@ namespace ReaserchPaper
                 }
                 sw.WriteLine(areas.Length);
                 foreach (var area in areas)
-                    sw.WriteLine("{0} {1} {2} {3}", XW[area[0]], XW[area[1]], YW[area[2]], YW[area[3]]);
+                    sw.WriteLine("{0} {1} {2} {3}", x[IX[area[0]]], x[IX[area[1]]], y[IY[area[2]]], y[IY[area[3]]]);
                 sw.Close();
             }
         }
