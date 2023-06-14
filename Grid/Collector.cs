@@ -264,14 +264,10 @@ namespace ReaserchPaper
         static void MakeSLau()
         {
             for (int j = 0; j < Grid.M-1; j++)
-            {
-
                 for (int i = 0; i < Grid.N-1; i++)
-                {
-
-                }
-            }
-            Master.Slau.A +=  _G * Grid.Lamda;
+                    Master.Slau.A += _G * Grid.Lamda(get;
+             
+            
         }
 
         static void MakeSLau(int timeLayer)
