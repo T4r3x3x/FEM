@@ -24,7 +24,7 @@ namespace ReaserchPaper
             _y = -Master.Slau.p.Elements[elemNumber] * X1(point.x, xBoundaries.y, hx) / hy - Master.Slau.p.Elements[elemNumber + 1] * X2(point.x, xBoundaries.x, hx) / hy
             + Master.Slau.p.Elements[elemNumber + Grid.N] * X1(point.x, xBoundaries.y, hx) / hy + Master.Slau.p.Elements[elemNumber + Grid.N + 1] * X2(point.x, xBoundaries.x, hx) / hy;
             Point result = new Point(-_x, -_y);
-            result *= Master.Lamda;
+            result *= Grid.Lamda;
             return result;
         }
 

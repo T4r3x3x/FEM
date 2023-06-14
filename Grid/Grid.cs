@@ -4,30 +4,63 @@ namespace ReaserchPaper
 {
     internal class Grid
     {
-        public static double[]  XW, YW, t;
+        public static double[] t;
         static int[][] areas;
-        public static List<double> x, y, hy, hx;
-        static List<int> IX, IY;
-        static double q,h;
-        static  int n, m;
+        public static double[] x, y, hy, hx, ht;
+        public static int[][] boreholes;
+        static int[] IX, IY;
+        static double q, h;
+        static int n, m;
+
+        static double Ro(int area)
+        {
+            switch (area)
+            {
+                default: return 0.850;
+            }
+        }
+        static double Fita(int area)
+        {
+            switch (area)
+            {
+                default: return 0.487;
+            }
+        }
+        static double K(int area)
+        {
+            switch (area)
+            {
+                default: return 0.487;
+            }
+        }
+        static double Nu(int area)
+        {
+            switch (area)
+            {
+                default: return 0.487;
+            }
+        }
+        static double Mu(int area)
+        {
+            switch (area)
+            {
+                default: return 0.487;
+            }
+        }
+
+        public static double Lamda(int area) => K(area) * Nu(area) / Mu(area);
+        public static double Sigma(int area) => Ro(area) * Fita(area);   
+
+        public static double Lamda2 = 0.124;
+
+
 
         public static int TimeLayersCount => t.Length;
         public static int ElementsCount => (n - 1) * (m - 1);
-        public static int NodesCount => n*m;
+        public static int NodesCount => n * m;
         public static int N => n;
         public static int M => m;
 
-
-        static Grid()
-        {
-            x = new List<double>();
-            y = new List<double>();
-            hy = new List<double>();
-            hx = new List<double>();
-            IX = new List<int>();
-            IY = new List<int>();
-
-        }
 
         public static void PrintTimeGrid()
         {
@@ -40,7 +73,8 @@ namespace ReaserchPaper
         }
         public static void ReadData()
         {
-            using (StreamReader sr = new StreamReader("domain.txt"))
+            double[] XW, YW;
+            using (StreamReader sr = new StreamReader(@"input\domain.txt"))
             {
                 string[] data = sr.ReadLine().Split(' ');
                 n = int.Parse(data[0]);
@@ -71,51 +105,104 @@ namespace ReaserchPaper
                 }
             }
 
-            using (StreamReader sr = new StreamReader("mesh.txt"))
+            using (StreamReader sr = new StreamReader(@"input\mesh.txt"))
             {
                 string[] data = sr.ReadLine().Split(' ');
-                x.Add(XW[0]);
-                IX.Add(0);
+                double[] q = new double[data.Length / 2];
+                List<int> xAreaLenghtes = new List<int>();
+                List<int> yAreaLenghtes = new List<int>();
+                //x.Add(XW[0]);
+                //IX.Add(0);
+                n = 0;
+                m = 0;
                 for (int i = 0; i < data.Length - 1; i += 2)
                 {
-                    n = int.Parse(data[i]);
-                    q = double.Parse(data[i + 1]);
-                    if (q == 1)
-                        h = (XW[i / 2 + 1] - XW[i / 2]) / (n - 1);
+                    xAreaLenghtes.Add(int.Parse(data[i]));
+                    n += int.Parse(data[i]) - 1;
+                    q[i / 2] = double.Parse(data[i + 1]);
+                }
+                n++;
+
+                x = new double[n];
+                x[0] = XW[0];
+                hx = new double[n - 1];
+                IX = new int[data.Length / 2 + 1];
+
+                int startPos = 0;
+                for (int i = 0; i < q.Length; i++)
+                {
+                    if (q[i] == 1)
+                        h = (XW[i + 1] - XW[i]) / (xAreaLenghtes[i] - 1);
                     else
                     {
-                        h = (XW[i / 2 + 1] - XW[i / 2]) * (q - 1) / (Math.Pow(q, n - 1) - 1);
+                        h = (XW[i + 1] - XW[i]) * (q[i] - 1) / (Math.Pow(q[i], xAreaLenghtes[i] - 1) - 1);
                     }
-                    MakeArea(h, x, hx, n, q);
-                    IX.Add(x.Count() - 1);
+
+                    MakeArea(h, x, hx, startPos, xAreaLenghtes[i], q[i]);
+                    x[startPos + xAreaLenghtes[i] - 1] = XW[i + 1];
+                    startPos += xAreaLenghtes[i] - 1;
+                    IX[i + 1] = IX[i] + xAreaLenghtes[i] - 1;
                 }
 
                 data = sr.ReadLine().Split(' ');
-                y.Add(YW[0]);
-                IY.Add(0);
+                q = new double[data.Length / 2];
+
                 for (int i = 0; i < data.Length - 1; i += 2)
                 {
-                    m = int.Parse(data[i]);
-                    q = double.Parse(data[i + 1]);
-                    if (q == 1)
-                        h = (YW[i / 2 + 1] - YW[i / 2]) / (m - 1);
+                    yAreaLenghtes.Add(int.Parse(data[i]));
+                    m += int.Parse(data[i]) - 1;
+                    q[i / 2] = double.Parse(data[i + 1]);
+                }
+                m++;
+                y = new double[m];
+                y[0] = YW[0];
+                hy = new double[m - 1];
+                IY = new int[data.Length / 2 + 1];
+
+                startPos = 0;
+                for (int i = 0; i < q.Length; i++)
+                {
+                    if (q[i] == 1)
+                        h = (YW[i + 1] - YW[i]) / (yAreaLenghtes[i] - 1);
                     else
                     {
-                        h = (YW[i / 2 + 1] - YW[i / 2]) * (q - 1) / (Math.Pow(q, m - 1) - 1);
+                        h = (YW[i + 1] - YW[i]) * (q[i] - 1) / (Math.Pow(q[i], yAreaLenghtes[i] - 1) - 1);
                     }
-                    MakeArea(h, y, hy, m, q);
-                    IY.Add(y.Count() - 1);
+                    MakeArea(h, y, hy, startPos, yAreaLenghtes[i], q[i]);
+                    y[startPos + yAreaLenghtes[i] - 1] = YW[i + 1];
+                    startPos += yAreaLenghtes[i] - 1;
+                    IY[i + 1] = IY[i] + yAreaLenghtes[i] - 1;
                 }
+
+
             }
-            n = x.Count();
-            m = y.Count();
+            if (new FileInfo(@"input\boreholes.txt").Length == 0)
+            {
+                boreholes = new int[0][];
+            }
+            else
+            {
+                using (StreamReader sr = new StreamReader(@"input\boreholes.txt"))
+                {
+                    string[] data = sr.ReadLine().Split(' ');
+                    boreholes = new int[int.Parse(data[0])][];
+                    for (int i = 0; i < boreholes.Length; i++)
+                    {
+                        boreholes[i] = new int[2];
+                        data = sr.ReadLine().Split(' ');
+                        boreholes[i][0] = int.Parse(data[0]);
+                        boreholes[i][1] = int.Parse(data[1]);
+                    }
+                }
 
+            }
 
-            using (StreamReader sr = new StreamReader("timeGrid.txt"))
+            using (StreamReader sr = new StreamReader(@"input\timeGrid.txt"))
             {
                 string[] data = sr.ReadLine().Split(' ');
                 int layersCount = int.Parse(data[0]);
                 t = new double[layersCount];
+                ht = new double[layersCount - 1];
                 t[0] = double.Parse(data[1]);
                 t[layersCount - 1] = double.Parse(data[2]);
                 q = double.Parse(data[3]);
@@ -128,30 +215,29 @@ namespace ReaserchPaper
                 for (int i = 1; i < layersCount; i++)
                 {
                     t[i] = t[i - 1] + h;
+                    ht[i - 1] = h;
                     h *= q;
                 }
             }
         }
-        static void MakeArea(double h, List<double> points, List<double> steps, int n, double q)//режим область на части и записываем в массив, h - шаг,  j - номер подобласти
+        static void MakeArea(double h, double[] points, double[] steps, int startPos, int areaLenght, double q)//режим область на части и записываем в массив, h - шаг,  j - номер подобласти
         {
-            n--;
-            int size = points.Count();
-            for (int j = size; j < n + size; j++)
+            areaLenght--;
+            for (int j = startPos; j < areaLenght + startPos; j++)
             {
-                points.Add(points[j - 1] + h);
-                steps.Add(h);
+                points[j + 1] = (points[j] + h);
+                steps[j] = h;
                 h *= q;
             }
         }
 
-        //                  y      x
-        public static int GetAreaNumber(int _i, int _j)
+        public static int GetAreaNumber(int IndexOfX, int IndexOfY)
         {
-            for (int i = areas.Length-1; i >=0 ; i--)//идём в обратном порядке чтобы не было бага, когда в качестве подобласти возвращается 0 (0 - вся расчётная область, которая уже вкл. подобласти)
+            for (int i = areas.Length - 1; i >= 0; i--)//идём в обратном порядке чтобы не было бага, когда в качестве подобласти возвращается 0 (0 - вся расчётная область, которая уже вкл. подобласти)
             {
-                if (IY[areas[i][2]] <= _i && _i <= IY[areas[i][3]])
+                if (IY[areas[i][2]] <= IndexOfY && IndexOfY <= IY[areas[i][3]])
                 {
-                    if (IX[areas[i][0]] <= _j && _j <= IX[areas[i][1]])
+                    if (IX[areas[i][0]] <= IndexOfX && IndexOfX <= IX[areas[i][1]])
                     {
                         return i;
                     }
@@ -162,19 +248,24 @@ namespace ReaserchPaper
 
         public static void WriteGrid()
         {
-            using (StreamWriter sw = new StreamWriter("grid.txt"))
+            using (StreamWriter sw = new StreamWriter(@"output\grid.txt"))
             {
-                sw.WriteLine("{0} {1} {2} {3}", x[Master.borehole[0]].ToString().Replace(",", "."), x[Master.borehole[1]].ToString().Replace(",", "."),
-                    y[Master.borehole[2]].ToString().Replace(",", "."), y[Master.borehole[3]].ToString().Replace(",", "."));
-                sw.WriteLine("{0} {1} {2} {3}", x[0].ToString().Replace(",", "."), x[x.Count()-1].ToString().Replace(",", "."),
-                    y[0].ToString().Replace(",", "."), y[y.Count() - 1].ToString().Replace(",", "."));
+                sw.WriteLine(boreholes.Length);
+                for (int i = 0; i < boreholes.Length; i++)
+                {
+                    sw.WriteLine("{0} {1} {2} {3}", x[Grid.boreholes[i][0]].ToString().Replace(",", "."), x[Grid.boreholes[i][0] + 1].ToString().Replace(",", "."),
+                    y[Grid.boreholes[i][1]].ToString().Replace(",", "."), y[Grid.boreholes[i][1] + 1].ToString().Replace(",", "."));
+                }
+
+                sw.WriteLine("{0} {1} {2} {3}", x[0].ToString().Replace(",", "."), x[x.Count() - 1].ToString().Replace(",", "."),
+                         y[0].ToString().Replace(",", "."), y[y.Count() - 1].ToString().Replace(",", "."));
 
                 sw.WriteLine(x.Count());
                 sw.WriteLine(y.Count());
                 //  sw.WriteLine("Hello World!!");
                 for (int i = 0; i < x.Count(); i++)
                 {
-                    sw.WriteLine(x[i].ToString().Replace(",","."));
+                    sw.WriteLine(x[i].ToString().Replace(",", "."));
                 }
                 for (int i = 0; i < y.Count(); i++)
                 {
@@ -182,11 +273,11 @@ namespace ReaserchPaper
                 }
                 sw.WriteLine(areas.Length);
                 foreach (var area in areas)
-                    sw.WriteLine("{0} {1} {2} {3}", XW[area[0]], XW[area[1]], YW[area[2]], YW[area[3]]);
+                    sw.WriteLine("{0} {1} {2} {3}", x[IX[area[0]]], x[IX[area[1]]], y[IY[area[2]]], y[IY[area[3]]]);
                 sw.Close();
             }
         }
-       public  static void PrintPartialGrid()
+        public static void PrintPartialGrid()
         {
             for (int j = 0; j < m; j++)
             {

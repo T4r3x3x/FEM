@@ -19,7 +19,7 @@ namespace ReaserchPaper
             result = 1 / 12.0 / h * (function(point));
             return result;
         }
-        public static double GaussIntegration(int elemNumber, int i, int j, Point xBoundaries, Point yBoundaries, double hx, double hy)
+        public static double GaussIntegration(int elemNumber, int i, int j, Point xBoundaries, Point yBoundaries, double hx, double hy, int area)
         {
             double result = 0;
             Point point;
@@ -34,7 +34,7 @@ namespace ReaserchPaper
                     double u = (xBoundaries.x + xBoundaries.y + hx * x[r]) / 2.0; // x
                     double v = (yBoundaries.x + yBoundaries.y + hy * x[l]) / 2.0; // y                  
                     point = new Point(u, v);
-                    temp += q[r] * FEM.VGradP(elemNumber, i, j, xBoundaries,yBoundaries, point, hx, hy);
+                    temp += q[r] * FEM.VGradP(elemNumber, i, j, xBoundaries,yBoundaries, point, hx, hy,area);
                 }
                 result += q[l] * temp;
             }

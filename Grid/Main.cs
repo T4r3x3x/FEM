@@ -12,8 +12,8 @@ namespace ResearchPaper
         public static double Lamda = 0.2 * 0.4 / 0.005, Gamma = 0, Sigma = ro*fita;//Sigma в массе масс вместо гаммы для времени     
         public static double Lamda2 = 0.124;
         public static SLAU Slau;
-        public static int[] boundaryConditions = new int[4] {1,1,1,1};
-        public static int[] borehole = new int[4] { 14,15, 14, 15 }; //индексы x0 x1 y0 y1
+      //  public static int[] boundaryConditions = new int[4] {1,1,1,1};
+      //  public static int[] borehole = new int[2] { 5, 5 }; //индексы x0 x1 y0 y1
 
         public static double PressuereInReservoir(double x, double y) => 13172250;
         public static double BoreholePower() => +6.9e-4;

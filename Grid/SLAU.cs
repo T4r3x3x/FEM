@@ -87,13 +87,13 @@ namespace ResearchPaper
             }
 
 
-            using (StreamWriter sw = new StreamWriter("pressure.txt"))
+            using (StreamWriter sw = new StreamWriter(@"output\pressure.txt"))
                 for (int j = 0; j < Grid.M; j++)
                     for (int i = 0; i < Grid.N; i++)                    
                         sw.WriteLine(Grid.x[i].ToString().Replace(",", ".") + " " + Grid.y[j].ToString().Replace(",", ".") +
                              " " + p.Elements[i*Grid.N + j].ToString().Replace(",", "."));
 
-            using (StreamWriter sw = new StreamWriter("temperature.txt"))
+            using (StreamWriter sw = new StreamWriter(@"output\temperature.txt"))
             {
                 sw.WriteLine(Size);
                 sw.WriteLine(Grid.TimeLayersCount);
