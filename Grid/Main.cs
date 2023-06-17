@@ -7,10 +7,8 @@ namespace ResearchPaper
 {
     class Master
     {
-        static double ro = 0.850, fita = 0.487, K, nu,mu;
 
-        public static double Lamda = 0.2 * 0.4 / 0.005, Gamma = 0, Sigma = ro*fita;//Sigma в массе масс вместо гаммы для времени     
-        public static double Lamda2 = 0.124;
+      
         public static SLAU Slau;
       //  public static int[] boundaryConditions = new int[4] {1,1,1,1};
       //  public static int[] borehole = new int[2] { 5, 5 }; //индексы x0 x1 y0 y1
@@ -20,9 +18,9 @@ namespace ResearchPaper
         public static double F1(double x, double y) => 0;
 
 
-        public static double TemperatureAtBegin() => 10;
-        public static double TemperatureAtBoundary() => 10;
-        public static double TemperatureInBorehole() => 100;
+        public static double TemperatureAtBegin() => 76;
+        public static double TemperatureAtBoundary() => 76;
+        public static double TemperatureInBorehole() => 170;
         public static double F2(double x, double y, double t) => 0;
 
 

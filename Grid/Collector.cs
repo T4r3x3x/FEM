@@ -118,6 +118,18 @@ namespace ReaserchPaper
             _M *= Grid.Sigma;
             SolveSecondTimeLayer(solver);
             ResetSlau();
+            _G.Reset();
+            double[][] localMatrix;
+            for (int j = 0; j < Grid.M - 1; j++) //все кэ под скважиной
+                for (int i = 0; i < Grid.N - 1; i++) // проходим по КЭ 
+                {
+                    if (!IsBorehole(i, j))
+                    {
+                        localMatrix = GetStiffnessMatrix(Grid.hx[i], Grid.hy[j]);
+                        AddLocalMatrix(_G, localMatrix, i, j);
+                    }
+                }
+
             Master.Slau.A += _G * Grid.Lamda2 + _H;
 
             deltaTimes[2] = Grid.ht[1] + Grid.ht[0];
@@ -150,6 +162,13 @@ namespace ReaserchPaper
                         AddLocalMatrix(_M, localMatrix, i, j);
 
                         localMatrix = GetStiffnessMatrix(Grid.hx[i], Grid.hy[j]);
+                        
+                        double a = Grid.Lamda(Grid.GetAreaNumber(i, j));                        
+
+                        for (int p = 0; p < localMatrix.Length; p++)                        
+                            for (int k = 0; k < localMatrix.Length; k++)
+                                localMatrix[p][k] *= a;
+
                         AddLocalMatrix(_G, localMatrix, i, j);
                     }
                 }
@@ -203,6 +222,25 @@ namespace ReaserchPaper
                 }
             }
         }
+        static void MultiplyLocalMatrix(Matrix matrix, int i, int j, double a)
+        {
+            for (int p = 0; p < 4; p++)
+            {
+                matrix.di[LocalNumToGlobal(i, j, p)] *= a;
+
+                int ibeg = matrix.ia[LocalNumToGlobal(i, j, p)];
+                int iend = matrix.ia[LocalNumToGlobal(i, j, p) + 1];
+                for (int k = 0; k < p; k++)
+                {
+                    int index = BinarySearch(matrix.ja, LocalNumToGlobal(i, j, k), ibeg, iend - 1);
+
+                    matrix.au[index] *= a;
+                    matrix.al[index] *= a;
+                    ibeg++;
+                }
+            }
+        }
+
         static int BinarySearch(List<int> list, int value, int l, int r)
         {
             while (l != r)
@@ -263,11 +301,14 @@ namespace ReaserchPaper
 
         static void MakeSLau()
         {
-            for (int j = 0; j < Grid.M-1; j++)
-                for (int i = 0; i < Grid.N-1; i++)
-                    Master.Slau.A += _G * Grid.Lamda(get;
-             
-            
+         //   for (int j = 0; j < Grid.M - 1; j++)
+           //     for (int i = 0; i < Grid.N - 1; i++)
+            //        MultiplyLocalMatrix(_G, i, j, Grid.Lamda(0));
+
+                    //  Master.Slau.A += _G * Grid.Lamda(0);
+                    Master.Slau.A += _G;
+
+
         }
 
         static void MakeSLau(int timeLayer)
@@ -318,20 +359,20 @@ namespace ReaserchPaper
             for (int i = 0; i < Grid.boreholes.Length; i++)
             {
                 //снизу
-                Master.Slau.b.Elements[Grid.boreholes[i][0] + Grid.boreholes[i][0] * Grid.N] += Grid.hx[Grid.boreholes[i][0]] / 6 * (2 * Master.BoreholePower() + Master.BoreholePower());
-                Master.Slau.b.Elements[Grid.boreholes[i][0] + Grid.boreholes[i][0] * Grid.N + 1] += Grid.hx[Grid.boreholes[i][0]] / 6 * (Master.BoreholePower() + 2 * Master.BoreholePower());
+                Master.Slau.b.Elements[Grid.boreholes[i][0] + Grid.boreholes[i][1] * Grid.N] += Grid.hx[Grid.boreholes[i][0]] / 6 * (2 * Master.BoreholePower() + Master.BoreholePower());
+                Master.Slau.b.Elements[Grid.boreholes[i][0] + Grid.boreholes[i][1] * Grid.N + 1] += Grid.hx[Grid.boreholes[i][0]] / 6 * (Master.BoreholePower() + 2 * Master.BoreholePower());
 
                 //сверху
-                Master.Slau.b.Elements[Grid.boreholes[i][0] + (Grid.boreholes[i][0] + 1) * Grid.N] += Grid.hx[Grid.boreholes[i][0]] / 6 * (2 * Master.BoreholePower() + Master.BoreholePower());
-                Master.Slau.b.Elements[Grid.boreholes[i][0] + (Grid.boreholes[i][0] + 1) * Grid.N + 1] += Grid.hx[Grid.boreholes[i][0]] / 6 * (Master.BoreholePower() + 2 * Master.BoreholePower());
+                Master.Slau.b.Elements[Grid.boreholes[i][0] + (Grid.boreholes[i][1] + 1) * Grid.N] += Grid.hx[Grid.boreholes[i][0]] / 6 * (2 * Master.BoreholePower() + Master.BoreholePower());
+                Master.Slau.b.Elements[Grid.boreholes[i][0] + (Grid.boreholes[i][1] + 1) * Grid.N + 1] += Grid.hx[Grid.boreholes[i][0]] / 6 * (Master.BoreholePower() + 2 * Master.BoreholePower());
 
                 //слева 
-                Master.Slau.b.Elements[Grid.boreholes[i][0] + Grid.boreholes[i][0] * Grid.N] += Grid.hx[Grid.boreholes[i][0]] / 6 * (2 * Master.BoreholePower() + Master.BoreholePower());
-                Master.Slau.b.Elements[Grid.boreholes[i][0] + (Grid.boreholes[i][0] + 1) * Grid.N] += Grid.hx[Grid.boreholes[i][0]] / 6 * (Master.BoreholePower() + 2 * Master.BoreholePower());
+                Master.Slau.b.Elements[Grid.boreholes[i][0] + Grid.boreholes[i][1] * Grid.N] += Grid.hy[Grid.boreholes[i][0]] / 6 * (2 * Master.BoreholePower() + Master.BoreholePower());
+                Master.Slau.b.Elements[Grid.boreholes[i][0] + (Grid.boreholes[i][1] + 1) * Grid.N] += Grid.hy[Grid.boreholes[i][0]] / 6 * (Master.BoreholePower() + 2 * Master.BoreholePower());
 
                 //справа
-                Master.Slau.b.Elements[Grid.boreholes[i][0] + Grid.boreholes[i][0] * Grid.N + 1] += Grid.hx[Grid.boreholes[i][0]] / 6 * (2 * Master.BoreholePower() + Master.BoreholePower());
-                Master.Slau.b.Elements[Grid.boreholes[i][0] + (Grid.boreholes[i][0] + 1) * Grid.N + 1] += Grid.hx[Grid.boreholes[i][0]] / 6 * (Master.BoreholePower() + 2 * Master.BoreholePower());
+                Master.Slau.b.Elements[Grid.boreholes[i][0] + Grid.boreholes[i][1] * Grid.N + 1] += Grid.hy[Grid.boreholes[i][0]] / 6 * (2 * Master.BoreholePower() + Master.BoreholePower());
+                Master.Slau.b.Elements[Grid.boreholes[i][0] + (Grid.boreholes[i][1] + 1) * Grid.N + 1] += Grid.hy[Grid.boreholes[i][0]] / 6 * (Master.BoreholePower() + 2 * Master.BoreholePower());
             }
 
             //нижняя граница
@@ -414,20 +455,20 @@ namespace ReaserchPaper
         {
             for (int i = 0; i < Grid.boreholes.Length; i++)
             {
-                ZeroingRow(Grid.boreholes[i][0] * Grid.N + Grid.boreholes[i][0]);
-                ZeroingRow(Grid.boreholes[i][0] * Grid.N + Grid.boreholes[i][0] + 1);
-                ZeroingRow((Grid.boreholes[i][0] + 1) * Grid.N + Grid.boreholes[i][0]);
-                ZeroingRow((Grid.boreholes[i][0] + 1) * Grid.N + Grid.boreholes[i][0] + 1);
+                ZeroingRow(Grid.boreholes[i][1] * Grid.N + Grid.boreholes[i][0]);
+                ZeroingRow(Grid.boreholes[i][1] * Grid.N + Grid.boreholes[i][0] + 1);
+                ZeroingRow((Grid.boreholes[i][1] + 1) * Grid.N + Grid.boreholes[i][0]);
+                ZeroingRow((Grid.boreholes[i][1] + 1) * Grid.N + Grid.boreholes[i][0] + 1);
 
-                Master.Slau.A.di[Grid.boreholes[i][0] * Grid.N + Grid.boreholes[i][0]] = 1;
-                Master.Slau.A.di[Grid.boreholes[i][0] * Grid.N + Grid.boreholes[i][0] + 1] = 1;
-                Master.Slau.A.di[(Grid.boreholes[i][0] + 1) * Grid.N + Grid.boreholes[i][0]] = 1;
-                Master.Slau.A.di[(Grid.boreholes[i][0] + 1) * Grid.N + Grid.boreholes[i][0] + 1] = 1;
+                Master.Slau.A.di[Grid.boreholes[i][1] * Grid.N + Grid.boreholes[i][0]] = 1;
+                Master.Slau.A.di[Grid.boreholes[i][1] * Grid.N + Grid.boreholes[i][0] + 1] = 1;
+                Master.Slau.A.di[(Grid.boreholes[i][1] + 1) * Grid.N + Grid.boreholes[i][0]] = 1;
+                Master.Slau.A.di[(Grid.boreholes[i][1] + 1) * Grid.N + Grid.boreholes[i][0] + 1] = 1;
 
-                Master.Slau.b.Elements[Grid.boreholes[i][0] * Grid.N + Grid.boreholes[i][0]] = Master.TemperatureInBorehole();
-                Master.Slau.b.Elements[Grid.boreholes[i][0] * Grid.N + Grid.boreholes[i][0] + 1] = Master.TemperatureInBorehole();
-                Master.Slau.b.Elements[(Grid.boreholes[i][0] + 1) * Grid.N + Grid.boreholes[i][0]] = Master.TemperatureInBorehole();
-                Master.Slau.b.Elements[(Grid.boreholes[i][0] + 1) * Grid.N + Grid.boreholes[i][0] + 1] = Master.TemperatureInBorehole();
+                Master.Slau.b.Elements[Grid.boreholes[i][1] * Grid.N + Grid.boreholes[i][0]] = Master.TemperatureInBorehole();
+                Master.Slau.b.Elements[Grid.boreholes[i][1] * Grid.N + Grid.boreholes[i][0] + 1] = Master.TemperatureInBorehole();
+                Master.Slau.b.Elements[(Grid.boreholes[i][1] + 1) * Grid.N + Grid.boreholes[i][0]] = Master.TemperatureInBorehole();
+                Master.Slau.b.Elements[(Grid.boreholes[i][1] + 1) * Grid.N + Grid.boreholes[i][0] + 1] = Master.TemperatureInBorehole();
 
             }
         }

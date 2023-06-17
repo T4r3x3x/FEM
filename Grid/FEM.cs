@@ -16,7 +16,7 @@ namespace ReaserchPaper
 
 
 
-        public static Point GetV(int elemNumber, Point xBoundaries, Point yBoundaries, Point point, double hx, double hy)
+        public static Point GetV(int elemNumber, Point xBoundaries, Point yBoundaries, Point point, double hx, double hy, int area)
         {
             double _x, _y;
             _x = -Master.Slau.p.Elements[elemNumber] * Y1(point.y, yBoundaries.y, hy) / hx + Master.Slau.p.Elements[elemNumber + 1] * Y1(point.y, yBoundaries.y, hy) / hx
@@ -24,14 +24,14 @@ namespace ReaserchPaper
             _y = -Master.Slau.p.Elements[elemNumber] * X1(point.x, xBoundaries.y, hx) / hy - Master.Slau.p.Elements[elemNumber + 1] * X2(point.x, xBoundaries.x, hx) / hy
             + Master.Slau.p.Elements[elemNumber + Grid.N] * X1(point.x, xBoundaries.y, hx) / hy + Master.Slau.p.Elements[elemNumber + Grid.N + 1] * X2(point.x, xBoundaries.x, hx) / hy;
             Point result = new Point(-_x, -_y);
-            result *= Grid.Lamda;
+            result *= Grid.Lamda(area);
             return result;
         }
 
-        public static double VGradP(int elemNumber, int i, int j, Point xBoundaries, Point yBoundaries, Point point, double hx, double hy)
+        public static double VGradP(int elemNumber, int i, int j, Point xBoundaries, Point yBoundaries, Point point, double hx, double hy, int area)
         {
             double result = 0;
-            Point V = GetV(elemNumber, xBoundaries,yBoundaries, point, hx, hy);
+            Point V = GetV(elemNumber, xBoundaries,yBoundaries, point, hx, hy, area);
             switch (j)
             {
                 case 0:

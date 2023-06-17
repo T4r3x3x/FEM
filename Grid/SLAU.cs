@@ -91,7 +91,7 @@ namespace ResearchPaper
                 for (int j = 0; j < Grid.M; j++)
                     for (int i = 0; i < Grid.N; i++)                    
                         sw.WriteLine(Grid.x[i].ToString().Replace(",", ".") + " " + Grid.y[j].ToString().Replace(",", ".") +
-                             " " + p.Elements[i*Grid.N + j].ToString().Replace(",", "."));
+                             " " + p.Elements[j *Grid.N + i].ToString().Replace(",", "."));
 
             using (StreamWriter sw = new StreamWriter(@"output\temperature.txt"))
             {
@@ -101,7 +101,7 @@ namespace ResearchPaper
                     for (int j = 0; j < Grid.M; j++)
                        for (int i = 0; i < Grid.N; i++)
                           sw.WriteLine(Grid.x[i].ToString().Replace(",", ".") + " " + Grid.y[j].ToString().Replace(",", ".") +
-                                " " + q[k].Elements[i * Grid.N + j].ToString().Replace(",", "."));
+                                " " + q[k].Elements[j * Grid.N + i].ToString().Replace(",", "."));
             }
         }
 

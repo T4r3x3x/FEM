@@ -12,47 +12,23 @@ namespace ReaserchPaper
         static double q, h;
         static int n, m;
 
-        static double Ro(int area)
-        {
-            switch (area)
-            {
-                default: return 0.850;
-            }
-        }
-        static double Fita(int area)
-        {
-            switch (area)
-            {
-                default: return 0.487;
-            }
-        }
+        static double Ro => 0.850;        
+        static double С => 2.935;
+        
         static double K(int area)
         {
             switch (area)
             {
-                default: return 0.487;
+                case 1:
+                    return 0.005;
+                default: return 0.4;
             }
-        }
-        static double Nu(int area)
-        {
-            switch (area)
-            {
-                default: return 0.487;
-            }
-        }
-        static double Mu(int area)
-        {
-            switch (area)
-            {
-                default: return 0.487;
-            }
-        }
+        }      
+        static double Eta => 0.030;        
 
-        public static double Lamda(int area) => K(area) * Nu(area) / Mu(area);
-        public static double Sigma(int area) => Ro(area) * Fita(area);   
-
-        public static double Lamda2 = 0.124;
-
+        public static double Lamda(int area) => K(area) / Eta;
+        public static double Sigma => Ro * С;   
+        public static double Lamda2 => 0.124;
 
 
         public static int TimeLayersCount => t.Length;
@@ -95,12 +71,12 @@ namespace ReaserchPaper
                 data = sr.ReadLine().Split(' ');
                 areas = new int[int.Parse(data[0])][];
                 for (int i = 0; i < areas.Length; i++)
-                    areas[i] = new int[4];
+                    areas[i] = new int[5];
 
                 for (int i = 0; i < areas.Length; i++)
                 {
                     data = sr.ReadLine().Split(' ');
-                    for (int j = 0; j < 4; j++)
+                    for (int j = 0; j < areas[i].Length; j++)
                         areas[i][j] = int.Parse(data[j]);
                 }
             }
@@ -118,10 +94,10 @@ namespace ReaserchPaper
                 for (int i = 0; i < data.Length - 1; i += 2)
                 {
                     xAreaLenghtes.Add(int.Parse(data[i]));
-                    n += int.Parse(data[i]) - 1;
+                    n += int.Parse(data[i]);
                     q[i / 2] = double.Parse(data[i + 1]);
                 }
-                n++;
+                n-=xAreaLenghtes.Count()-1;
 
                 x = new double[n];
                 x[0] = XW[0];
@@ -150,10 +126,10 @@ namespace ReaserchPaper
                 for (int i = 0; i < data.Length - 1; i += 2)
                 {
                     yAreaLenghtes.Add(int.Parse(data[i]));
-                    m += int.Parse(data[i]) - 1;
+                    m += int.Parse(data[i]);
                     q[i / 2] = double.Parse(data[i + 1]);
                 }
-                m++;
+                m -= yAreaLenghtes.Count() - 1;
                 y = new double[m];
                 y[0] = YW[0];
                 hy = new double[m - 1];
@@ -239,7 +215,7 @@ namespace ReaserchPaper
                 {
                     if (IX[areas[i][0]] <= IndexOfX && IndexOfX <= IX[areas[i][1]])
                     {
-                        return i;
+                        return areas[i][4];
                     }
                 }
             }
