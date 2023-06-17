@@ -118,7 +118,6 @@ namespace ReaserchPaper
             _M *= Grid.Sigma;
             SolveSecondTimeLayer(solver);
             ResetSlau();
-            _G.Reset();
             double[][] localMatrix;
             for (int j = 0; j < Grid.M - 1; j++) //все кэ под скважиной
                 for (int i = 0; i < Grid.N - 1; i++) // проходим по КЭ 
