@@ -79,24 +79,27 @@ namespace ReaserchPaper
             for (int j = 0; j < Grid.M - 1; j++) //y
                 for (int i = 0; i < Grid.N - 1; i++) //x | проходим по КЭ 
                 {
-                    int area = Grid.GetAreaNumber(i, j);
+                    if (IsBorehole(i, j))
+                    {
+                        int area = Grid.GetAreaNumber(i, j);
 
-                    localMatrix = FEM.GetMassMatrix(Grid.hx[i], Grid.hy[j]);
+                        localMatrix = FEM.GetMassMatrix(Grid.hx[i], Grid.hy[j]);
 
-                    for (int p = 0; p < 4; p++)
-                        for (int k = 0; k < 4; k++)
-                            localMatrix[p][k] *= Master.Sigma(area);
+                        for (int p = 0; p < 4; p++)
+                            for (int k = 0; k < 4; k++)
+                                localMatrix[p][k] *= Master.Sigma(area);
 
-                    AddLocalMatrix(_M, localMatrix, i, j);
+                        AddLocalMatrix(_M, localMatrix, i, j);
 
 
-                    localMatrix = FEM.GetStiffnessMatrix(Grid.hx[i], Grid.hy[j]);
+                        localMatrix = FEM.GetStiffnessMatrix(Grid.hx[i], Grid.hy[j]);
 
-                    for (int p = 0; p < 4; p++)
-                        for (int k = 0; k < 4; k++)
-                            localMatrix[p][k] *= Master.Lamda(area);
+                        for (int p = 0; p < 4; p++)
+                            for (int k = 0; k < 4; k++)
+                                localMatrix[p][k] *= Master.Lamda(area);
 
-                    AddLocalMatrix(_G, localMatrix, i, j);
+                        AddLocalMatrix(_G, localMatrix, i, j);
+                    }
                 }
             SolveSecondTimeLayer(solver);
             ResetSlau();
@@ -124,26 +127,28 @@ namespace ReaserchPaper
             for (int j = 0; j < Grid.M - 1; j++) //y
                 for (int i = 0; i < Grid.N - 1; i++) //x | проходим по КЭ 
                 {
-                    int area = Grid.GetAreaNumber(i, j);
+                    if (IsBorehole(i, j))
+                    {
+                        int area = Grid.GetAreaNumber(i, j);
 
-                    localMatrix = FEM.GetMassMatrix(Grid.hx[i], Grid.hy[j]);
+                        localMatrix = FEM.GetMassMatrix(Grid.hx[i], Grid.hy[j]);
 
-                    for (int p = 0; p < 4; p++)
-                        for (int k = 0; k < 4; k++)
-                            localMatrix[p][k] *= Master.Gamma(area);
+                        for (int p = 0; p < 4; p++)
+                            for (int k = 0; k < 4; k++)
+                                localMatrix[p][k] *= Master.Gamma(area);
 
-                    AddLocalMatrix(_M, localMatrix, i, j);
+                        AddLocalMatrix(_M, localMatrix, i, j);
 
 
 
-                    localMatrix = FEM.GetStiffnessMatrix(Grid.hx[i], Grid.hy[j]);
-                   
-                    for (int p = 0; p < 4; p++)
-                        for (int k = 0; k < 4; k++)
-                            localMatrix[p][k] *= Master.Lamda(area);
-                     
-                    AddLocalMatrix(_G, localMatrix, i, j);
+                        localMatrix = FEM.GetStiffnessMatrix(Grid.hx[i], Grid.hy[j]);
 
+                        for (int p = 0; p < 4; p++)
+                            for (int k = 0; k < 4; k++)
+                                localMatrix[p][k] *= Master.Lamda(area);
+
+                        AddLocalMatrix(_G, localMatrix, i, j);
+                    }
                 }
         }
         public void GetMatrixH()
@@ -152,9 +157,25 @@ namespace ReaserchPaper
             for (int j = 0; j < Grid.M - 1; j++)
                 for (int i = 0; i < Grid.N - 1; i++) // проходим по КЭ 
                 {
-                    localMatrix = GetGradTMatrix(LocalNumToGlobal(i, j, 0), Grid.hx[i], Grid.hy[j], Grid.x[i], Grid.y[j]);
-                    AddLocalMatrix(_H, localMatrix, i, j);
+                    if (IsBorehole(i, j))
+                    {
+                        localMatrix = GetGradTMatrix(LocalNumToGlobal(i, j, 0), Grid.hx[i], Grid.hy[j], Grid.x[i], Grid.y[j]);
+                        AddLocalMatrix(_H, localMatrix, i, j);
+                    }
                 }
+        }
+
+
+        bool IsBorehole(int xIndex, int yIndex)
+        {
+            foreach (var borehole in Grid.boreholes)
+            {
+                if (xIndex == borehole[0])
+                    if (yIndex == borehole[1])
+                        return true;
+            }
+
+            return false;
         }
         public static int LocalNumToGlobal(int i, int j, int k)
         {
