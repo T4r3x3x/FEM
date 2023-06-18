@@ -14,7 +14,7 @@ namespace ResearchPaper
             {
             //    case 0: return 1;
              //   case 1: return 10;
-                default: return 5;
+                default: return 1;
             }
         }
         public static double Gamma(int area)
@@ -31,9 +31,9 @@ namespace ResearchPaper
         {
             switch (area)
             {
-                case 0: return 1;
-                case 1: return 2;
-                default: return 5;
+            //    case 0: return 1;
+              //  case 1: return 2;
+                default: return 1;
             }
         }
         public static SLAU Slau;
@@ -104,9 +104,10 @@ namespace ResearchPaper
         {
             switch (area)
             {
-                case 0: return -1;
-                case 1: return 0;
-                default: return 1 -6 * x - 6 * y  -9* x * x * x*x -9*y* y * y * y;
+                //    case 0: return -1;
+                // case 1: return 0;
+                //       default: return 1 -6 * x - 6 * y  -9* x * x * x*x -9*y* y * y * y;
+                default: return -1;
             }
         }
 
