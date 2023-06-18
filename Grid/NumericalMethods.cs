@@ -23,8 +23,10 @@ namespace ReaserchPaper
         {
             double result = 0;
             Point point;
-            double[] q = new double[2] { 1,1};
-            double[] x = new double[2] { -0.5773502692, 0.5773502692 };
+          //  double[] q = new double[2] { 1,1};
+           // double[] x = new double[2] { -0.5773502692, 0.5773502692 };
+            double[] q = new double[4] { (18 - Math.Sqrt(30)) / 36, (18 + Math.Sqrt(30)) / 36, (18 + Math.Sqrt(30)) / 36, (18 - Math.Sqrt(30)) / 36 };
+            double[] x = new double[4] { -Math.Sqrt((15 + 2 * Math.Sqrt(30)) / 35), -Math.Sqrt((15 - 2 * Math.Sqrt(30)) / 35), Math.Sqrt((15 - 2 * Math.Sqrt(30)) / 35), Math.Sqrt((15 + 2 * Math.Sqrt(30)) / 35) };
 
             for (int l = 0; l < q.Length; l++)
             {

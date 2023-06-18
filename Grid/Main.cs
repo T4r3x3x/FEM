@@ -7,8 +7,35 @@ namespace ResearchPaper
     class Master
     {
         static double ro, fita, K, nu,mu;
-       
-        public static double Lamda = 1, Gamma = 1, Sigma = 2;//Sigma в массе масс вместо гаммы для времени     
+
+        public static double Lamda(int area)
+        {
+            switch (area)
+            {
+            //    case 0: return 1;
+             //   case 1: return 10;
+                default: return 5;
+            }
+        }
+        public static double Gamma(int area)
+        {
+            switch (area) 
+            {
+               // case 0: return 1;
+               // case 1: return 2;
+                default: return 5;
+            }
+        }
+
+        public static double Sigma(int area)
+        {
+            switch (area)
+            {
+                case 0: return 1;
+                case 1: return 2;
+                default: return 5;
+            }
+        }
         public static SLAU Slau;
         public static int[] boundaryConditions = new int[4] {1,1,1,1};
         
@@ -17,9 +44,10 @@ namespace ResearchPaper
         {
             switch (area)
             {
-                case 0: return x + y;
-                case 1: return x - y;
-                default: return 0;
+              //  case 0: return Math.Pow(Math.E,Math.PI*y)*Math.Sin(Math.PI*x);
+              //  case 1: return Math.Pow(Math.E, Math.PI * y) * Math.Sin(Math.PI * x)/10;
+                default: return x+y;
+                //default: return x * x * x + y * y * y;
             }
         }
 
@@ -41,9 +69,9 @@ namespace ResearchPaper
         {
             switch (area)
             {
-                case 0: return x + y;
-                case 1: return x - y;
-                default: return 0;
+         //      case 0: return x + y;
+        //        case 1: return 2 * x + 2 * y;
+                default: return 5*(x+y);
             }
         }
 
@@ -52,9 +80,9 @@ namespace ResearchPaper
         {
             switch (area)
             {
-                case 0: return -x * y * t;
-                case 1: return x * y * t;
-                default: return x * y * t;
+            //    case 0: return -x * y * t;
+            //    case 1: return x * y * t;
+                default: return x+ y + t;
             }
         }
         public static double DivFuncX2(double x, double y, double t, int area) {
@@ -76,10 +104,9 @@ namespace ResearchPaper
         {
             switch (area)
             {
-                case 0: return - 2 * x * y + y * t + x * t;
-                case 1: return 2 * x * y - y * t + x * t;
-                default:
-                    return 2 * x * y - x * t + y * t;
+                case 0: return -1;
+                case 1: return 0;
+                default: return 1 -6 * x - 6 * y  -9* x * x * x*x -9*y* y * y * y;
             }
         }
 
@@ -92,10 +119,10 @@ namespace ResearchPaper
             start.UseShellExecute = false;
             start.RedirectStandardOutput = true;
             Process.Start(start);
-            //start.Arguments = string.Format("C:\\Users\\hardb\\source\\repos\\Grid\\Grid\\bin\\Debug\\net6.0\\pressure.py");
-            //Process.Start(start);
-            //start.Arguments = string.Format("C:\\Users\\hardb\\source\\repos\\Grid\\Grid\\bin\\Debug\\net6.0\\temperature.py");
-            //Process.Start(start);
+            start.Arguments = string.Format("C:\\Users\\hardb\\source\\repos\\Grid\\Grid\\bin\\Debug\\net6.0\\pressure.py");
+            Process.Start(start);
+            start.Arguments = string.Format("C:\\Users\\hardb\\source\\repos\\Grid\\Grid\\bin\\Debug\\net6.0\\temperature.py");
+            Process.Start(start);
         }
 
         static void Main(string[] args)

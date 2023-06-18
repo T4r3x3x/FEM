@@ -57,6 +57,14 @@ namespace ReaserchPaper
             return result;
         }
 
+        //static double SolutionInPoint(int elemNumber, Point xBoundaries, Point yBoundaries, Point point, double hx, double hy)
+        //{
+        //    double result = 0;
+        //    Master.Slau.p.Elements[elemNumber]*X1()* Y1(point.y, yBoundaries.y, hy)
+
+        //    return result
+        //}
+
 
         public static Point GetV(int elemNumber, Point xBoundaries, Point yBoundaries, Point point, double hx, double hy)
         {
