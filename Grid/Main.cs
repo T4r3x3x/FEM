@@ -10,7 +10,7 @@ namespace ResearchPaper
         public static SLAU Slau;
 
         public static double PressuereInReservoir(double x, double y) => 13172250;
-        public static double BoreholePower() => +6.9e-2;
+        public static double BoreholePower() => +6.9e-4;
         public static double F1(double x, double y) => 0;
 
 

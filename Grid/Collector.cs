@@ -102,7 +102,8 @@ namespace ReaserchPaper
 
         static void ResetSlauOptimized()
         {
-            SubstractM();
+            //SubstractM();
+            Master.Slau.A.Reset();
             Master.Slau.b.Reset();
         }
 
@@ -136,7 +137,7 @@ namespace ReaserchPaper
             SolveSecondTimeLayer(solver);
             ResetSlau();
 
-            Master.Slau.A += _G + _H;
+       //     Master.Slau.A += _G + _H;
 
             deltaTimes[2] = Grid.ht[1] + Grid.ht[0];
             deltaTimes[1] = Grid.ht[0];
@@ -206,7 +207,7 @@ namespace ReaserchPaper
                         localMatrix = GetGradTMatrix(LocalNumToGlobal(i, j, 0), Grid.hx[i], Grid.hy[j], Grid.x[i], Grid.y[j], Grid.GetAreaNumber(i,j));
                         for (int p = 0; p < localMatrix.Length; p++)
                             for (int k = 0; k < localMatrix.Length; k++)
-                                localMatrix[p][k] *= Grid.Sigma;
+                                localMatrix[p][k] *= 0;
                         AddLocalMatrix(_H, localMatrix, i, j);
                     }
                 }
@@ -334,7 +335,7 @@ namespace ReaserchPaper
             timeCoef = ((deltaTimes[2] + deltaTimes[0]) / (deltaTimes[2] * deltaTimes[0]));
 
             Master.Slau.b += -(deltaTimes[0] / (deltaTimes[2] * deltaTimes[1])) * MQs[0] + deltaTimes[2] / (deltaTimes[1] * deltaTimes[0]) * MQs[1];
-            Master.Slau.A += _M * timeCoef;
+            Master.Slau.A += _M * timeCoef + _H + _G;
         }
         static void AddLocalB(int i, int j)
         {
