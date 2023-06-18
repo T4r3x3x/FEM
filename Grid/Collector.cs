@@ -115,28 +115,34 @@ namespace ReaserchPaper
         public void SwitchTask(Solver solver)
         {
             ResetSlau();
-            _M *= Grid.Sigma;
-            SolveSecondTimeLayer(solver);
-            ResetSlau();
+            _G.Reset();
+
             double[][] localMatrix;
-            for (int j = 0; j < Grid.M - 1; j++) //все кэ под скважиной
-                for (int i = 0; i < Grid.N - 1; i++) // проходим по КЭ 
+            for (int j = 0; j < Grid.M - 1; j++) //y
+                for (int i = 0; i < Grid.N - 1; i++) //x | проходим по КЭ 
                 {
                     if (!IsBorehole(i, j))
                     {
                         localMatrix = GetStiffnessMatrix(Grid.hx[i], Grid.hy[j]);
+
+                        for (int p = 0; p < 4; p++)
+                            for (int k = 0; k < 4; k++)
+                                localMatrix[p][k] *= Grid.Lamda2;
+
                         AddLocalMatrix(_G, localMatrix, i, j);
                     }
                 }
+           
+            SolveSecondTimeLayer(solver);
+            ResetSlau();
 
-            Master.Slau.A += _G * Grid.Lamda2 + _H;
+            Master.Slau.A += _G + _H;
 
             deltaTimes[2] = Grid.ht[1] + Grid.ht[0];
             deltaTimes[1] = Grid.ht[0];
             deltaTimes[0] = Grid.ht[1];
 
-            MQs[0] = _M * Master.Slau.q[0];
-            MQs[1] = _M * Master.Slau.q[1];
+            MQs[1] = _M * Master.Slau.q[0];
         }
 
         private void SolveSecondTimeLayer(Solver solver)
@@ -158,6 +164,9 @@ namespace ReaserchPaper
                     if (!IsBorehole(i, j))
                     {
                         localMatrix = GetMassMatrix(Grid.hx[i], Grid.hy[j]);
+                        for (int p = 0; p < localMatrix.Length; p++)
+                            for (int k = 0; k < localMatrix.Length; k++)
+                                localMatrix[p][k] *= Grid.Sigma;
                         AddLocalMatrix(_M, localMatrix, i, j);
 
                         localMatrix = GetStiffnessMatrix(Grid.hx[i], Grid.hy[j]);
@@ -195,6 +204,9 @@ namespace ReaserchPaper
                     if (!IsBorehole(i, j))
                     {
                         localMatrix = GetGradTMatrix(LocalNumToGlobal(i, j, 0), Grid.hx[i], Grid.hy[j], Grid.x[i], Grid.y[j], Grid.GetAreaNumber(i,j));
+                        for (int p = 0; p < localMatrix.Length; p++)
+                            for (int k = 0; k < localMatrix.Length; k++)
+                                localMatrix[p][k] *= Grid.Sigma;
                         AddLocalMatrix(_H, localMatrix, i, j);
                     }
                 }
