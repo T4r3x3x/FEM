@@ -12,8 +12,8 @@ namespace ReaserchPaper
         static double q, h;
         static int n, m;
 
-        static double Ro => 0.950;        
-        static double С => 0.4200;
+        static double Ro => 950;        
+        static double С => 4200;
         
         static double K(int area)
         {

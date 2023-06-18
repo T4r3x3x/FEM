@@ -7,14 +7,10 @@ namespace ResearchPaper
 {
     class Master
     {
-
-      
         public static SLAU Slau;
-      //  public static int[] boundaryConditions = new int[4] {1,1,1,1};
-      //  public static int[] borehole = new int[2] { 5, 5 }; //индексы x0 x1 y0 y1
 
         public static double PressuereInReservoir(double x, double y) => 13172250;
-        public static double BoreholePower() => +6.9e-4;
+        public static double BoreholePower() => +6.9e-2;
         public static double F1(double x, double y) => 0;
 
 
