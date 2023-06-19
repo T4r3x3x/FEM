@@ -160,6 +160,7 @@ namespace ReaserchPaper
         {
             double[][] localMatrix;
             for (int j = 0; j < Grid.M - 1; j++) //все кэ под скважиной
+            {
                 for (int i = 0; i < Grid.N - 1; i++) // проходим по КЭ 
                 {
                     if (!IsBorehole(i, j))
@@ -171,16 +172,17 @@ namespace ReaserchPaper
                         AddLocalMatrix(_M, localMatrix, i, j);
 
                         localMatrix = GetStiffnessMatrix(Grid.hx[i], Grid.hy[j]);
-                        
-                        double a = Grid.Lamda(Grid.GetAreaNumber(i, j));                        
 
-                        for (int p = 0; p < localMatrix.Length; p++)                        
+                        double a = Grid.Lamda(Grid.GetAreaNumber(i, j));
+
+                        for (int p = 0; p < localMatrix.Length; p++)
                             for (int k = 0; k < localMatrix.Length; k++)
                                 localMatrix[p][k] *= a;
 
                         AddLocalMatrix(_G, localMatrix, i, j);
                     }
                 }
+            }
         }
 
         bool IsBorehole(int xIndex, int yIndex)
@@ -207,7 +209,7 @@ namespace ReaserchPaper
                         localMatrix = GetGradTMatrix(LocalNumToGlobal(i, j, 0), Grid.hx[i], Grid.hy[j], Grid.x[i], Grid.y[j], Grid.GetAreaNumber(i,j));
                         for (int p = 0; p < localMatrix.Length; p++)
                             for (int k = 0; k < localMatrix.Length; k++)
-                                localMatrix[p][k] *= 0;
+                                localMatrix[p][k] *= Grid.Sigma/10;
                         AddLocalMatrix(_H, localMatrix, i, j);
                     }
                 }

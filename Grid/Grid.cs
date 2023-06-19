@@ -12,15 +12,15 @@ namespace ReaserchPaper
         static double q, h;
         static int n, m;
 
-        static double Ro => 950;        
-        static double С => 4200;
+        static double Ro => 0.850;        
+        static double С => 0.2935;
         
         static double K(int area)
         {
             switch (area)
             {
                 case 1:
-                    return 0.005;
+                    return 0.00005;
                 default: return 0.4;
             }
         }      
@@ -28,7 +28,7 @@ namespace ReaserchPaper
 
         public static double Lamda(int area) => K(area) / Eta;
         public static double Sigma => Ro * С;   
-        public static double Lamda2 => 0.6;
+        public static double Lamda2 => 0.127;
 
 
         public static int TimeLayersCount => t.Length;
