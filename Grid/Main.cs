@@ -1,4 +1,6 @@
 ﻿using ReaserchPaper;
+using ReaserchPaper.Grid;
+using ReaserchPaper.Slae;
 using System.Diagnostics;
 using System.Security.Principal;
 
@@ -36,7 +38,7 @@ namespace ResearchPaper
                 default: return 1;
             }
         }
-        public static SLAU Slau;
+        public static Slae Slau;
         public static int[] boundaryConditions = new int[4] {1,1,1,1};
         
 
@@ -130,12 +132,12 @@ namespace ResearchPaper
         {
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             sw.Start();
-            Solver solver = new();
+            LosLU solver = new();
             Grid.ReadData();
             //  Grid.PrintPartialGrid();
             //   Grid.PrintTimeGrid();
             Grid.WriteGrid();
-            Slau = new SLAU(Grid.NodesCount, Grid.TimeLayersCount);
+            Slau = new Slae(Grid.NodesCount, Grid.TimeLayersCount);
             Collector collector = new(Grid.NodesCount);
             collector.Collect();
             Slau.p = solver.Solve(Slau.A, Slau.b);

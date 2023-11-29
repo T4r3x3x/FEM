@@ -1,0 +1,6 @@
+{
+  "SlaeSolvingAlgorithm": "LOSLU"
+  "Grid": "none"
+  "MaxIterCount": 1000
+  "SolveAccuracy": 1e-12
+}
