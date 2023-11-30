@@ -3,12 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReaserchPaper", "Grid\ReaserchPaper.csproj", "{EC37A2A9-025A-4F60-A34E-3522A67FAEA6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FemProducer", "Grid\FemProducer.csproj", "{EC37A2A9-025A-4F60-A34E-3522A67FAEA6}"
 	ProjectSection(ProjectDependencies) = postProject
 		{00BFC537-98CC-4175-B91B-8DA7F4560100} = {00BFC537-98CC-4175-B91B-8DA7F4560100}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tensus", "Tensus\Tensus.csproj", "{00BFC537-98CC-4175-B91B-8DA7F4560100}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tensus", "Tensus\Tensus.csproj", "{00BFC537-98CC-4175-B91B-8DA7F4560100}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

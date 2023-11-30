@@ -1,6 +1,12 @@
 {
-  "SlaeSolvingAlgorithm": "LOSLU"
-  "Grid": "none"
-  "MaxIterCount": 1000
-  "SolveAccuracy": 1e-12
+  "SlaeSolvingAlgorithm": "LOSLU",
+  "Grid": "none",
+  "MaxIterCount": 1000,
+  "SolveAccuracy": 1e-12,
+  "XBoundries": [ 1, 2 ],
+  "XSliceCount": 1,
+  "YBoundries": [ 1, 2 ],
+  "YSliceCount": 1,
+  "TimeBoundaries": [ 1, 2 ],
+  "TimeSliceCount": 1,
 }

@@ -1,6 +1,8 @@
-﻿namespace ReaserchPaper
+﻿using System.Collections;
+
+namespace ReaserchPaper
 {
-	public class Vector
+	public class Vector : IEnumerable<double>
 	{
 		private double[] Elements;
 
@@ -30,7 +32,7 @@
 		public static double operator *(Vector a, Vector b)
 		{
 			if (a.Length != b.Length)
-				throw new Exception("Sizes of the vectors aren't equals");
+				throw new Exception("Sizes of the vectors aren'T equals");
 
 			double result = 0;
 
@@ -43,7 +45,7 @@
 		public static Vector operator +(Vector a, Vector b)
 		{
 			if (a.Length != b.Length)
-				throw new Exception("Sizes of the vectors aren't equals");
+				throw new Exception("Sizes of the vectors aren'T equals");
 
 			Vector result = new Vector(a.Length, null);
 
@@ -58,7 +60,7 @@
 		public static Vector operator -(Vector a, Vector b)
 		{
 			if (a.Length != b.Length)
-				throw new Exception("Sizes of the vectors aren't equals");
+				throw new Exception("Sizes of the vectors aren'T equals");
 
 			Vector result = new Vector(a.Length, null);
 
@@ -94,5 +96,8 @@
 				Elements[i] = 0;
 			}
 		}
+
+		public IEnumerator<double> GetEnumerator() => ((IEnumerable<double>)Elements).GetEnumerator();
+		IEnumerator IEnumerable.GetEnumerator() => Elements.GetEnumerator();
 	}
 }

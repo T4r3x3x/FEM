@@ -12,7 +12,7 @@ for line in range(0,boreholes_count):
 
 array = f.readline().split(' ')
 	
-x =[]
+X =[]
 y =[]
 xCount = int(f.readline())
 yCount = int(f.readline())
@@ -20,33 +20,33 @@ fig = plt.figure(figsize=(16,12))
 
 for line in range(0,xCount):	
 	_x = float(f.readline())
-	x.append(_x)
-	plt.vlines(x=_x,ymin=float(array[2]),ymax=float(array[3]),color="gray")
+	X.append(_x)
+	plt.vlines(X=_x,ymin=float(array[2]),ymax=float(array[3]),color="gray")
 
 for line in range(0,yCount):
 	_y = float(f.readline())
 	y.append(_y)
 	plt.hlines(y=_y,xmin=float(array[0]),xmax=float(array[1]),color="gray")
 
-plt.vlines(x=[float(array[0]),float(array[1])],ymin=float(array[2]),ymax=float(array[3]),color='r',linewidth = 4)#обводка границ 
+plt.vlines(X=[float(array[0]),float(array[1])],ymin=float(array[2]),ymax=float(array[3]),color='r',linewidth = 4)#обводка границ 
 plt.hlines(y=[float(array[2]),float(array[3])],xmin=float(array[0]),xmax=float(array[1]),color='r',linewidth = 4)#расчётной области
 
 for i in range(0,boreholes_count):
-    plt.vlines(x=[float(boreholes[i][0]),float(boreholes[i][1])],ymin=float(boreholes[i][2]),ymax=float(boreholes[i][3]),color='orange',linewidth = 4)#обводка границ
+    plt.vlines(X=[float(boreholes[i][0]),float(boreholes[i][1])],ymin=float(boreholes[i][2]),ymax=float(boreholes[i][3]),color='orange',linewidth = 4)#обводка границ
     plt.hlines(y=[float(boreholes[i][2]),float(boreholes[i][3])],xmin=float(boreholes[i][0]),xmax=float(boreholes[i][1]),color='orange',linewidth = 4)#скважины
 
 areasCount = int(f.readline())
 
 for line in range(0,areasCount): #обводка границ подобластей
 	array = f.readline().split(' ')
-	plt.vlines(x=[float(array[0]),float(array[1])],ymin=float(array[2]),ymax=float(array[3]),color='r',linewidth = 4)
+	plt.vlines(X=[float(array[0]),float(array[1])],ymin=float(array[2]),ymax=float(array[3]),color='r',linewidth = 4)
 	plt.hlines(y=[float(array[2]),float(array[3])],xmin=float(array[0]),xmax=float(array[1]),color='r',linewidth = 4)
     
 xTicks = [] 
 yTicks = []       
 for i in range(0,xCount): #через один пишем значения х
     if i%2:
-        xTicks.append(round(x[i]))
+        xTicks.append(round(X[i]))
         
 for i in range(0,yCount): #через один пишем значения х
     if i%2:
@@ -54,7 +54,7 @@ for i in range(0,yCount): #через один пишем значения х
 #plt.xticks(xTicks)
 #plt.yticks(yTicks)
 plt.tick_params(axis = 'both', which = 'major', labelsize = 16) 
-plt.xlabel('x', fontsize=20)  
+plt.xlabel('X', fontsize=20)  
 plt.ylabel('y ', fontsize=20) 
 plt.xticks(rotation=45, ha='right')
 plt.yticks(rotation=45, ha='right')

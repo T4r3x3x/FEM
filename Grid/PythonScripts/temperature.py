@@ -17,9 +17,9 @@ import random
 _x=[]
 _y=[]
 _t=[]
-x = []
+X = []
 y = []
-t = []
+T = []
 
 f = open(r'output\temperature.txt', 'r', encoding="utf-8")
 size = int(f.readline())
@@ -28,15 +28,15 @@ layersCount = int(f.readline())
 for layer in range(0,layersCount):
 	for line in range(0,size):        
 		arr = list(f.readline().split(" "))
-		x.append(float(arr[0]))
+		X.append(float(arr[0]))
 		y.append(float(arr[1]))
-		t.append(float(arr[2]))
-	_x.append(x.copy())
+		T.append(float(arr[2]))
+	_x.append(X.copy())
 	_y.append(y.copy())
-	_t.append(t.copy())
-	x.clear()
+	_t.append(T.copy())
+	X.clear()
 	y.clear()
-	t.clear()
+	T.clear()
 
 
 fig = plt.figure(figsize=(27,18))
@@ -45,14 +45,14 @@ fig = plt.gcf()
 fig.canvas.manager.set_window_title("temperature")
 ax.plot_trisurf(_x[0], _y[0],_t[0], linewidth=0, antialiased=False,
                label='temperature', shade=True, cmap=cm.inferno)
-plt.xlabel('x', fontsize=30, labelpad =30)  
+plt.xlabel('X', fontsize=30, labelpad =30)  
 plt.ylabel('y ', fontsize=30, labelpad =30) 
 
 def draw(layer):
 	ax.cla()
 	ax.plot_trisurf(_x[0], _y[0],_t[int(layer)], linewidth=0, antialiased=False,label='temperature', shade=True, cmap=cm.inferno)
 	ax.set_ylabel('y ', fontsize=30, labelpad =30)
-	ax.set_xlabel('x ', fontsize=30, labelpad =30)
+	ax.set_xlabel('X ', fontsize=30, labelpad =30)
 	ax.tick_params(axis = 'both', which = 'major', labelsize = 24)
 
 

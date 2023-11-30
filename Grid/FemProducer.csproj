@@ -15,4 +15,8 @@
     <ProjectReference Include="..\Tensus\Tensus.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Slae\" />
+  </ItemGroup>
+
 </Project>

@@ -4,19 +4,20 @@ namespace ResearchPaper
 {
 	public class Matrix
 	{
-		public int Size => di.Length;
-		public double[] di;
-		public List<double> al, au;
-		public List<int> ja, ia;
-		public Matrix(int size)
+		private double[] _di;
+		private double[] _al, _au;
+		private int[] _ja, _ia;
+
+		public Matrix(double[] di, double[] al, double[] au, int[] ja, int[] ia)
 		{
-			di = new double[size];
-			ia = new List<int>(size + 1);
-			al = new List<double>();
-			au = new List<double>();
-			ja = new List<int>();
-			GenerateSLAU(size);
+			_di = di;
+			_al = al;
+			_au = au;
+			_ja = ja;
+			_ia = ia;
 		}
+
+		public int Size => _di.Length;
 
 		public double[][] ConvertToDenseFormat()
 		{
@@ -28,187 +29,100 @@ namespace ResearchPaper
 
 			for (int i = 0; i < Size; i++)
 			{
-				matrix[i][i] = di[i];
-				for (int j = ia[i]; j < ia[i + 1]; j++)
+				matrix[i][i] = _di[i];
+				for (int j = _ia[i]; j < _ia[i + 1]; j++)
 				{
-					matrix[i][ja[j]] = al[j];
-					matrix[ja[j]][i] = au[j];
+					matrix[i][_ja[j]] = _al[j];
+					matrix[_ja[j]][i] = _au[j];
 				}
 			}
 
 			return matrix;
-
-		}
-
-
-		void GenerateSLAU(int size)
-		{
-			int memory = size * 8;
-			List<List<int>> list = new List<List<int>>(2);
-			list.Add(new List<int>(memory));
-			list.Add(new List<int>(memory));
-			list[0].AddRange(Enumerable.Repeat(0, list[0].Capacity));
-			list[1].AddRange(Enumerable.Repeat(0, list[1].Capacity));
-			ja = new List<int>(memory);
-			List<int> listbeg = new List<int>(size);
-			listbeg.AddRange(Enumerable.Repeat(0, listbeg.Capacity));
-			int listSize = 0;
-
-			for (int t = 0; t < Grid.ElementsCount; t++)
-			{
-				for (int i = 0; i < 4; i++)
-				{
-					int k = GetNodeNumber(i, t);
-
-					for (int j = i + 1; j < 4; j++)
-					{
-						int ind1 = k;
-
-						int ind2 = GetNodeNumber(j, t);
-						if (ind2 < ind1)
-						{
-							ind1 = ind2;
-							ind2 = k;
-						}
-						int iaddr = listbeg[ind2];
-						if (iaddr == 0)
-						{
-							listSize++;
-							listbeg[ind2] = listSize;
-							list[0][listSize] = ind1;
-							list[1][listSize] = 0;
-						}
-						else
-						{
-							while (list[0][iaddr] < ind1 && list[1][iaddr] > 0)
-							{
-								iaddr = list[1][iaddr];
-							}
-							if (list[0][iaddr] > ind1)
-							{
-								listSize++;
-								list[0][listSize] = list[0][iaddr];
-								list[1][listSize] = list[1][iaddr];
-								list[0][iaddr] = ind1;
-								list[1][iaddr] = listSize;
-							}
-							else
-							{
-								if (list[0][iaddr] < ind1)
-								{
-									listSize++;
-									list[1][iaddr] = listSize;
-									list[0][listSize] = ind1;
-									list[1][listSize] = 0;
-								}
-							}
-						}
-					}
-				}
-			}
-
-			this.ia.Add(0);
-			for (int i = 0; i < size; i++)
-			{
-				ia.Add(ia[i]);
-				int iaddr = listbeg[i];
-				while (iaddr != 0)
-				{
-					ja.Add(list[0][iaddr]);
-					ia[i + 1]++;
-					iaddr = list[1][iaddr];
-				}
-			}
-			al = new List<double>(ja.Count());
-			al.AddRange(Enumerable.Repeat(0.0, al.Capacity));
-			au = new List<double>(ja.Count());
-			au.AddRange(Enumerable.Repeat(0.0, au.Capacity));
 		}
 
 		public static Vector operator *(Matrix matrix, Vector vector)
 		{
-			if (matrix.Size == vector.Length)
+			if (matrix.Size != vector.Length)
+				throw new Exception("Sizes of the matrix and vector aren'T equals");
+
+			Vector result = new Vector(vector.Length);
+
+			for (int i = 0; i < vector.Length; i++)
+				result[i] = matrix._di[i] * vector[i];
+
+
+			for (int i = 0; i < vector.Length; i++)
 			{
-				Vector result = new Vector(vector.Length);
-
-				for (int i = 0; i < vector.Length; i++)
-					result.Elements[i] = matrix.di[i] * vector.Elements[i];
-
-
-				for (int i = 0; i < vector.Length; i++)
+				for (int j = matrix._ia[i]; j < matrix._ia[i + 1]; j++)
 				{
-					for (int j = matrix.ia[i]; j < matrix.ia[i + 1]; j++)
-					{
-						result.Elements[i] += matrix.al[j] * vector.Elements[matrix.ja[j]];
-						result.Elements[matrix.ja[j]] += matrix.au[j] * vector.Elements[i];
-					}
+					result[i] += matrix._al[j] * vector[matrix._ja[j]];
+					result[matrix._ja[j]] += matrix._au[j] * vector[i];
 				}
-
-				return result;
 			}
-			else
-				throw new Exception("Sizes of the matrix and vector aren't equals");
+
+			return result;
 		}
+
 		public static Matrix operator *(Matrix matrix, double b)
 		{
-			Matrix result = new Matrix(matrix.Size);
+			Matrix result = new Matrix(matrix._di, matrix._al, matrix._au, matrix._ja, matrix._ia);
 
 			for (int i = 0; i < matrix.Size; i++)
-				result.di[i] = matrix.di[i] * b;
+				result._di[i] = matrix._di[i] * b;
 
-			for (int i = 0; i < matrix.au.Count(); i++)
-				result.au[i] = matrix.au[i] * b;
+			for (int i = 0; i < matrix._au.Count(); i++)
+				result._au[i] = matrix._au[i] * b;
 
-			for (int i = 0; i < matrix.al.Count(); i++)
-				result.al[i] = matrix.al[i] * b;
+			for (int i = 0; i < matrix._al.Count(); i++)
+				result._al[i] = matrix._al[i] * b;
 
 			return result;
 		}
 
 		public static Matrix operator /(Matrix matrix, double b)
 		{
-			Matrix result = new Matrix(matrix.Size);
+			Matrix result = new Matrix(matrix._di, matrix._al, matrix._au, matrix._ja, matrix._ia);
 
 			for (int i = 0; i < matrix.Size; i++)
-				result.di[i] = matrix.di[i] / b;
+				result._di[i] = matrix._di[i] / b;
 
-			for (int i = 0; i < matrix.au.Count(); i++)
-				result.au[i] = matrix.au[i] / b;
+			for (int i = 0; i < matrix._au.Count(); i++)
+				result._au[i] = matrix._au[i] / b;
 
-			for (int i = 0; i < matrix.al.Count(); i++)
-				result.al[i] = matrix.al[i] / b;
+			for (int i = 0; i < matrix._al.Count(); i++)
+				result._al[i] = matrix._al[i] / b;
 
 			return result;
 		}
 
 		public static Matrix operator +(Matrix a, Matrix b)
 		{
-			Matrix result = new Matrix(a.Size);
+			Matrix result = new Matrix(a._di, a._al, a._au, a._ja, a._ia);
 
 			for (int i = 0; i < a.Size; i++)
-				result.di[i] = a.di[i] + b.di[i];
+				result._di[i] = a._di[i] + b._di[i];
 
-			for (int i = 0; i < a.au.Count(); i++)
-				result.au[i] = a.au[i] + b.au[i];
+			for (int i = 0; i < a._au.Count(); i++)
+				result._au[i] = a._au[i] + b._au[i];
 
-			for (int i = 0; i < a.al.Count(); i++)
-				result.al[i] = a.al[i] + b.al[i];
+			for (int i = 0; i < a._al.Count(); i++)
+				result._al[i] = a._al[i] + b._al[i];
 
 			return result;
 		}
 
 		public static Matrix operator -(Matrix a, Matrix b)
 		{
-			Matrix result = new Matrix(a.Size);
+			Matrix result = new Matrix(a._di, a._al, a._au, a._ja, a._ia);
 
 			for (int i = 0; i < a.Size; i++)
-				result.di[i] = a.di[i] - b.di[i];
+				result._di[i] = a._di[i] - b._di[i];
 
-			for (int i = 0; i < a.au.Count(); i++)
-				result.au[i] = a.au[i] - b.au[i];
+			for (int i = 0; i < a._au.Count(); i++)
+				result._au[i] = a._au[i] - b._au[i];
 
-			for (int i = 0; i < a.al.Count(); i++)
-				result.al[i] = a.al[i] - b.al[i];
+			for (int i = 0; i < a._al.Count(); i++)
+				result._al[i] = a._al[i] - b._al[i];
 
 			return result;
 		}
@@ -232,13 +146,13 @@ namespace ResearchPaper
 		public void Reset()
 		{
 			for (int i = 0; i < Size; i++)
-				di[i] = 0;
+				_di[i] = 0;
 
-			for (int i = 0; i < au.Count(); i++)
-				au[i] = 0;
+			for (int i = 0; i < _au.Count(); i++)
+				_au[i] = 0;
 
-			for (int i = 0; i < al.Count(); i++)
-				al[i] = 0;
+			for (int i = 0; i < _al.Count(); i++)
+				_al[i] = 0;
 		}
 	}
 }

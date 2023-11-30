@@ -1,9 +1,10 @@
 ﻿using ReaserchPaper;
+using ReaserchPaper.Grid;
 using ReaserchPaper.Solver;
 
 namespace ResearchPaper
 {
-	internal class LosLU : ISolver
+    internal class LosLU : ISolver
 	{
 		static int maxItCount = 10000;
 		static double a, eps = 1e-40, b;
