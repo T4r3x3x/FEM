@@ -9,4 +9,6 @@
   "YSliceCount": 1,
   "TimeBoundaries": [ 1, 2 ],
   "TimeSliceCount": 1,
+  "GridOutputFile": "grid.txt",
+  "SolvesOutputFile": "solves.txt"
 }

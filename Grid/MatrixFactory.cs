@@ -26,8 +26,10 @@ namespace Tensus
 			_ja = new List<int>();
 		}
 
-		public Matrix CreateMatrix(int nodesCount, int elemCount)
+		public Matrix CreateMatrix()
 		{
+			int nodesCount = _grid.NodesCount;
+			int elemCount = _grid.ElementsCount;
 			Initialize(nodesCount, elemCount);
 
 			int memory = nodesCount * 8;

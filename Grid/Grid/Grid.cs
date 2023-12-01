@@ -2,9 +2,13 @@
 {
 	public class Grid
 	{
-		public double[] T;
-		public double[] X, Y, Hy, Hx, Ht;
-		public int[][] Boreholes;
+		public double[] T { get; private set; }
+		public double[] X { get; private set; }
+		public double[] Y { get; private set; }
+		public double[] Hy { get; private set; }
+		public double[] Hx { get; private set; }
+		public double[] Ht { get; private set; }
+		public int[][] Boreholes { get; private set; }
 
 		private int[] _IX, _IY;
 		private int[][] _areas;
@@ -47,6 +51,29 @@
 			return -1;
 		}
 
+		public bool IsBorehole(int xIndex, int yIndex)
+		{
+			foreach (var borehole in Boreholes)
+			{
+				if (xIndex == borehole[0])
+					if (yIndex == borehole[1])
+						return true;
+			}
+
+			return false;
+		}
+
+		/// <summary>
+		/// Что-то не так 2 N кто-то из них явно должен быть M
+		/// </summary>
+		/// <param name="i"></param>
+		/// <param name="j"></param>
+		/// <param name="k"></param>
+		/// <returns></returns>
+		public int LocalNumToGlobal(int i, int j, int k)
+		{
+			return i + j * N + k / 2 * N + k % 2;
+		}
 		public int GetNodeGlobalNumber(int nodeLocalNumber, int elemNumber)
 		{
 			int yLine = elemNumber / (N - 1);//в каком ряду по у находится кэ 

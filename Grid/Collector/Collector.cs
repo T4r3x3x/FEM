@@ -2,13 +2,13 @@
 
 namespace ReaserchPaper.Assemblier
 {
-	public class Assemblier : IAssemblier
+	public class Collector : ICollector
 	{
 		private Matrix _M, _G, _H;
 		private double _timeCoef;
 		private int _area = 0;
 
-		public Assemblier(int nodesCount)
+		public Collector(int nodesCount)
 		{
 			_M = new Matrix(nodesCount);
 			_G = new Matrix(nodesCount);
@@ -35,18 +35,18 @@ namespace ReaserchPaper.Assemblier
 			GetBoundaryConditions(timeLayer);
 		}
 
-		static void SubstractM()
+		private void SubstractM()
 		{
 			Master.Slau.A -= _M * timeCoef;
 		}
 
-		static void ResetSlauOptimized()
+		private void ResetSlauOptimized()
 		{
 			SubstractM();
 			Master.Slau.b.Reset();
 		}
 
-		static void ResetSlau()
+		private void ResetSlau()
 		{
 			Master.Slau.A.Reset();
 			Master.Slau.b.Reset();
@@ -148,23 +148,11 @@ namespace ReaserchPaper.Assemblier
 				}
 		}
 
-
-		bool IsBorehole(int xIndex, int yIndex)
-		{
-			foreach (var borehole in Grid.boreholes)
-			{
-				if (xIndex == borehole[0])
-					if (yIndex == borehole[1])
-						return true;
-			}
-
-			return false;
-		}
-		public static int LocalNumToGlobal(int i, int j, int k)
+		public int LocalNumToGlobal(int i, int j, int k)
 		{
 			return i + j * Grid.N + k / 2 * Grid.N + k % 2;
 		}
-		static void AddLocalMatrix(Matrix matrix, double[][] localMatrix, int i, int j)
+		private void AddLocalMatrix(Matrix matrix, double[][] localMatrix, int i, int j)
 		{
 			for (int p = 0; p < 4; p++)
 			{
@@ -182,7 +170,7 @@ namespace ReaserchPaper.Assemblier
 				}
 			}
 		}
-		static int BinarySearch(List<int> list, int value, int l, int r)
+		private int BinarySearch(List<int> list, int value, int l, int r)
 		{
 			while (l != r)
 			{
@@ -196,7 +184,7 @@ namespace ReaserchPaper.Assemblier
 
 			return list[l] == value ? l : -1;
 		}
-		private static void GetTimeConditions()
+		private void GetTimeConditions()
 		{
 
 			for (int p = 0; p < 2; p++) //записываем в [1] и в [2] так как потом в цикле вызовется SwapSolves и значение перезапишутся в [0] и [1] соотвественно.     
@@ -212,7 +200,7 @@ namespace ReaserchPaper.Assemblier
 		}
 
 
-		static void MakeSLau()
+		private void MakeSLau()
 		{
 			Master.Slau.A += _M + _G;
 
@@ -221,7 +209,7 @@ namespace ReaserchPaper.Assemblier
 					AddLocalB(i, j);
 		}
 
-		static void MakeSLau(int timeLayer)
+		private void MakeSLau(int timeLayer)
 		{
 			double deltaT = Grid.ht[timeLayer - 1] + Grid.ht[timeLayer - 2];//Grid.T[timeLayer] - Grid.T[timeLayer - 2];
 			double deltaT1 = Grid.ht[timeLayer - 2];//Grid.T[timeLayer - 1] - Grid.T[timeLayer - 2];
@@ -239,7 +227,7 @@ namespace ReaserchPaper.Assemblier
 				for (int i = 0; i < Grid.N - 1; i++) // проходим по КЭ 
 					AddLocalB(i, j, timeLayer);
 		}
-		static void AddLocalB(int i, int j)
+		private void AddLocalB(int i, int j)
 		{
 			area = Grid.GetAreaNumber(i, j);
 			Master.Slau.b.Elements[i + j * Grid.N] += Grid.hx[i] * Grid.hy[j] / 36 * (4 * Master.F1(Grid.X[i], Grid.y[j], area) + 2 * Master.F1(Grid.X[i + 1], Grid.y[j], area) + 2 * Master.F1(Grid.X[i], Grid.y[j + 1], area) + Master.F1(Grid.X[i + 1], Grid.y[j + 1], area));
@@ -247,7 +235,7 @@ namespace ReaserchPaper.Assemblier
 			Master.Slau.b.Elements[i + (j + 1) * Grid.N] += Grid.hx[i] * Grid.hy[j] / 36 * (2 * Master.F1(Grid.X[i], Grid.y[j], area) + Master.F1(Grid.X[i + 1], Grid.y[j], area) + 4 * Master.F1(Grid.X[i], Grid.y[j + 1], area) + 2 * Master.F1(Grid.X[i + 1], Grid.y[j + 1], area));
 			Master.Slau.b.Elements[i + (j + 1) * Grid.N + 1] += Grid.hx[i] * Grid.hy[j] / 36 * (Master.F1(Grid.X[i], Grid.y[j], area) + 2 * Master.F1(Grid.X[i + 1], Grid.y[j], area) + 2 * Master.F1(Grid.X[i], Grid.y[j + 1], area) + 4 * Master.F1(Grid.X[i + 1], Grid.y[j + 1], area));
 		}
-		static void AddLocalB(int i, int j, int timeLayer)
+		private void AddLocalB(int i, int j, int timeLayer)
 		{
 			area = Grid.GetAreaNumber(i, j);
 			Master.Slau.b.Elements[i + j * Grid.N] += Grid.hx[i] * Grid.hy[j] / 36 * (4 * Master.F2(Grid.X[i], Grid.y[j], Grid.T[timeLayer], area) + 2 * Master.F2(Grid.X[i + 1], Grid.y[j], Grid.T[timeLayer], area) + 2 * Master.F2(Grid.X[i], Grid.y[j + 1], Grid.T[timeLayer], area) + Master.F2(Grid.X[i + 1], Grid.y[j + 1], Grid.T[timeLayer], area));
@@ -255,7 +243,7 @@ namespace ReaserchPaper.Assemblier
 			Master.Slau.b.Elements[i + (j + 1) * Grid.N] += Grid.hx[i] * Grid.hy[j] / 36 * (2 * Master.F2(Grid.X[i], Grid.y[j], Grid.T[timeLayer], area) + Master.F2(Grid.X[i + 1], Grid.y[j], Grid.T[timeLayer], area) + 4 * Master.F2(Grid.X[i], Grid.y[j + 1], Grid.T[timeLayer], area) + 2 * Master.F2(Grid.X[i + 1], Grid.y[j + 1], Grid.T[timeLayer], area));
 			Master.Slau.b.Elements[i + (j + 1) * Grid.N + 1] += Grid.hx[i] * Grid.hy[j] / 36 * (Master.F2(Grid.X[i], Grid.y[j], Grid.T[timeLayer], area) + 2 * Master.F2(Grid.X[i + 1], Grid.y[j], Grid.T[timeLayer], area) + 2 * Master.F2(Grid.X[i], Grid.y[j + 1], Grid.T[timeLayer], area) + 4 * Master.F2(Grid.X[i + 1], Grid.y[j + 1], Grid.T[timeLayer], area));
 		}
-		static void ZeroingRow(int row)
+		private void ZeroingRow(int row)
 		{
 			for (int i = Master.Slau.A.ia[row]; i < Master.Slau.A.ia[row + 1]; i++)
 				Master.Slau.A.al[i] = 0;
@@ -270,7 +258,7 @@ namespace ReaserchPaper.Assemblier
 			}
 		}
 
-		static void GetBoundaryConditions()
+		private void GetBoundaryConditions()
 		{
 			//нижняя граница
 			if (Master.boundaryConditions[0] == 1)//первое краевое
@@ -355,7 +343,7 @@ namespace ReaserchPaper.Assemblier
 
 			}
 		}
-		static void GetBoundaryConditions(int timeLayer)
+		private void GetBoundaryConditions(int timeLayer)
 		{
 			//нижняя граница
 			if (Master.boundaryConditions[0] == 1)//первое краевое
@@ -426,7 +414,7 @@ namespace ReaserchPaper.Assemblier
 			AccountingBoreholes(timeLayer);
 		}
 
-		static void AccountingBoreholes(int timeLayer)
+		private void AccountingBoreholes(int timeLayer)
 		{
 			for (int i = 0; i < Grid.boreholes.Length; i++)
 			{
@@ -447,7 +435,7 @@ namespace ReaserchPaper.Assemblier
 
 			}
 		}
-		static double[][] GetGradTMatrix(int elemNumber, double hx, double hy, double xLeft, double yLower)
+		private double[][] GetGradTMatrix(int elemNumber, double hx, double hy, double xLeft, double yLower)
 		{
 			double[][] matrix = new double[4][];
 			Point xBoundaries = new Point(xLeft, xLeft + hx);
@@ -463,6 +451,6 @@ namespace ReaserchPaper.Assemblier
 			return matrix;
 		}
 
-		public Slae Assembly(Slae slae, int timeLayer = 0) => throw new NotImplementedException();
+		public IList<Matrix> Collect(Grid.Grid grid) => throw new NotImplementedException();
 	}
 }

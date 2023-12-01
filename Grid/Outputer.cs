@@ -1,37 +1,149 @@
-﻿using ReaserchPaper.Logger;
+﻿using System.Diagnostics;
+using System.Text;
+
+using ReaserchPaper;
+using ReaserchPaper.Grid;
+using ReaserchPaper.Logger;
+
+using ResearchPaper;
 
 namespace FemProducer
 {
 	/// <summary>
 	/// Класс отвечает за запись результата работы программы
 	/// </summary>
-	internal class Outputer
+	internal class Outputer<TLogger> where TLogger : ILogger
 	{
-		private readonly ILogger _logger;
+		private readonly TLogger _logger;
+		private readonly Grid _grid;
+		private readonly ResultProducer _resultProducer;
+		private readonly StringBuilder stringBuilder = new StringBuilder();
 
+		public Outputer(TLogger logger, Grid grid, ResultProducer resultProducer)
+		{
+			_logger = logger;
+			_grid = grid;
+			_resultProducer = resultProducer;
+		}
 
 		public void PrintTimeGrid()
 		{
-			Console.WriteLine();
-			for (int i = 0; i < T.Length; i++)
-			{
-				Console.Write("[" + T[i] + "] ");
-			}
-			Console.WriteLine();
+			stringBuilder.Clear();
+			stringBuilder.AppendLine();
+
+			for (int i = 0; i < _grid.T.Length; i++)
+				stringBuilder.AppendLine("[" + _grid.T[i] + "] ");
+
+			stringBuilder.AppendLine();
+
+			_logger.Log(stringBuilder.ToString());
 		}
 		public void PrintPartialGrid()
 		{
-			for (int j = 0; j < _m; j++)
+			stringBuilder.Clear();
+			for (int j = 0; j < _grid.M; j++)
 			{
-				for (int i = 0; i < _n; i++)
+				for (int i = 0; i < _grid.N; i++)
 				{
-
-					Console.Write(" [{0}, {1}] ", X[i].ToString("e2"), Y[j].ToString("e2"));
+					var line = string.Format(" [{0}, {1}] ", _grid.X[i].ToString("e2"), _grid.Y[j].ToString("e2"));
+					stringBuilder.Append(line);
 				}
-				Console.WriteLine("\n");
+				stringBuilder.AppendLine();
+			}
+			_logger.Log(stringBuilder.ToString());
+		}
+		public void PrintSlae(Slae slae)
+		{
+			double[][] matrix = slae.Matrix.ConvertToDenseFormat();
+			for (int i = 0; i < matrix.Length; i++)
+			{
+				for (int j = 0; j < matrix.Length; j++)
+				{
+					if (matrix[i][j] >= 0)
+						Console.Write(" ");
+					Console.Write(matrix[i][j].ToString("E2") + " ");
+				}
+				Console.Write(" " + slae.Vector[i].ToString("E2"));
+				Console.WriteLine();
+			}
+			Console.WriteLine("\n\n");
+		}
+
+		public void Show()
+		{
+			WriteGrid();
+			foreach (var solve in _resultProducer.NumericalSolves)
+			{
+				WriteSolve(path, solve);
+			}
+			ProcessStartInfo start = new ProcessStartInfo();
+			start.FileName = "C:\\Python\\python.exe";
+			start.Arguments = string.Format("Show\\grid.py");
+			start.UseShellExecute = false;
+			start.RedirectStandardOutput = true;
+			Process.Start(start);
+			start.Arguments = string.Format("C:\\Users\\hardb\\source\\repos\\Grid\\Grid\\bin\\Debug\\net6.0\\pressure.py");
+			Process.Start(start);
+			start.Arguments = string.Format("C:\\Users\\hardb\\source\\repos\\Grid\\Grid\\bin\\Debug\\net6.0\\temperature.py");
+			Process.Start(start);
+		}
+		public void PrintResult(int timeLayer, bool isPrint)
+		{
+			Vector exactSolution = new Vector(q[0].Length);
+
+			if (isPrint)
+			{
+				Console.WriteLine("      Численное решение      |         точное решение        |      разница решений      ");
+				Console.WriteLine("--------------------------------------------------------------------------------------");
+
+			}
+			if (timeLayer == -1)
+			{
+				for (int i = 0; i < Grid.M; i++)
+					for (int j = 0; j < Grid.N; j++)
+						exactSolution.Elements[i * Grid.N + j] = Master.Func1(Grid.X[j], Grid.y[i], Grid.GetAreaNumber(j, i));
+
+				if (isPrint)
+					for (int i = 0; i < p.Length; i++)
+						Console.WriteLine("u{0} = {1:E16} | u*{0} = {2:E16} | {3:E16}", i + 1, p.Elements[i], exactSolution.Elements[i], Math.Abs(exactSolution.Elements[i] - p.Elements[i]));
+
+				Console.WriteLine("Относительная погрешность: " + GetSolveDifference(p, exactSolution));
+			}
+			else
+			{
+				for (int i = 0; i < Grid.M; i++)
+					for (int j = 0; j < Grid.N; j++)
+						exactSolution.Elements[i * Grid.N + j] = Master.Func2(Grid.X[j], Grid.y[i], Grid.T[timeLayer], Grid.GetAreaNumber(j, i));
+
+				if (isPrint)
+					for (int i = 0; i < p.Length; i++)
+						Console.WriteLine("u{0} = {1:E16} | u*{0} = {2:E16} | {3:E16}", i + 1, q[timeLayer].Elements[i], exactSolution.Elements[i], Math.Abs(exactSolution.Elements[i] - q[timeLayer].Elements[i]));
+				Console.WriteLine("--------------------------------------------------------------------------------------");
+				Console.WriteLine("Относительная погрешность: " + GetSolveDifference(q[timeLayer], exactSolution));
+			}
+
+		}
+
+		private void WriteSolve(string path, Vector solve)
+		{
+			using (StreamWriter sw = new StreamWriter(path))
+				for (int j = 0; j < _grid.M; j++)
+					for (int i = 0; i < _grid.N; i++)
+						sw.WriteLine(_grid.X[i].ToString().Replace(",", ".") + " " + _grid.Y[j].ToString().Replace(",", ".") +
+							 " " + solve[j * _grid.N + i].ToString().Replace(",", "."));
+
+			using (StreamWriter sw = new StreamWriter(@"output\temperature.txt"))
+			{
+				sw.WriteLine(_grid.Y);
+				sw.WriteLine(_grid.TimeLayersCount);
+				for (int k = 0; k < _grid.TimeLayersCount; k++)
+					for (int j = 0; j < _grid.M; j++)
+						for (int i = 0; i < _grid.N; i++)
+							sw.WriteLine(_grid.X[i].ToString().Replace(",", ".") + " " + _grid.Y[j].ToString().Replace(",", ".") +
+								  " " + q[k].Elements[j * _grid.N + i].ToString().Replace(",", "."));
 			}
 		}
-		public void WriteGrid()
+		private void WriteGrid()
 		{
 			using (StreamWriter sw = new StreamWriter(@"output\grid.txt"))
 			{
