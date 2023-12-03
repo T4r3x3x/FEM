@@ -13,6 +13,6 @@ namespace ReaserchPaper
 			Vector = vector;
 		}
 
-		public double Size => Matrix.Size;
+		public int Size => Matrix.Size;
 	}
 }

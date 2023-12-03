@@ -4,20 +4,20 @@ namespace ResearchPaper
 {
 	public class Matrix
 	{
-		private double[] _di;
-		private double[] _al, _au;
-		private int[] _ja, _ia;
+		public double[] Di;
+		public double[] Al, Au;
+		public int[] Ja, Ia;
 
 		public Matrix(double[] di, double[] al, double[] au, int[] ja, int[] ia)
 		{
-			_di = di;
-			_al = al;
-			_au = au;
-			_ja = ja;
-			_ia = ia;
+			Di = di;
+			Al = al;
+			Au = au;
+			Ja = ja;
+			Ia = ia;
 		}
 
-		public int Size => _di.Length;
+		public int Size => Di.Length;
 
 		public double[][] ConvertToDenseFormat()
 		{
@@ -29,15 +29,29 @@ namespace ResearchPaper
 
 			for (int i = 0; i < Size; i++)
 			{
-				matrix[i][i] = _di[i];
-				for (int j = _ia[i]; j < _ia[i + 1]; j++)
+				matrix[i][i] = Di[i];
+				for (int j = Ia[i]; j < Ia[i + 1]; j++)
 				{
-					matrix[i][_ja[j]] = _al[j];
-					matrix[_ja[j]][i] = _au[j];
+					matrix[i][Ja[j]] = Al[j];
+					matrix[Ja[j]][i] = Au[j];
 				}
 			}
 
 			return matrix;
+		}
+
+		public void ZeroingRow(int row)
+		{
+			for (int i = Ia[row]; i < Ia[row + 1]; i++)
+				Al[i] = 0;
+			for (int j = row + 1; j < Size; j++)
+			{
+				int jbeg = Ia[j];
+				int jend = Ia[j + 1];
+				int index = Tools.BinarySearch(Ja, row, jbeg, jend - 1);
+				if (index != -1)
+					Au[index] = 0;
+			}
 		}
 
 		public static Vector operator *(Matrix matrix, Vector vector)
@@ -48,15 +62,15 @@ namespace ResearchPaper
 			Vector result = new Vector(vector.Length);
 
 			for (int i = 0; i < vector.Length; i++)
-				result[i] = matrix._di[i] * vector[i];
+				result[i] = matrix.Di[i] * vector[i];
 
 
 			for (int i = 0; i < vector.Length; i++)
 			{
-				for (int j = matrix._ia[i]; j < matrix._ia[i + 1]; j++)
+				for (int j = matrix.Ia[i]; j < matrix.Ia[i + 1]; j++)
 				{
-					result[i] += matrix._al[j] * vector[matrix._ja[j]];
-					result[matrix._ja[j]] += matrix._au[j] * vector[i];
+					result[i] += matrix.Al[j] * vector[matrix.Ja[j]];
+					result[matrix.Ja[j]] += matrix.Au[j] * vector[i];
 				}
 			}
 
@@ -65,64 +79,64 @@ namespace ResearchPaper
 
 		public static Matrix operator *(Matrix matrix, double b)
 		{
-			Matrix result = new Matrix(matrix._di, matrix._al, matrix._au, matrix._ja, matrix._ia);
+			Matrix result = new Matrix(matrix.Di, matrix.Al, matrix.Au, matrix.Ja, matrix.Ia);
 
 			for (int i = 0; i < matrix.Size; i++)
-				result._di[i] = matrix._di[i] * b;
+				result.Di[i] = matrix.Di[i] * b;
 
-			for (int i = 0; i < matrix._au.Count(); i++)
-				result._au[i] = matrix._au[i] * b;
+			for (int i = 0; i < matrix.Au.Count(); i++)
+				result.Au[i] = matrix.Au[i] * b;
 
-			for (int i = 0; i < matrix._al.Count(); i++)
-				result._al[i] = matrix._al[i] * b;
+			for (int i = 0; i < matrix.Al.Count(); i++)
+				result.Al[i] = matrix.Al[i] * b;
 
 			return result;
 		}
 
 		public static Matrix operator /(Matrix matrix, double b)
 		{
-			Matrix result = new Matrix(matrix._di, matrix._al, matrix._au, matrix._ja, matrix._ia);
+			Matrix result = new Matrix(matrix.Di, matrix.Al, matrix.Au, matrix.Ja, matrix.Ia);
 
 			for (int i = 0; i < matrix.Size; i++)
-				result._di[i] = matrix._di[i] / b;
+				result.Di[i] = matrix.Di[i] / b;
 
-			for (int i = 0; i < matrix._au.Count(); i++)
-				result._au[i] = matrix._au[i] / b;
+			for (int i = 0; i < matrix.Au.Count(); i++)
+				result.Au[i] = matrix.Au[i] / b;
 
-			for (int i = 0; i < matrix._al.Count(); i++)
-				result._al[i] = matrix._al[i] / b;
+			for (int i = 0; i < matrix.Al.Count(); i++)
+				result.Al[i] = matrix.Al[i] / b;
 
 			return result;
 		}
 
 		public static Matrix operator +(Matrix a, Matrix b)
 		{
-			Matrix result = new Matrix(a._di, a._al, a._au, a._ja, a._ia);
+			Matrix result = new Matrix(a.Di, a.Al, a.Au, a.Ja, a.Ia);
 
 			for (int i = 0; i < a.Size; i++)
-				result._di[i] = a._di[i] + b._di[i];
+				result.Di[i] = a.Di[i] + b.Di[i];
 
-			for (int i = 0; i < a._au.Count(); i++)
-				result._au[i] = a._au[i] + b._au[i];
+			for (int i = 0; i < a.Au.Count(); i++)
+				result.Au[i] = a.Au[i] + b.Au[i];
 
-			for (int i = 0; i < a._al.Count(); i++)
-				result._al[i] = a._al[i] + b._al[i];
+			for (int i = 0; i < a.Al.Count(); i++)
+				result.Al[i] = a.Al[i] + b.Al[i];
 
 			return result;
 		}
 
 		public static Matrix operator -(Matrix a, Matrix b)
 		{
-			Matrix result = new Matrix(a._di, a._al, a._au, a._ja, a._ia);
+			Matrix result = new Matrix(a.Di, a.Al, a.Au, a.Ja, a.Ia);
 
 			for (int i = 0; i < a.Size; i++)
-				result._di[i] = a._di[i] - b._di[i];
+				result.Di[i] = a.Di[i] - b.Di[i];
 
-			for (int i = 0; i < a._au.Count(); i++)
-				result._au[i] = a._au[i] - b._au[i];
+			for (int i = 0; i < a.Au.Count(); i++)
+				result.Au[i] = a.Au[i] - b.Au[i];
 
-			for (int i = 0; i < a._al.Count(); i++)
-				result._al[i] = a._al[i] - b._al[i];
+			for (int i = 0; i < a.Al.Count(); i++)
+				result.Al[i] = a.Al[i] - b.Al[i];
 
 			return result;
 		}
@@ -146,13 +160,13 @@ namespace ResearchPaper
 		public void Reset()
 		{
 			for (int i = 0; i < Size; i++)
-				_di[i] = 0;
+				Di[i] = 0;
 
-			for (int i = 0; i < _au.Count(); i++)
-				_au[i] = 0;
+			for (int i = 0; i < Au.Count(); i++)
+				Au[i] = 0;
 
-			for (int i = 0; i < _al.Count(); i++)
-				_al[i] = 0;
+			for (int i = 0; i < Al.Count(); i++)
+				Al[i] = 0;
 		}
 	}
 }

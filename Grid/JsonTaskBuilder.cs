@@ -1,19 +1,15 @@
 ﻿using FemProducer;
+using FemProducer.DTO;
 
-using Newtonsoft.Json;
+using ReaserchPaper.Solver;
 
 namespace ReaserchPaper
 {
 	internal class JsonTaskBuilder : ITaskBuilder
 	{
-		void ITaskBuilder.Load(string path)
-		{
-			using (StreamReader r = new StreamReader("file.json"))
-			{
-				string json = r.ReadToEnd();
-				List<Item> items = JsonConvert.DeserializeObject<List<Item>>(json);
-			}
-		}
+		GridParametrs ITaskBuilder.GetGridParametrs() => throw new NotImplementedException();
+		ProblemParametrs ITaskBuilder.GetProblem() => throw new NotImplementedException();
+		ISolver ITaskBuilder.GetSolver() => throw new NotImplementedException();
 
 		public class Item
 		{

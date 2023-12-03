@@ -1,6 +1,4 @@
-﻿using ResearchPaper;
-
-namespace ReaserchPaper
+﻿namespace ReaserchPaper
 {
 	internal class FEM
 	{
@@ -62,15 +60,15 @@ namespace ReaserchPaper
 		//}
 
 
-		public static Point GetV(FiniteElement element, Point point)
-		{
-			double _x, _y;
-			_x = -Master.Slau.p.Elements[elemNumber] * Y1(point.y, yBoundaries.y, hy) / hx + Master.Slau.p.Elements[elemNumber + 1] * Y1(point.y, yBoundaries.y, hy) / hx
-			- Master.Slau.p.Elements[elemNumber + Grid.N] * Y2(point.y, yBoundaries.X, hy) / hx + Master.Slau.p.Elements[elemNumber + Grid.N + 1] * Y2(point.y, yBoundaries.X, hy) / hx;
-			_y = -Master.Slau.p.Elements[elemNumber] * X1(point.X, xBoundaries.y, hx) / hy - Master.Slau.p.Elements[elemNumber + 1] * X2(point.X, xBoundaries.X, hx) / hy
-			+ Master.Slau.p.Elements[elemNumber + Grid.N] * X1(point.X, xBoundaries.y, hx) / hy + Master.Slau.p.Elements[elemNumber + Grid.N + 1] * X2(point.X, xBoundaries.X, hx) / hy;
-			return new Point(-_x, -_y);
-		}
+		//public static Point GetV(FiniteElement element, Point point)
+		//{
+		//	double _x, _y;
+		//	_x = -Master.Slau.p.Elements[elemNumber] * Y1(point.y, yBoundaries.y, hy) / hx + Master.Slau.p.Elements[elemNumber + 1] * Y1(point.y, yBoundaries.y, hy) / hx
+		//	- Master.Slau.p.Elements[elemNumber + Grid.N] * Y2(point.y, yBoundaries.X, hy) / hx + Master.Slau.p.Elements[elemNumber + Grid.N + 1] * Y2(point.y, yBoundaries.X, hy) / hx;
+		//	_y = -Master.Slau.p.Elements[elemNumber] * X1(point.X, xBoundaries.y, hx) / hy - Master.Slau.p.Elements[elemNumber + 1] * X2(point.X, xBoundaries.X, hx) / hy
+		//	+ Master.Slau.p.Elements[elemNumber + Grid.N] * X1(point.X, xBoundaries.y, hx) / hy + Master.Slau.p.Elements[elemNumber + Grid.N + 1] * X2(point.X, xBoundaries.X, hx) / hy;
+		//	return new Point(-_x, -_y);
+		//}
 
 		public static double VGradP(FiniteElement element, Point point, int i, int j)
 		{

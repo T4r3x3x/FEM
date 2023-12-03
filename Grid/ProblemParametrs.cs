@@ -3,7 +3,7 @@
 	/// <summary>
 	/// Тут хранится все что касается задачи: искомая функция, краевые условия, константы и т.д.
 	/// </summary>
-	internal class Problem
+	internal class ProblemParametrs
 	{
 		public double Lamda(int area)
 		{

@@ -1,4 +1,6 @@
-﻿namespace ReaserchPaper.Grid
+﻿using FemProducer.DTO;
+
+namespace ReaserchPaper.Grid
 {
 	internal class GridFactory
 	{
@@ -15,13 +17,13 @@
 		private double[] _q;
 		private double q;
 
-		public GridFactory(int n, double[] XW, int m, double[] YW, int[][] areas, double[] q)
+		public GridFactory()
 		{
 
 
 		}
 
-		public Grid GetGrid()
+		public Grid GetGrid(GridParametrs gridParametrs)
 		{
 			_q = new double[data.Length / 2];
 			List<int> xAreaLenghtes = new List<int>();

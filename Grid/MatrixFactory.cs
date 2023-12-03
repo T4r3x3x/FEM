@@ -17,7 +17,7 @@ namespace Tensus
 			_grid = grid;
 		}
 
-		private void Initialize(int nodesCount, int elemCount)
+		private void Initialize(int nodesCount)
 		{
 			_di = new double[nodesCount];
 			_ia = new List<int>(nodesCount + 1);
@@ -25,12 +25,16 @@ namespace Tensus
 			_au = new List<double>();
 			_ja = new List<int>();
 		}
+		public int GetNodesCount()
+		{
+			return _di.Length;
+		}
 
 		public Matrix CreateMatrix()
 		{
 			int nodesCount = _grid.NodesCount;
 			int elemCount = _grid.ElementsCount;
-			Initialize(nodesCount, elemCount);
+			Initialize(nodesCount);
 
 			int memory = nodesCount * 8;
 			List<List<int>> list = new List<List<int>>(2);

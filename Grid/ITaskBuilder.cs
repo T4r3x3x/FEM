@@ -6,7 +6,7 @@ namespace FemProducer
 {
 	internal interface ITaskBuilder
 	{
-		internal Problem GetProblem();
+		internal ProblemParametrs GetProblem();
 		internal ISolver GetSolver();
 		internal GridParametrs GetGridParametrs();
 	}
