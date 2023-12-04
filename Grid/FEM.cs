@@ -70,48 +70,48 @@
 		//	return new Point(-_x, -_y);
 		//}
 
-		public static double VGradP(FiniteElement element, Point point, int i, int j)
-		{
-			double result = 0;
-			var hy = element.hy;
-			var hx = element.hx;
-			var topBoundary = element.YBoundaries.Y;
-			var bottomBoundary = element.YBoundaries.X;
-			var leftBoudary = element.XBoundaries.X;
-			var rightBoundary = element.XBoundaries.Y;
-			Point V = GetV(element, point);
+		//public static double VGradP(FiniteElement element, Point point, int i, int j)
+		//{
+		//	double result = 0;
+		//	var hy = element.hy;
+		//	var hx = element.hx;
+		//	var topBoundary = element.YBoundaries.Y;
+		//	var bottomBoundary = element.YBoundaries.X;
+		//	var leftBoudary = element.XBoundaries.X;
+		//	var rightBoundary = element.XBoundaries.Y;
+		//	Point V = GetV(element, point);
 
-			switch (j)
-			{
-				case 0:
-					result += (-V.X * Y1(point.Y, topBoundary, hy) / hx - V.Y * X1(point.X, rightBoundary, hx) / hy);
-					break;
-				case 1:
-					result += (V.X * Y1(point.Y, topBoundary, hy) / hx - V.Y * X2(point.X, leftBoudary, hx) / hy);
-					break;
-				case 2:
-					result += (-V.X * Y2(point.Y, bottomBoundary, hy) / hx + V.Y * X1(point.X, rightBoundary, hx) / hy);
-					break;
-				case 3:
-					result += (V.X * Y2(point.Y, bottomBoundary, hy) / hx + V.Y * X2(point.X, leftBoudary, hx) / hy);
-					break;
-			}
-			switch (i)
-			{
-				case 0:
-					result *= Y1(point.Y, topBoundary, hy) * X1(point.X, rightBoundary, hx);
-					break;
-				case 1:
-					result *= Y1(point.Y, topBoundary, hy) * X2(point.X, leftBoudary, hx);
-					break;
-				case 2:
-					result *= Y2(point.Y, bottomBoundary, hy) * X1(point.X, rightBoundary, hx);
-					break;
-				case 3:
-					result *= Y2(point.Y, bottomBoundary, hy) * X2(point.X, leftBoudary, hx);
-					break;
-			}
-			return result;
-		}
+		//	switch (j)
+		//	{
+		//		case 0:
+		//			result += (-V.X * Y1(point.Y, topBoundary, hy) / hx - V.Y * X1(point.X, rightBoundary, hx) / hy);
+		//			break;
+		//		case 1:
+		//			result += (V.X * Y1(point.Y, topBoundary, hy) / hx - V.Y * X2(point.X, leftBoudary, hx) / hy);
+		//			break;
+		//		case 2:
+		//			result += (-V.X * Y2(point.Y, bottomBoundary, hy) / hx + V.Y * X1(point.X, rightBoundary, hx) / hy);
+		//			break;
+		//		case 3:
+		//			result += (V.X * Y2(point.Y, bottomBoundary, hy) / hx + V.Y * X2(point.X, leftBoudary, hx) / hy);
+		//			break;
+		//	}
+		//	switch (i)
+		//	{
+		//		case 0:
+		//			result *= Y1(point.Y, topBoundary, hy) * X1(point.X, rightBoundary, hx);
+		//			break;
+		//		case 1:
+		//			result *= Y1(point.Y, topBoundary, hy) * X2(point.X, leftBoudary, hx);
+		//			break;
+		//		case 2:
+		//			result *= Y2(point.Y, bottomBoundary, hy) * X1(point.X, rightBoundary, hx);
+		//			break;
+		//		case 3:
+		//			result *= Y2(point.Y, bottomBoundary, hy) * X2(point.X, leftBoudary, hx);
+		//			break;
+		//	}
+		//	return result;
+		//}
 	}
 }

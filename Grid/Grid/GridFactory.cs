@@ -23,12 +23,19 @@ namespace ReaserchPaper.Grid
 
 		}
 
-		public Grid GetGrid(GridParametrs gridParametrs)
+		public Grid GetGrid(GridParameters gridParametrs)
 		{
 			double h;
 			int startPos = 0;
-			var hx = new double[gridParametrs.n - 1];
-			var x = new double[gridParametrs.n];
+			var n = 0;
+			foreach (var item in gridParametrs.xAreaLenghtes)
+				n += item;
+
+			var m = 0;
+			foreach (var item in gridParametrs.yAreaLenghtes)
+				m += item;
+			var hx = new double[n - 1];
+			var x = new double[n];
 			var IX = new int[gridParametrs.qx.Length + 1];
 			x[0] = gridParametrs.XW[0];
 
@@ -47,8 +54,8 @@ namespace ReaserchPaper.Grid
 				IX[i + 1] = IX[i] + gridParametrs.xAreaLenghtes[i] - 1;
 			}
 
-			var hy = new double[gridParametrs.m - 1];
-			var y = new double[gridParametrs.m];
+			var hy = new double[m - 1];
+			var y = new double[m];
 			var IY = new int[gridParametrs.qy.Length + 1];
 			startPos = 0;
 			for (int i = 0; i < gridParametrs.qy.Length; i++)
@@ -75,7 +82,7 @@ namespace ReaserchPaper.Grid
 			//	_ht[i - 1] = _h;
 			//	_h *= q;
 			//}
-			return new Grid(null, x, y, hy, hx, null, null, IX, IY, gridParametrs.areas, gridParametrs.n, gridParametrs.m);
+			return new Grid(new double[] { 0 }, x, y, hy, hx, null, null, IX, IY, gridParametrs.areas, n, m);
 		}
 
 		void MakeArea(double _h, double[] points, double[] steps, int startPos, int areaLenght, double _q)//режим область на части и записываем в массив, _h - шаг,  j - номер подобласти

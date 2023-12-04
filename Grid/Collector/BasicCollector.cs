@@ -18,11 +18,12 @@ namespace FemProducer.Assemblier
 		private Matrix _matrix;
 		private Vector _vector;
 
-		public BasicCollector(ICollector collector, Grid grid, MatrixFactory matrixFactory) : base(grid, matrixFactory)
+		public BasicCollector(ICollector collector, Grid grid, MatrixFactory matrixFactory, ProblemParametrs problemParametrs) : base(grid, matrixFactory, problemParametrs)
 		{
 			_collector = collector;
 			_grid = grid;
 			_matrixFactory = matrixFactory;
+			_problemParametrs = problemParametrs;
 
 			_matrix = _matrixFactory.CreateMatrix();
 			_vector = new Vector(_matrix.Size);
@@ -115,6 +116,8 @@ namespace FemProducer.Assemblier
 				for (int i = 0; i < _grid.N - 1; i++) // проходим по КЭ 
 					AddLocalB(i, j);
 
+			GetBoundaryConditions();
+
 			return new Slae(_matrix, _vector);
 		}
 
@@ -183,7 +186,7 @@ namespace FemProducer.Assemblier
 				for (int i = 0; i < _grid.N; i++)
 				{
 					area = _grid.GetAreaNumber(i, 0);
-					AccountFirstCondition(i, 0, area);
+					AccountFirstCondition(i, i, 0, area);
 				}
 			else //второе краевое            
 				for (int i = 0; i < _grid.N - 1; i++)
@@ -196,7 +199,7 @@ namespace FemProducer.Assemblier
 				for (int i = _matrix.Size - 1; i > _matrix.Size - _grid.N - 1; i--)
 				{
 					area = _grid.GetAreaNumber(i % _grid.N, _grid.M - 1);
-					AccountFirstCondition(i % _grid.N, _grid.M - 1, area);
+					AccountFirstCondition(i, i % _grid.N, _grid.M - 1, area);
 				}
 			else
 				for (int i = 0; i < _grid.N - 1; i++)
@@ -209,7 +212,7 @@ namespace FemProducer.Assemblier
 				for (int i = _grid.N; i < _matrix.Size - _grid.N - 1; i += _grid.N)
 				{
 					area = _grid.GetAreaNumber(0, i / _grid.N);
-					AccountFirstCondition(0, i / _grid.N, area);
+					AccountFirstCondition(i, 0, i / _grid.N, area);
 				}
 			else
 				for (int i = 0; i < _grid.N - 1; i++)
@@ -218,10 +221,10 @@ namespace FemProducer.Assemblier
 					AccountSecondConditionHorizontal(0, i / _grid.N, area, NormalVectorDirection.NonCoDirectional);
 				}
 			if (_problemParametrs.boundaryConditions[1] == 1)//правая граница
-				for (int i = 2 * _grid.N - 1; i < _slae.Size - 1; i += _grid.N)
+				for (int i = 2 * _grid.N - 1; i < _matrix.Size - 1; i += _grid.N)
 				{
 					area = _grid.GetAreaNumber(_grid.N - 1, i / _grid.N);
-					AccountFirstCondition(_grid.N - 1, i / _grid.N, area);
+					AccountFirstCondition(i, _grid.N - 1, i / _grid.N, area);
 				}
 			else
 				for (int i = 0; i < _grid.N - 1; i++)
@@ -245,11 +248,11 @@ namespace FemProducer.Assemblier
 		//	MakeSLau(timeLayer);
 		//	GetBoundaryConditions(timeLayer);
 		//}
-		private void AccountFirstCondition(int i, int j, int area)
+		private void AccountFirstCondition(int k, int i, int j, int area)
 		{
-			_matrix.ZeroingRow(i);
-			_matrix.Di[i] = 1;
-			_vector[i] = _problemParametrs.Func1(_grid.X[i], _grid.Y[j], area);
+			_matrix.ZeroingRow(k);
+			_matrix.Di[k] = 1;
+			_vector[k] = _problemParametrs.Func1(_grid.X[i], _grid.Y[j], area);
 		}
 
 		private void AccountSecondConditionHorizontal(int i, int j, int area, NormalVectorDirection normal)

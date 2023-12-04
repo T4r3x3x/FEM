@@ -10,11 +10,13 @@ namespace ReaserchPaper.Assemblier
 	{
 		private readonly Grid.Grid _grid;
 		private readonly MatrixFactory _matrixFactory;
+		private readonly ProblemParametrs _problemParametrs;
 
-		public CollectorBase(Grid.Grid grid, MatrixFactory matrixFactory)
+		public CollectorBase(Grid.Grid grid, MatrixFactory matrixFactory, ProblemParametrs problemParametrs)
 		{
 			_grid = grid;
 			_matrixFactory = matrixFactory;
+			_problemParametrs = problemParametrs;
 		}
 
 		public IList<Matrix> Collect()
@@ -29,16 +31,18 @@ namespace ReaserchPaper.Assemblier
 			Matrix G = _matrixFactory.CreateMatrix();
 			for (int j = 0; j < _grid.M - 1; j++) //y
 				for (int i = 0; i < _grid.N - 1; i++) //X | проходим по КЭ 
-					if (!_grid.IsBorehole(i, j))
-					{
-						int area = _grid.GetAreaNumber(i, j);
+													  //if (!_grid.IsBorehole(i, j))
+				{
+					int area = _grid.GetAreaNumber(i, j);
 
-						localMatrix = FEM.GetMassMatrix(_grid.Hx[i], _grid.Hy[j]);
-						AddLocalMatrix(M, localMatrix, i, j);
+					localMatrix = FEM.GetMassMatrix(_grid.Hx[i], _grid.Hy[j]);
+					localMatrix = Tools.MultiplyLocalMatrix(localMatrix, _problemParametrs.Gamma(area));
+					AddLocalMatrix(M, localMatrix, i, j);
 
-						localMatrix = FEM.GetStiffnessMatrix(_grid.Hx[i], _grid.Hy[j]);
-						AddLocalMatrix(G, localMatrix, i, j);
-					}
+					localMatrix = FEM.GetStiffnessMatrix(_grid.Hx[i], _grid.Hy[j]);
+					localMatrix = Tools.MultiplyLocalMatrix(localMatrix, _problemParametrs.Lamda(area));
+					AddLocalMatrix(G, localMatrix, i, j);
+				}
 			return new Matrix[] { M, G };
 		}
 

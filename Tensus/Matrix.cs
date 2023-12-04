@@ -79,7 +79,7 @@ namespace ResearchPaper
 			return result;
 		}
 
-		public static Matrix operator *(Matrix matrix, double b)
+		public static Matrix operator *(double b, Matrix matrix)
 		{
 			Matrix result = new Matrix(matrix.Di, matrix.Al, matrix.Au, matrix.Ja, matrix.Ia);
 

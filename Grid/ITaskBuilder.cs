@@ -8,6 +8,6 @@ namespace FemProducer
 	{
 		internal ProblemParametrs GetProblem();
 		internal ISolver GetSolver();
-		internal GridParametrs GetGridParametrs();
+		internal GridParameters GetGridParameters();
 	}
 }

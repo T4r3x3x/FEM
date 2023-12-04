@@ -38,6 +38,8 @@ namespace Tensus
 
 			int memory = nodesCount * 8;
 			List<List<int>> list = new List<List<int>>(2);
+			list.Add(new List<int>(memory));
+			list.Add(new List<int>(memory));
 			list[0].AddRange(Enumerable.Repeat(0, list[0].Capacity));
 			list[1].AddRange(Enumerable.Repeat(0, list[1].Capacity));
 			_ja = new List<int>(memory);

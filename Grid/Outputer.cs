@@ -5,8 +5,6 @@ using ReaserchPaper;
 using ReaserchPaper.Grid;
 using ReaserchPaper.Logger;
 
-using ResearchPaper;
-
 namespace FemProducer
 {
 	/// <summary>
@@ -18,12 +16,14 @@ namespace FemProducer
 		private readonly Grid _grid;
 		private readonly ResultProducer _resultProducer;
 		private readonly StringBuilder stringBuilder = new StringBuilder();
+		private readonly ProblemParametrs _problemParametrs;
 
-		public Outputer(TLogger logger, Grid grid, ResultProducer resultProducer)
+		public Outputer(TLogger logger, Grid grid, ResultProducer resultProducer, ProblemParametrs problemParametrs)
 		{
 			_logger = logger;
 			_grid = grid;
 			_resultProducer = resultProducer;
+			_problemParametrs = problemParametrs;
 		}
 
 		public void PrintTimeGrid()
@@ -69,12 +69,12 @@ namespace FemProducer
 			Console.WriteLine("\n\n");
 		}
 
-		public void Show()
+		public void Show(string filePath)
 		{
-			WriteGrid();
+			//WriteGrid();
 			foreach (var solve in _resultProducer.NumericalSolves)
 			{
-				WriteSolve(path, solve);
+				WriteSolve(filePath, solve);
 			}
 			ProcessStartInfo start = new ProcessStartInfo();
 			start.FileName = "C:\\Python\\python.exe";
@@ -89,7 +89,8 @@ namespace FemProducer
 		}
 		public void PrintResult(int timeLayer, bool isPrint)
 		{
-			Vector exactSolution = new Vector(q[0].Length);
+			Vector exactSolution = _resultProducer.AnalyticsSolves[0];
+			var solution = _resultProducer.NumericalSolves[0];
 
 			if (isPrint)
 			{
@@ -99,28 +100,28 @@ namespace FemProducer
 			}
 			if (timeLayer == -1)
 			{
-				for (int i = 0; i < Grid.M; i++)
-					for (int j = 0; j < Grid.N; j++)
-						exactSolution.Elements[i * Grid.N + j] = Master.Func1(Grid.X[j], Grid.y[i], Grid.GetAreaNumber(j, i));
+				for (int i = 0; i < _grid.M; i++)
+					for (int j = 0; j < _grid.N; j++)
+						exactSolution[i * _grid.N + j] = _problemParametrs.Func1(_grid.X[j], _grid.Y[i], _grid.GetAreaNumber(j, i));
 
 				if (isPrint)
-					for (int i = 0; i < p.Length; i++)
-						Console.WriteLine("u{0} = {1:E16} | u*{0} = {2:E16} | {3:E16}", i + 1, p.Elements[i], exactSolution.Elements[i], Math.Abs(exactSolution.Elements[i] - p.Elements[i]));
+					for (int i = 0; i < solution.Length; i++)
+						Console.WriteLine("u{0} = {1:E16} | u*{0} = {2:E16} | {3:E16}", i + 1, solution[i], exactSolution[i], Math.Abs(exactSolution[i] - solution[i]));
 
-				Console.WriteLine("Относительная погрешность: " + GetSolveDifference(p, exactSolution));
+				Console.WriteLine("Относительная погрешность: " + _resultProducer.GetSolveDifference(0));
 			}
-			else
-			{
-				for (int i = 0; i < Grid.M; i++)
-					for (int j = 0; j < Grid.N; j++)
-						exactSolution.Elements[i * Grid.N + j] = Master.Func2(Grid.X[j], Grid.y[i], Grid.T[timeLayer], Grid.GetAreaNumber(j, i));
+			//else
+			//{
+			//	for (int i = 0; i < _grid.M; i++)
+			//		for (int j = 0; j < _grid.N; j++)
+			//			exactSolution.Elements[i * _grid.N + j] = Master.Func2(_grid.X[j], _grid.y[i], _grid.T[timeLayer], _grid.GetAreaNumber(j, i));
 
-				if (isPrint)
-					for (int i = 0; i < p.Length; i++)
-						Console.WriteLine("u{0} = {1:E16} | u*{0} = {2:E16} | {3:E16}", i + 1, q[timeLayer].Elements[i], exactSolution.Elements[i], Math.Abs(exactSolution.Elements[i] - q[timeLayer].Elements[i]));
-				Console.WriteLine("--------------------------------------------------------------------------------------");
-				Console.WriteLine("Относительная погрешность: " + GetSolveDifference(q[timeLayer], exactSolution));
-			}
+			//	if (isPrint)
+			//		for (int i = 0; i < p.Length; i++)
+			//			Console.WriteLine("u{0} = {1:E16} | u*{0} = {2:E16} | {3:E16}", i + 1, q[timeLayer].Elements[i], exactSolution.Elements[i], Math.Abs(exactSolution.Elements[i] - q[timeLayer].Elements[i]));
+			//	Console.WriteLine("--------------------------------------------------------------------------------------");
+			//	Console.WriteLine("Относительная погрешность: " + GetSolveDifference(q[timeLayer], exactSolution));
+			//}
 
 		}
 
@@ -132,47 +133,47 @@ namespace FemProducer
 						sw.WriteLine(_grid.X[i].ToString().Replace(",", ".") + " " + _grid.Y[j].ToString().Replace(",", ".") +
 							 " " + solve[j * _grid.N + i].ToString().Replace(",", "."));
 
-			using (StreamWriter sw = new StreamWriter(@"output\temperature.txt"))
-			{
-				sw.WriteLine(_grid.Y);
-				sw.WriteLine(_grid.TimeLayersCount);
-				for (int k = 0; k < _grid.TimeLayersCount; k++)
-					for (int j = 0; j < _grid.M; j++)
-						for (int i = 0; i < _grid.N; i++)
-							sw.WriteLine(_grid.X[i].ToString().Replace(",", ".") + " " + _grid.Y[j].ToString().Replace(",", ".") +
-								  " " + q[k].Elements[j * _grid.N + i].ToString().Replace(",", "."));
-			}
+			//using (StreamWriter sw = new StreamWriter(@"output\temperature.txt"))
+			//{
+			//	sw.WriteLine(_grid.Y);
+			//	sw.WriteLine(_grid.TimeLayersCount);
+			//	for (int k = 0; k < _grid.TimeLayersCount; k++)
+			//		for (int j = 0; j < _grid.M; j++)
+			//			for (int i = 0; i < _grid.N; i++)
+			//				sw.WriteLine(_grid.X[i].ToString().Replace(",", ".") + " " + _grid.Y[j].ToString().Replace(",", ".") +
+			//					  " " + q[k].Elements[j * _grid.N + i].ToString().Replace(",", "."));
+			//}
 		}
-		private void WriteGrid()
-		{
-			using (StreamWriter sw = new StreamWriter(@"output\grid.txt"))
-			{
-				sw.WriteLine(_boreholes.Length);
-				for (int i = 0; i < _boreholes.Length; i++)
-				{
-					sw.WriteLine("{0} {1} {2} {3}", _x[_boreholes[i][0]].ToString().Replace(",", "."), _x[_boreholes[i][0] + 1].ToString().Replace(",", "."),
-					_y[_boreholes[i][1]].ToString().Replace(",", "."), _y[_boreholes[i][1] + 1].ToString().Replace(",", "."));
-				}
+		//private void WriteGrid()
+		//{
+		//	using (StreamWriter sw = new StreamWriter(@"output\grid.txt"))
+		//	{
+		//		sw.WriteLine(_boreholes.Length);
+		//		for (int i = 0; i < _boreholes.Length; i++)
+		//		{
+		//			sw.WriteLine("{0} {1} {2} {3}", _x[_boreholes[i][0]].ToString().Replace(",", "."), _x[_boreholes[i][0] + 1].ToString().Replace(",", "."),
+		//			_y[_boreholes[i][1]].ToString().Replace(",", "."), _y[_boreholes[i][1] + 1].ToString().Replace(",", "."));
+		//		}
 
-				sw.WriteLine("{0} {1} {2} {3}", _x[0].ToString().Replace(",", "."), _x[_x.Count() - 1].ToString().Replace(",", "."),
-						 _y[0].ToString().Replace(",", "."), _y[_y.Count() - 1].ToString().Replace(",", "."));
+		//		sw.WriteLine("{0} {1} {2} {3}", _x[0].ToString().Replace(",", "."), _x[_x.Count() - 1].ToString().Replace(",", "."),
+		//				 _y[0].ToString().Replace(",", "."), _y[_y.Count() - 1].ToString().Replace(",", "."));
 
-				sw.WriteLine(_x.Count());
-				sw.WriteLine(_y.Count());
-				//  sw.WriteLine("Hello World!!");
-				for (int i = 0; i < _x.Count(); i++)
-				{
-					sw.WriteLine(_x[i].ToString().Replace(",", "."));
-				}
-				for (int i = 0; i < _y.Count(); i++)
-				{
-					sw.WriteLine(_y[i].ToString().Replace(",", "."));
-				}
-				sw.WriteLine(_areas.Length);
-				foreach (var area in _areas)
-					sw.WriteLine("{0} {1} {2} {3}", _x[_IX[area[0]]], _x[_IX[area[1]]], _y[_IY[area[2]]], _y[_IY[area[3]]]);
-				sw.Close();
-			}
-		}
+		//		sw.WriteLine(_x.Count());
+		//		sw.WriteLine(_y.Count());
+		//		//  sw.WriteLine("Hello World!!");
+		//		for (int i = 0; i < _x.Count(); i++)
+		//		{
+		//			sw.WriteLine(_x[i].ToString().Replace(",", "."));
+		//		}
+		//		for (int i = 0; i < _y.Count(); i++)
+		//		{
+		//			sw.WriteLine(_y[i].ToString().Replace(",", "."));
+		//		}
+		//		sw.WriteLine(_areas.Length);
+		//		foreach (var area in _areas)
+		//			sw.WriteLine("{0} {1} {2} {3}", _x[_IX[area[0]]], _x[_IX[area[1]]], _y[_IY[area[2]]], _y[_IY[area[3]]]);
+		//		sw.Close();
+		//	}
+		//}
 	}
 }

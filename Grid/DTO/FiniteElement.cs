@@ -1,4 +1,6 @@
-﻿namespace ReaserchPaper
+﻿using ReaserchPaper;
+
+namespace FemProducer.DTO
 {
 	public class FiniteElement
 	{
