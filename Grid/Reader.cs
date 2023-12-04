@@ -4,8 +4,6 @@ namespace FemProducer
 {
 	internal class Reader
 	{
-
-
 		public GridParametrs ReadDomain()
 		{
 			using (StreamReader sr = new StreamReader(@"input\domain.txt"))

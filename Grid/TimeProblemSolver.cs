@@ -29,9 +29,8 @@ namespace FemProducer
 
 			Matrix matrix = matrixFactory.CreateMatrix();
 			Vector vector = new Vector(grid.NodesCount);
-			Slae slae = new Slae(matrix, vector);
 
-			Collector collector = new(grid, matrixFactory);
+			CollectorBase collector = new(grid, matrixFactory);
 			CollectorTimeDecorator timeCollector = new CollectorTimeDecorator(collector, grid);
 
 			ResultProducer resultProducer = new ResultProducer(problemParamters, grid);

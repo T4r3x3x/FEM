@@ -98,7 +98,7 @@
 					return x * t;
 			}
 		}
-		public static double F2(double x, double y, double t, int area)
+		public double F2(double x, double y, double t, int area)
 		{
 			switch (area)
 			{

@@ -19,32 +19,6 @@ namespace ReaserchPaper.Grid
 
 		public GridFactory()
 		{
-
-
-		}
-
-		public Grid GetGrid(GridParametrs gridParametrs)
-		{
-			_q = new double[data.Length / 2];
-			List<int> xAreaLenghtes = new List<int>();
-			List<int> yAreaLenghtes = new List<int>();
-			//_x.Add(XW[0]);
-			//_IX.Add(0);
-			_n = 0;
-			_m = 0;
-			for (int i = 0; i < data.Length - 1; i += 2)
-			{
-				xAreaLenghtes.Add(int.Parse(data[i]));
-				_n += int.Parse(data[i]) - 1;
-				_q[i / 2] = double.Parse(data[i + 1]);
-			}
-			_n++;
-
-			_x = new double[_n];
-			_x[0] = XW[0];
-			_hx = new double[_n - 1];
-			_IX = new int[data.Length / 2 + 1];
-
 			int startPos = 0;
 			for (int i = 0; i < _q.Length; i++)
 			{
@@ -60,22 +34,6 @@ namespace ReaserchPaper.Grid
 				startPos += xAreaLenghtes[i] - 1;
 				_IX[i + 1] = _IX[i] + xAreaLenghtes[i] - 1;
 			}
-
-			data = sr.ReadLine().Split(' ');
-			_q = new double[data.Length / 2];
-
-			for (int i = 0; i < data.Length - 1; i += 2)
-			{
-				yAreaLenghtes.Add(int.Parse(data[i]));
-				_m += int.Parse(data[i]) - 1;
-				_q[i / 2] = double.Parse(data[i + 1]);
-			}
-			_m++;
-			_y = new double[_m];
-			_y[0] = YW[0];
-			_hy = new double[_m - 1];
-			_IY = new int[data.Length / 2 + 1];
-
 			startPos = 0;
 			for (int i = 0; i < _q.Length; i++)
 			{
@@ -90,6 +48,23 @@ namespace ReaserchPaper.Grid
 				startPos += yAreaLenghtes[i] - 1;
 				_IY[i + 1] = _IY[i] + yAreaLenghtes[i] - 1;
 			}
+			if (q == 1)
+				_h = (_t[layersCount - 1] - _t[0]) / (layersCount - 1);
+			else
+				_h = (_t[layersCount - 1] - _t[0]) * (q - 1) / (Math.Pow(q, layersCount - 1) - 1);
+
+			for (int i = 1; i < layersCount; i++)
+			{
+				_t[i] = _t[i - 1] + _h;
+				_ht[i - 1] = _h;
+				_h *= q;
+			}
+
+		}
+
+		public Grid GetGrid(GridParametrs gridParametrs)
+		{
+
 		}
 
 		public void ReadData()
