@@ -22,8 +22,6 @@ namespace ReaserchPaper.Assemblier
 			return GetMatrixesMG();
 		}
 
-
-
 		private IList<Matrix> GetMatrixesMG()
 		{
 			double[][] localMatrix;
