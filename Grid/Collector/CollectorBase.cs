@@ -30,22 +30,41 @@ namespace ReaserchPaper.Assemblier
 			Matrix M = _matrixFactory.CreateMatrix();
 			Matrix G = _matrixFactory.CreateMatrix();
 
-			for (int j = 0; j < _grid.M - 1; j++)
+			foreach (var element in _grid.Elements)
 			{
-				for (int i = 0; i < _grid.N - 1; i++) //X | проходим по КЭ 
-													  //if (!_grid.IsBorehole(i, j))
-				{
-					int area = _grid.GetAreaNumber(i, j);
+				var i = element.indexes[0];
+				var j = element.indexes[1];
 
-					localMatrix = FEM.GetMassMatrix(_grid.Hx[i], _grid.Hy[j]);
-					Tools.MultiplyLocalMatrix(localMatrix, _problemParametrs.Gamma(area));
-					AddLocalMatrix(M, localMatrix, i, j);
+				var hx = _grid.Nodes[j].X - _grid.Nodes[i].X;
+				var hy = _grid.Nodes[element.indexes[2]].Y - _grid.Nodes[i].Y;
 
-					localMatrix = FEM.GetStiffnessMatrix(_grid.Hx[i], _grid.Hy[j]);
-					Tools.MultiplyLocalMatrix(localMatrix, _problemParametrs.Lamda(area));
-					AddLocalMatrix(G, localMatrix, i, j);
-				}
+				int area = _grid.GetAreaNumber(i, j);
+
+				localMatrix = FEM.GetMassMatrix(hx, hy);
+				Tools.MultiplyLocalMatrix(localMatrix, _problemParametrs.Gamma(area));
+				AddLocalMatrix(M, localMatrix, element);
+
+				localMatrix = FEM.GetStiffnessMatrix(hx, hy);
+				Tools.MultiplyLocalMatrix(localMatrix, _problemParametrs.Lamda(area));
+				AddLocalMatrix(G, localMatrix, element);
 			}
+
+			//for (int j = 0; j < _grid.M - 1; j++)
+			//{
+			//	for (int i = 0; i < _grid.N - 1; i++) //X | проходим по КЭ 
+			//										  //if (!_grid.IsBorehole(i, j))
+			//	{
+			//		int area = _grid.GetAreaNumber(i, j);
+
+			//		localMatrix = FEM.GetMassMatrix(_grid.Hx[i], _grid.Hy[j]);
+			//		Tools.MultiplyLocalMatrix(localMatrix, _problemParametrs.Gamma(area));
+			//		AddLocalMatrix(M, localMatrix, i, j);
+
+			//		localMatrix = FEM.GetStiffnessMatrix(_grid.Hx[i], _grid.Hy[j]);
+			//		Tools.MultiplyLocalMatrix(localMatrix, _problemParametrs.Lamda(area));
+			//		AddLocalMatrix(G, localMatrix, i, j);
+			//	}
+			//}
 
 			return new Matrix[] { M, G };
 		}
@@ -62,17 +81,17 @@ namespace ReaserchPaper.Assemblier
 		//			}
 		//}
 
-		private void AddLocalMatrix(Matrix matrix, double[][] localMatrix, int i, int j)
+		private void AddLocalMatrix(Matrix matrix, double[][] localMatrix, Grid.Grid.Element element)
 		{
 			for (int p = 0; p < 4; p++)
 			{
-				matrix.Di[_grid.LocalNumToGlobal(i, j, p)] += localMatrix[p][p];
+				matrix.Di[element.indexes[p]] += localMatrix[p][p];
 
-				int ibeg = matrix.Ia[_grid.LocalNumToGlobal(i, j, p)];
-				int iend = matrix.Ia[_grid.LocalNumToGlobal(i, j, p) + 1];
+				int ibeg = matrix.Ia[element.indexes[p]];
+				int iend = matrix.Ia[element.indexes[p] + 1];
 				for (int k = 0; k < p; k++)
 				{
-					int index = Tools.BinarySearch(matrix.Ja, _grid.LocalNumToGlobal(i, j, k), ibeg, iend - 1);
+					int index = Tools.BinarySearch(matrix.Ja, element.indexes[k], ibeg, iend - 1);
 
 					matrix.Au[index] += localMatrix[k][p];
 					matrix.Al[index] += localMatrix[p][k];
