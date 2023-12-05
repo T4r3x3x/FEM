@@ -4,6 +4,6 @@ namespace ReaserchPaper.Assemblier
 {
 	internal interface ICollector
 	{
-		public IList<Matrix> Collect();
+		public (IList<Matrix>, Vector) Collect();
 	}
 }

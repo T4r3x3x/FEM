@@ -33,7 +33,9 @@ namespace FemProducer.Assemblier
 		public Slae Collect(int timeLayer)
 		{
 			ResetSlae();
-			var matrixes = _collector.Collect();
+			var result = _collector.Collect();
+			var matrixes = result.Item1;
+			_vector = result.Item2;
 			var slae = GetSlae(matrixes[0], matrixes[1]);
 			return slae;
 		}
@@ -111,10 +113,6 @@ namespace FemProducer.Assemblier
 		private Slae GetSlae(Matrix M, Matrix G)
 		{
 			_matrix = M + G;
-			_vector = new Vector(_matrix.Size);
-			for (int j = 0; j < _grid.M - 1; j++)
-				for (int i = 0; i < _grid.N - 1; i++) // проходим по КЭ 
-					AddLocalB(i, j);
 
 			GetBoundaryConditions();
 
@@ -139,20 +137,7 @@ namespace FemProducer.Assemblier
 		//		for (int i = 0; i < _grid.N - 1; i++) // проходим по КЭ 
 		//			AddLocalB(i, j, timeLayer);
 		//}
-		private void AddLocalB(int i, int j)
-		{
-			var area = _grid.GetAreaNumber(i, j);
 
-			var firstIndex = i + j * _grid.N;
-			var secondIndex = firstIndex + 1;
-			var thirdIndex = i + (j + 1) * _grid.N;
-			var fourthIndex = thirdIndex + 1;
-
-			_vector[firstIndex] += _grid.Hx[i] * _grid.Hy[j] / 36 * (4 * _problemParametrs.F1(_grid.X[i], _grid.Y[j], area) + 2 * _problemParametrs.F1(_grid.X[i + 1], _grid.Y[j], area) + 2 * _problemParametrs.F1(_grid.X[i], _grid.Y[j + 1], area) + _problemParametrs.F1(_grid.X[i + 1], _grid.Y[j + 1], area));
-			_vector[secondIndex] += _grid.Hx[i] * _grid.Hy[j] / 36 * (2 * _problemParametrs.F1(_grid.X[i], _grid.Y[j], area) + 4 * _problemParametrs.F1(_grid.X[i + 1], _grid.Y[j], area) + _problemParametrs.F1(_grid.X[i], _grid.Y[j + 1], area) + 2 * _problemParametrs.F1(_grid.X[i + 1], _grid.Y[j + 1], area));
-			_vector[thirdIndex] += _grid.Hx[i] * _grid.Hy[j] / 36 * (2 * _problemParametrs.F1(_grid.X[i], _grid.Y[j], area) + _problemParametrs.F1(_grid.X[i + 1], _grid.Y[j], area) + 4 * _problemParametrs.F1(_grid.X[i], _grid.Y[j + 1], area) + 2 * _problemParametrs.F1(_grid.X[i + 1], _grid.Y[j + 1], area));
-			_vector[fourthIndex] += _grid.Hx[i] * _grid.Hy[j] / 36 * (_problemParametrs.F1(_grid.X[i], _grid.Y[j], area) + 2 * _problemParametrs.F1(_grid.X[i + 1], _grid.Y[j], area) + 2 * _problemParametrs.F1(_grid.X[i], _grid.Y[j + 1], area) + 4 * _problemParametrs.F1(_grid.X[i + 1], _grid.Y[j + 1], area));
-		}
 		//private void AddLocalB(Vector vector, int i, int j, int timeLayer)
 		//{
 		//	var area = _grid.GetAreaNumber(i, j);
