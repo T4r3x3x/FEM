@@ -23,54 +23,68 @@ namespace ReaserchPaper.Grid
 
 		}
 
+		private List<Grid.Node> GetNodes(double[] x, double[] y)
+		{
+			List<Grid.Node> nodes = new List<Grid.Node>();
+
+			for (int i = 0; i < y.Length; i++)
+				for (int j = 0; j < x.Length; j++)
+					nodes.Add(new Grid.Node(x[j], y[i]));
+
+			return nodes;
+		}
+
+		private int[] GetIndexes(int nodeIndex, int countOfNodesInHorizontalLine, int countOfNodesInElement)
+		{
+			var indexes = new int[countOfNodesInElement];
+			indexes[0] = nodeIndex;
+			indexes[1] = nodeIndex + 1;
+			indexes[2] = nodeIndex + countOfNodesInHorizontalLine;
+			indexes[3] = nodeIndex + countOfNodesInHorizontalLine + 1;
+			return indexes;
+		}
+
+		private List<Grid.Element> GetElements(List<Grid.Node> nodes, int countOfNodesInHorizontalLine, int countOfNodesInElement)
+		{
+			List<Grid.Element> elements = new List<Grid.Element>();
+
+			for (int i = 0; i < nodes.Count - countOfNodesInHorizontalLine - 1; i++)
+			{
+				if ((i + 1) % countOfNodesInHorizontalLine == 0)
+					i++;
+				var element = new Grid.Element(GetIndexes(i, countOfNodesInHorizontalLine, countOfNodesInElement));
+				elements.Add(element);
+			}
+			return elements;
+		}
+
+
+		//toDo вынести всё это в отдельный метод.
 		public Grid GetGrid(GridParameters gridParametrs)
 		{
 			double h;
 			int startPos = 0;
 			var n = 0;
-			foreach (var item in gridParametrs.xAreaLenghtes)
+			foreach (var item in gridParametrs.xSplitsCount)
 				n += item;
 
 			var m = 0;
-			foreach (var item in gridParametrs.yAreaLenghtes)
+			foreach (var item in gridParametrs.ySplitsCount)
 				m += item;
-			var hx = new double[n - 1];
-			var x = new double[n];
-			var IX = new int[gridParametrs.qx.Length + 1];
-			x[0] = gridParametrs.XW[0];
 
-			for (int i = 0; i < gridParametrs.qx.Length; i++)
-			{
-				if (gridParametrs.qx[i] == 1)
-					h = (gridParametrs.XW[i + 1] - gridParametrs.XW[i]) / (gridParametrs.xAreaLenghtes[i] - 1);
-				else
-				{
-					h = (gridParametrs.XW[i + 1] - gridParametrs.XW[i]) * (gridParametrs.qx[i] - 1) / (Math.Pow(gridParametrs.qx[i], gridParametrs.xAreaLenghtes[i] - 1) - 1);
-				}
+			var result = MakeSplit(n, gridParametrs.qx, gridParametrs.XW, gridParametrs.xSplitsCount);
+			var IX = result.Item1;
+			var hx = result.Item2;
+			var x = result.Item3;
 
-				MakeArea(h, x, hx, startPos, gridParametrs.xAreaLenghtes[i], gridParametrs.qx[i]);
-				x[startPos + gridParametrs.xAreaLenghtes[i] - 1] = gridParametrs.XW[i + 1];
-				startPos += gridParametrs.xAreaLenghtes[i] - 1;
-				IX[i + 1] = IX[i] + gridParametrs.xAreaLenghtes[i] - 1;
-			}
+			result = MakeSplit(m, gridParametrs.qy, gridParametrs.YW, gridParametrs.ySplitsCount);
+			var IY = result.Item1;
+			var hy = result.Item2;
+			var y = result.Item3;
 
-			var hy = new double[m - 1];
-			var y = new double[m];
-			var IY = new int[gridParametrs.qy.Length + 1];
-			startPos = 0;
-			for (int i = 0; i < gridParametrs.qy.Length; i++)
-			{
-				if (gridParametrs.qy[i] == 1)
-					h = (gridParametrs.YW[i + 1] - gridParametrs.YW[i]) / (gridParametrs.yAreaLenghtes[i] - 1);
-				else
-				{
-					h = (gridParametrs.YW[i + 1] - gridParametrs.YW[i]) * (gridParametrs.qy[i] - 1) / (Math.Pow(gridParametrs.qy[i], gridParametrs.yAreaLenghtes[i] - 1) - 1);
-				}
-				MakeArea(h, y, hy, startPos, gridParametrs.yAreaLenghtes[i], gridParametrs.qy[i]);
-				y[startPos + gridParametrs.yAreaLenghtes[i] - 1] = gridParametrs.YW[i + 1];
-				startPos += gridParametrs.yAreaLenghtes[i] - 1;
-				IY[i + 1] = IY[i] + gridParametrs.yAreaLenghtes[i] - 1;
-			}
+			var nodes = GetNodes(x, y);
+			var elements = GetElements(nodes, n, 4);
+
 			//if (q == 1)
 			//	_h = (_t[layersCount - 1] - _t[0]) / (layersCount - 1);
 			//else
@@ -82,8 +96,36 @@ namespace ReaserchPaper.Grid
 			//	_ht[i - 1] = _h;
 			//	_h *= q;
 			//}
-			return new Grid(new double[] { 0 }, x, y, hy, hx, null, null, IX, IY, gridParametrs.areas, n, m);
+			return new Grid(new double[] { 0 }, x, y, hy, hx, null, null, IX, IY, gridParametrs.areas, n, m, elements, nodes);
 		}
+
+
+		private (int[], double[], double[]) MakeSplit(int size, double[] q, double[] W, IList<int> splitsCount)
+		{
+			double h = 0;
+			int startPos = 0;
+			var steps = new double[size - 1];
+			var points = new double[size];
+			var I = new int[q.Length + 1];
+			points[0] = W[0];
+
+			for (int i = 0; i < q.Length; i++)
+			{
+				if (q[i] == 1)
+					h = (W[i + 1] - W[i]) / (splitsCount[i] - 1);
+				else
+				{
+					h = (W[i + 1] - W[i]) * (q[i] - 1) / (Math.Pow(q[i], splitsCount[i] - 1) - 1);
+				}
+
+				MakeArea(h, points, steps, startPos, splitsCount[i], q[i]);
+				points[startPos + splitsCount[i] - 1] = W[i + 1];
+				startPos += splitsCount[i] - 1;
+				I[i + 1] = I[i] + splitsCount[i] - 1;
+			}
+			return (I, steps, points);
+		}
+
 
 		void MakeArea(double _h, double[] points, double[] steps, int startPos, int areaLenght, double _q)//режим область на части и записываем в массив, _h - шаг,  j - номер подобласти
 		{

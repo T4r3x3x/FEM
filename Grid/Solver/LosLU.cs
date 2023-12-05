@@ -5,34 +5,37 @@ namespace ResearchPaper
 {
 	internal class LosLU : ISolver
 	{
-		private int maxItCount = 10000;
-		private double a, eps = 1e-40, b;
-		private Vector r, z, p;
-		private Vector D, L, U;
+		private readonly int maxItCount;
+		private readonly double eps;
+
+		public LosLU(int maxItCount, double eps)
+		{
+			this.maxItCount = maxItCount;
+			this.eps = eps;
+		}
 
 		public Vector Solve(Slae slae)
 		{
-			return LOSLU(slae);
+			var vectors = ILUsqModi(slae.Matrix);
+			var D = vectors.Item1;
+			var L = vectors.Item2;
+			var U = vectors.Item3;
+			return LOSLU(slae, D, L, U);
 		}
 
 
-		private Vector LOSLU(Slae slae)
+		private Vector LOSLU(Slae slae, Vector D, Vector L, Vector U)
 		{
 			var size = slae.Size;
+			double a, b;
 			Vector solve = new Vector(size);
-			r = new Vector(size);
-			z = new Vector(size);
-			p = new Vector(size);
-			Vector Ur = new Vector(size);
-			Vector temp = new Vector(size);
-			Vector LAUr = new Vector(size);
-			ILUsqModi(slae.Matrix);
+			Vector r, z, p, Ur, LAUr;
 
 			int k = 0;
 
-			r = ForwardStepModi(slae.Matrix, slae.Vector); //+                      
-			z = BackStepModi(slae.Matrix, r);
-			p = ForwardStepModi(slae.Matrix, slae.Matrix * z);//+
+			r = ForwardStepModi(slae.Matrix, slae.Vector, D, L); //+                      
+			z = BackStepModi(slae.Matrix, r, U);
+			p = ForwardStepModi(slae.Matrix, slae.Matrix * z, D, L);//+
 
 			do
 			{
@@ -42,8 +45,8 @@ namespace ResearchPaper
 				solve += a * z;
 				r -= a * p;
 
-				Ur = BackStepModi(slae.Matrix, r);
-				LAUr = ForwardStepModi(slae.Matrix, slae.Matrix * Ur);
+				Ur = BackStepModi(slae.Matrix, r, U);
+				LAUr = ForwardStepModi(slae.Matrix, slae.Matrix * Ur, D, L);
 
 				b = -GetCoefficent(p, LAUr, p, p);
 
@@ -51,8 +54,7 @@ namespace ResearchPaper
 				p = LAUr + b * p;
 
 			} while (r * r > eps && k <= maxItCount);
-			//   Console.WriteLine("iter counts: " + k);
-			//   Console.WriteLine("disperancy: " + r * r);
+
 			return solve;
 		}
 
@@ -64,15 +66,13 @@ namespace ResearchPaper
 			return result;
 		}
 
-		private void ILUsqModi(Matrix matrix)
+		private (Vector, Vector, Vector) ILUsqModi(Matrix matrix)
 		{
 			int i;
 
-			D = new Vector(matrix.Size);
-			L = new Vector(matrix.Al.Count());
-			U = new Vector(matrix.Au.Count());
-
-
+			var D = new Vector(matrix.Size);
+			var L = new Vector(matrix.Al.Count());
+			var U = new Vector(matrix.Au.Count());
 
 			for (i = 0; i < matrix.Al.Count(); i++)
 				L[i] = matrix.Al[i];
@@ -84,12 +84,12 @@ namespace ResearchPaper
 
 			for (i = 0; i < matrix.Size; i++)
 			{
-				double d = 0;
+				double ls, us, d = 0;
 				int temp = matrix.Ia[i];
 				for (int j = matrix.Ia[i]; j < matrix.Ia[i + 1]; j++)
 				{
-					double ls = 0;
-					double us = 0;
+					ls = 0;
+					us = 0;
 					for (int h = matrix.Ia[matrix.Ja[j]], k = temp; h < matrix.Ia[matrix.Ja[j] + 1] && k < j;)
 						if (matrix.Ja[k] == matrix.Ja[h])
 						{
@@ -109,14 +109,17 @@ namespace ResearchPaper
 				}
 				D[i] -= d;
 			}
+			return (D, L, U);
 		}
 
-		private Vector ForwardStepModi(Matrix matrix, Vector rightSide)
+		private Vector ForwardStepModi(Matrix matrix, Vector rightSide, Vector D, Vector L)
 		{
 			Vector result = new Vector(matrix.Size);
+			double sum;
+
 			for (int i = 0; i < matrix.Size; i++)
 			{
-				double sum = 0;
+				sum = 0;
 				for (int j = matrix.Ia[i]; j < matrix.Ia[i + 1]; j++)
 					sum += result[matrix.Ja[j]] * L[j];
 
@@ -125,21 +128,18 @@ namespace ResearchPaper
 			return result;
 		}
 
-		private Vector BackStepModi(Matrix matrix, Vector rightSide)
+		private Vector BackStepModi(Matrix matrix, Vector rightSide, Vector U)
 		{
 			Vector result = new Vector(matrix.Size);
 
 			for (int i = 0; i < matrix.Size; i++)
 				result[i] = rightSide[i];
+
 			for (int i = matrix.Size - 1; i >= 0; i--)
-			{
 				for (int j = matrix.Ia[i]; j < matrix.Ia[i + 1]; j++)
 					result[matrix.Ja[j]] -= result[i] * U[j];
-			}
 
 			return result;
 		}
-
-
 	}
 }

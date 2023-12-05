@@ -10,11 +10,14 @@
 		public double[] Ht { get; private set; }
 		public int[][] Boreholes { get; private set; }
 
+		public List<Element> Elements { get; private set; }
+		public List<Node> Nodes { get; private set; }
+
 		private int[] _IX, _IY;
 		private int[][] _areas;
 		private int _n, _m;
 
-		public Grid(double[] t, double[] x, double[] y, double[] hy, double[] hx, double[] ht, int[][] boreholes, int[] iX, int[] iY, int[][] areas, int n, int m)
+		public Grid(double[] t, double[] x, double[] y, double[] hy, double[] hx, double[] ht, int[][] boreholes, int[] iX, int[] iY, int[][] areas, int n, int m, List<Element> elements, List<Node> nodes)
 		{
 			T = t;
 			X = x;
@@ -28,6 +31,8 @@
 			_areas = areas;
 			_n = n;
 			_m = m;
+			Elements = elements;
+			Nodes = nodes;
 		}
 
 		public int TimeLayersCount => T.Length;
@@ -96,5 +101,27 @@
 			return xLine + xOffset + (yLine + yOffset) * N;
 		}
 
+
+		public class Node
+		{
+			public double X, Y;
+
+			public Node(double x, double y)
+			{
+				X = x;
+				Y = y;
+			}
+		}
+
+
+		public class Element
+		{
+			public int[] indexes = new int[4];
+
+			public Element(int[] indexes)
+			{
+				this.indexes = indexes;
+			}
+		}
 	}
 }

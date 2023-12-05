@@ -7,8 +7,6 @@ using ReaserchPaper.Grid;
 using ReaserchPaper.Logger;
 using ReaserchPaper.Solver;
 
-using ResearchPaper;
-
 using Tensus;
 
 namespace FemProducer
@@ -20,40 +18,40 @@ namespace FemProducer
 			ConsoleLogger consoleLogger = new();
 			ITaskBuilder taskBuilder = new JsonTaskBuilder(configureFile, consoleLogger);
 
-			taskBuilder.GetGridParameters();
-			ProblemParametrs problemParameters = taskBuilder.GetProblem();
-			ISolver solver = taskBuilder.GetSolver();
+			var problemParameters = taskBuilder.GetProblemParameters();
+			var solverParameters = taskBuilder.GetSolverParameters();
+			var gridParameters = taskBuilder.GetGridParameters();
 
 			GridFactory gridFactory = new GridFactory();
-			Grid grid = gridFactory.GetGrid(taskBuilder.GetGridParameters());
+			SolverFactory solverFactory = new SolverFactory();
+
+			ISolver solver = solverFactory.CreateSolver(solverParameters);
+			Grid grid = gridFactory.GetGrid(gridParameters);
+
+			consoleLogger.Log("The grid was built!");
 
 			MatrixFactory matrixFactory = new(grid);
-
-			Matrix matrix = matrixFactory.CreateMatrix();
-			Vector vector = new Vector(grid.NodesCount);
 
 			CollectorBase collector = new(grid, matrixFactory, problemParameters);
 			BasicCollector timeCollector = new BasicCollector(collector, grid, matrixFactory, problemParameters);
 
 			ResultProducer resultProducer = new ResultProducer(problemParameters, grid);
-			var logger = new ConsoleLogger();
 
 			Outputer<TxtLogger> solvesOutputer = new(new TxtLogger("results"), grid, resultProducer, problemParameters);
 
 			Vector solve = new(grid.NodesCount);
 
-			Slae slae;
-			List<Vector> solves = new List<Vector>();
-			for (int timeLayer = 0; timeLayer < grid.T.Length; timeLayer++)
-			{
-				slae = timeCollector.Collect(timeLayer);
-				solvesOutputer.PrintSlae(slae);
-				solve = solver.Solve(slae);
-				resultProducer.NumericalSolves.Add(solve);
-			}
-			solvesOutputer.PrintResult(-1, true);
+			Slae slae = timeCollector.Collect(-1);
+			consoleLogger.Log(message: "The slae was collected!");
+
+			//	solvesOutputer.PrintSlae(slae);
+			solve = solver.Solve(slae);
+			consoleLogger.Log(message: "The slae was solved!");
+			resultProducer.NumericalSolves.Add(solve);
+
+			solvesOutputer.PrintResult(-1, false);
 			//consoleLogger.Log();
-			solvesOutputer.Show(outputFile);
+			//solvesOutputer.Show(outputFile);
 		}
 	}
 }

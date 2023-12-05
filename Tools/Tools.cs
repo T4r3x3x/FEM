@@ -21,16 +21,11 @@
 		/// </summary>
 		/// <param name="localMatrix"></param>
 		/// <param name="coefficient"></param>
-		public static double[][] MultiplyLocalMatrix(double[][] localMatrix, double coefficient)
+		public static void MultiplyLocalMatrix(double[][] localMatrix, double coefficient)
 		{
-			var result = new double[localMatrix.Length][];
 			for (int p = 0; p < 4; p++)
-			{
-				result[p] = new double[localMatrix.Length];
 				for (int k = 0; k < 4; k++)
-					result[p][k] = localMatrix[p][k] * coefficient;
-			}
-			return result;
+					localMatrix[p][k] *= coefficient;
 		}
 	}
 }

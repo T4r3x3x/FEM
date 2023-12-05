@@ -76,15 +76,16 @@ namespace FemProducer
 			{
 				WriteSolve(filePath, solve);
 			}
+
 			ProcessStartInfo start = new ProcessStartInfo();
 			start.FileName = "C:\\Python\\python.exe";
-			start.Arguments = string.Format("Show\\grid.py");
+			start.Arguments = string.Format("grid.py");
 			start.UseShellExecute = false;
 			start.RedirectStandardOutput = true;
 			Process.Start(start);
-			start.Arguments = string.Format("C:\\Users\\hardb\\source\\repos\\Grid\\Grid\\bin\\Debug\\net6.0\\pressure.py");
+			start.Arguments = string.Format("pressure.py");
 			Process.Start(start);
-			start.Arguments = string.Format("C:\\Users\\hardb\\source\\repos\\Grid\\Grid\\bin\\Debug\\net6.0\\temperature.py");
+			start.Arguments = string.Format("temperature.py");
 			Process.Start(start);
 		}
 		public void PrintResult(int timeLayer, bool isPrint)
@@ -148,15 +149,15 @@ namespace FemProducer
 		//{
 		//	using (StreamWriter sw = new StreamWriter(@"output\grid.txt"))
 		//	{
-		//		sw.WriteLine(_boreholes.Length);
-		//		for (int i = 0; i < _boreholes.Length; i++)
-		//		{
-		//			sw.WriteLine("{0} {1} {2} {3}", _x[_boreholes[i][0]].ToString().Replace(",", "."), _x[_boreholes[i][0] + 1].ToString().Replace(",", "."),
-		//			_y[_boreholes[i][1]].ToString().Replace(",", "."), _y[_boreholes[i][1] + 1].ToString().Replace(",", "."));
-		//		}
-
-		//		sw.WriteLine("{0} {1} {2} {3}", _x[0].ToString().Replace(",", "."), _x[_x.Count() - 1].ToString().Replace(",", "."),
-		//				 _y[0].ToString().Replace(",", "."), _y[_y.Count() - 1].ToString().Replace(",", "."));
+		//		//	sw.WriteLine(_boreholes.Length);
+		//		//for (int i = 0; i < _boreholes.Length; i++)
+		//		//	{
+		//		//		sw.WriteLine("{0} {1} {2} {3}", _x[_boreholes[i][0]].ToString().Replace(",", "."), _x[_boreholes[i][0] + 1].ToString().Replace(",", "."),
+		//		//		_y[_boreholes[i][1]].ToString().Replace(",", "."), _y[_boreholes[i][1] + 1].ToString().Replace(",", "."));
+		//		//	}
+		//		sw.WriteLine("0 0 0 0");
+		//		sw.WriteLine("{0} {1} {2} {3}", _grid.X[0].ToString().Replace(",", "."), _grid.X[_grid.X.Count() - 1].ToString().Replace(",", "."),
+		//				 _grid.Y[0].ToString().Replace(",", "."), _grid.Y[_grid.Y.Count() - 1].ToString().Replace(",", "."));
 
 		//		sw.WriteLine(_x.Count());
 		//		sw.WriteLine(_y.Count());

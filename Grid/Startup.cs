@@ -14,7 +14,7 @@ namespace ResearchPaper
 			IProblemSolver problemSolver = new TimeProblemSolver();
 			problemSolver.Solve(configureFile, outputFile);
 			sw.Stop();
-			Console.WriteLine(sw.ElapsedMilliseconds);
+			Console.WriteLine("program work time: " + sw.ElapsedMilliseconds);
 		}
 	}
 }

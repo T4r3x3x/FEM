@@ -29,20 +29,24 @@ namespace ReaserchPaper.Assemblier
 			double[][] localMatrix;
 			Matrix M = _matrixFactory.CreateMatrix();
 			Matrix G = _matrixFactory.CreateMatrix();
-			for (int j = 0; j < _grid.M - 1; j++) //y
+
+			for (int j = 0; j < _grid.M - 1; j++)
+			{
 				for (int i = 0; i < _grid.N - 1; i++) //X | проходим по КЭ 
 													  //if (!_grid.IsBorehole(i, j))
 				{
 					int area = _grid.GetAreaNumber(i, j);
 
 					localMatrix = FEM.GetMassMatrix(_grid.Hx[i], _grid.Hy[j]);
-					localMatrix = Tools.MultiplyLocalMatrix(localMatrix, _problemParametrs.Gamma(area));
+					Tools.MultiplyLocalMatrix(localMatrix, _problemParametrs.Gamma(area));
 					AddLocalMatrix(M, localMatrix, i, j);
 
 					localMatrix = FEM.GetStiffnessMatrix(_grid.Hx[i], _grid.Hy[j]);
-					localMatrix = Tools.MultiplyLocalMatrix(localMatrix, _problemParametrs.Lamda(area));
+					Tools.MultiplyLocalMatrix(localMatrix, _problemParametrs.Lamda(area));
 					AddLocalMatrix(G, localMatrix, i, j);
 				}
+			}
+
 			return new Matrix[] { M, G };
 		}
 
