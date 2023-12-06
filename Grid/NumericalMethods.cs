@@ -16,8 +16,11 @@
 		//	Point point;
 		//	//  double[] q = new double[2] { 1,1};
 		//	// double[] X = new double[2] { -0.5773502692, 0.5773502692 };
-		//	double[] q = new double[4] { (18 - Math.Sqrt(30)) / 36, (18 + Math.Sqrt(30)) / 36, (18 + Math.Sqrt(30)) / 36, (18 - Math.Sqrt(30)) / 36 };
-		//	double[] X = new double[4] { -Math.Sqrt((15 + 2 * Math.Sqrt(30)) / 35), -Math.Sqrt((15 - 2 * Math.Sqrt(30)) / 35), Math.Sqrt((15 - 2 * Math.Sqrt(30)) / 35), Math.Sqrt((15 + 2 * Math.Sqrt(30)) / 35) };
+		//	double[] q = new double[3] { 8 / 9, 5 / 9, 5 / 9 };
+		//	double[] X = new double[3] { 0, 0.77459666924148337, -0.77459666924148337 };
+
+		//	//	double[] q = new double[4] { (18 - Math.Sqrt(30)) / 36, (18 + Math.Sqrt(30)) / 36, (18 + Math.Sqrt(30)) / 36, (18 - Math.Sqrt(30)) / 36 };
+		//	//double[] X = new double[4] { -Math.Sqrt((15 + 2 * Math.Sqrt(30)) / 35), -Math.Sqrt((15 - 2 * Math.Sqrt(30)) / 35), Math.Sqrt((15 - 2 * Math.Sqrt(30)) / 35), Math.Sqrt((15 + 2 * Math.Sqrt(30)) / 35) };
 
 		//	for (int l = 0; l < q.Length; l++)
 		//	{

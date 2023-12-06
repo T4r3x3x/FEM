@@ -31,8 +31,8 @@ namespace ReaserchPaper.Assemblier
 			Matrix G = _matrixFactory.CreateMatrix();
 			Vector vector = new Vector(M.Size);
 
-			//Parallel.ForEach(_grid.Elements, element =>
-			foreach (var element in _grid.Elements)
+			Parallel.ForEach(_grid.Elements, element =>
+			//foreach (var element in _grid.Elements)
 			{
 				//Console.WriteLine(element.indexes[0] + " " + element.indexes[1] + " " + element.indexes[2] + " " + element.indexes[3]);
 				var i = element.indexes[0];
@@ -53,7 +53,7 @@ namespace ReaserchPaper.Assemblier
 
 				AddLocalVector(vector, element, area, hx, hy);
 			}
-			//);
+			);
 			//for (int j = 0; j < _grid.M - 1; j++)
 			//{
 			//	for (int i = 0; i < _grid.N - 1; i++) //X | проходим по КЭ 
@@ -70,7 +70,7 @@ namespace ReaserchPaper.Assemblier
 			//		AddLocalMatrix(G, localMatrix, i, j);
 			//	}
 			//}
-
+			Console.WriteLine("Done with matrixes " + DateTime.UtcNow);
 			return (new Matrix[] { M, G }, vector);
 		}
 
@@ -88,39 +88,39 @@ namespace ReaserchPaper.Assemblier
 
 		private void AddLocalVector(Vector vector, Grid.Grid.Element element, int area, double hx, double hy)
 		{
-			//lock (_lock)
-			//{
-			var x1 = _grid.Nodes[element.indexes[0]].X;
-			var x2 = _grid.Nodes[element.indexes[1]].X;
-			var y1 = _grid.Nodes[element.indexes[0]].Y;
-			var y2 = _grid.Nodes[element.indexes[2]].Y;
+			lock (_lock)
+			{
+				var x1 = _grid.Nodes[element.indexes[0]].X;
+				var x2 = _grid.Nodes[element.indexes[1]].X;
+				var y1 = _grid.Nodes[element.indexes[0]].Y;
+				var y2 = _grid.Nodes[element.indexes[2]].Y;
 
-			vector[element.indexes[0]] += hx * hy / 36 * (4 * _problemParametrs.F1(x1, y1, area) + 2 * _problemParametrs.F1(x2, y1, area) + 2 * _problemParametrs.F1(x1, y2, area) + _problemParametrs.F1(x2, y2, area));
-			vector[element.indexes[1]] += hx * hy / 36 * (2 * _problemParametrs.F1(x1, y1, area) + 4 * _problemParametrs.F1(x2, y1, area) + _problemParametrs.F1(x1, y2, area) + 2 * _problemParametrs.F1(x2, y2, area));
-			vector[element.indexes[2]] += hx * hy / 36 * (2 * _problemParametrs.F1(x1, y1, area) + _problemParametrs.F1(x2, y1, area) + 4 * _problemParametrs.F1(x1, y2, area) + 2 * _problemParametrs.F1(x2, y2, area));
-			vector[element.indexes[3]] += hx * hy / 36 * (_problemParametrs.F1(x1, y1, area) + 2 * _problemParametrs.F1(x2, y1, area) + 2 * _problemParametrs.F1(x1, y2, area) + 4 * _problemParametrs.F1(x2, y2, area));
-			//	}
+				vector[element.indexes[0]] += hx * hy / 36 * (4 * _problemParametrs.F1(x1, y1, area) + 2 * _problemParametrs.F1(x2, y1, area) + 2 * _problemParametrs.F1(x1, y2, area) + _problemParametrs.F1(x2, y2, area));
+				vector[element.indexes[1]] += hx * hy / 36 * (2 * _problemParametrs.F1(x1, y1, area) + 4 * _problemParametrs.F1(x2, y1, area) + _problemParametrs.F1(x1, y2, area) + 2 * _problemParametrs.F1(x2, y2, area));
+				vector[element.indexes[2]] += hx * hy / 36 * (2 * _problemParametrs.F1(x1, y1, area) + _problemParametrs.F1(x2, y1, area) + 4 * _problemParametrs.F1(x1, y2, area) + 2 * _problemParametrs.F1(x2, y2, area));
+				vector[element.indexes[3]] += hx * hy / 36 * (_problemParametrs.F1(x1, y1, area) + 2 * _problemParametrs.F1(x2, y1, area) + 2 * _problemParametrs.F1(x1, y2, area) + 4 * _problemParametrs.F1(x2, y2, area));
+			}
 		}
 		private void AddLocalMatrix(Matrix matrix, double[][] localMatrix, Grid.Grid.Element element)
 		{
-			//	lock (_lock)
-			//	{
-			for (int p = 0; p < 4; p++)
+			lock (_lock)
 			{
-				matrix.Di[element.indexes[p]] += localMatrix[p][p];
-
-				int ibeg = matrix.Ia[element.indexes[p]];
-				int iend = matrix.Ia[element.indexes[p] + 1];
-				for (int k = 0; k < p; k++)
+				for (int p = 0; p < 4; p++)
 				{
-					int index = Tools.BinarySearch(matrix.Ja, element.indexes[k], ibeg, iend - 1);
+					matrix.Di[element.indexes[p]] += localMatrix[p][p];
 
-					matrix.Au[index] += localMatrix[k][p];
-					matrix.Al[index] += localMatrix[p][k];
-					ibeg++;
+					int ibeg = matrix.Ia[element.indexes[p]];
+					int iend = matrix.Ia[element.indexes[p] + 1];
+					for (int k = 0; k < p; k++)
+					{
+						int index = Tools.BinarySearch(matrix.Ja, element.indexes[k], ibeg, iend - 1);
+
+						matrix.Au[index] += localMatrix[k][p];
+						matrix.Al[index] += localMatrix[p][k];
+						ibeg++;
+					}
 				}
 			}
-			//}
 		}
 
 		//private double[][] GetGradTMatrix(int elemNumber, double hx, double hy, double xLeft, double yLower)

@@ -49,7 +49,7 @@ namespace FemProducer
 			consoleLogger.Log(message: "The slae was solved!");
 			resultProducer.NumericalSolves.Add(solve);
 
-			solvesOutputer.PrintResult(-1, false);
+			solvesOutputer.PrintResult(-1, true);
 			//consoleLogger.Log();
 			//solvesOutputer.Show(outputFile);
 		}

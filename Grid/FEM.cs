@@ -7,6 +7,26 @@
 		static double X1(double X, double xRight, double hx) => (xRight - X) / hx;
 		static double X2(double X, double xLeft, double hx) => (X - xLeft) / hx;
 
+		public static double Psi(int i, Grid.Grid.Node node, Point xLimits, Point yLimits)
+		{
+			double hx = xLimits.Y - xLimits.X;
+			double hy = yLimits.Y - yLimits.X;
+
+			switch (i)
+			{
+				case 0:
+					return X1(node.X, xLimits.Y, hx) * Y1(node.Y, yLimits.Y, hy);
+				case 1:
+					return X2(node.X, xLimits.X, hx) * Y1(node.Y, yLimits.Y, hy);
+				case 2:
+					return X1(node.X, xLimits.Y, hx) * Y2(node.Y, yLimits.X, hy);
+				case 3:
+					return X2(node.X, xLimits.X, hx) * Y2(node.Y, yLimits.X, hy);
+				default:
+					throw new Exception("Ne verniy i!");
+			}
+		}
+
 		static double[,] G = new double[,]
 		{
 			{1,-1 },
@@ -17,6 +37,12 @@
 			 { 2, 1 },
 			{ 1, 2 }
 		};
+
+		//static double[,] M = new double[,]
+		//{
+		//	 { 2, 1 },
+		//	{ 1, 2 }
+		//};
 
 		static int mu(int i) => ((i) % 2);
 		static int nu(int i) => ((i) / 2);
