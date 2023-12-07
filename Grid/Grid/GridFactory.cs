@@ -11,7 +11,7 @@ namespace ReaserchPaper.Grid
 
 		private int GetAreaNumber(double[][] subDomains, Grid.Node node)
 		{
-			for (int i = subDomains.Length - 1; i >= 0; i--)//идём в обратном порядке чтобы не было бага, когда в качестве подобласти возвращается 0 (0 - вся расчётная область, которая уже вкл. подобласти)
+			for (int i = subDomains.Length - 1; i > -1; i--)//идём в обратном порядке чтобы не было бага, когда в качестве подобласти возвращается 0 (0 - вся расчётная область, которая уже вкл. подобласти)
 				if (subDomains[i][2] <= node.Y && node.Y <= subDomains[i][3])
 					if (subDomains[i][0] <= node.X && node.X <= subDomains[i][1])
 						return i;
@@ -86,7 +86,6 @@ namespace ReaserchPaper.Grid
 						for (int k = 0; k < indexes.Length; k++)
 							indexes[k] -= missingNodes[indexes[k]];
 						elements.Add(new Grid.Element(indexes));
-
 					}
 				}
 			}
@@ -123,6 +122,7 @@ namespace ReaserchPaper.Grid
 				subDomains[i] = GetRectangleArea(new Point[] { lines[areas[i][2]][areas[i][0]], lines[areas[i][2]][areas[i][1]],
 							lines[areas[i][3]][areas[i][0]], lines[areas[i][3]][areas[i][1]] });
 			}
+			///	subDomains = new double[][] {}
 
 			var result = MakeSplit(n, gridParametrs.qx, XW, gridParametrs.xSplitsCount);
 			var IX = result.Item1;
@@ -151,6 +151,8 @@ namespace ReaserchPaper.Grid
 			//}
 			using (StreamWriter sw = new StreamWriter("grid2.txt"))
 			{
+				sw.Write(string.Format("{0} {1} {2} {3}", XW[0] - 1, XW[XW.Length - 1] + 1, YW[0] - 1, YW[YW.Length - 1] + 1));
+				sw.Write('\n');
 				sw.WriteLine(elements.Count);
 				foreach (var element in elements)
 				{
@@ -162,13 +164,19 @@ namespace ReaserchPaper.Grid
 				}
 			}
 
+			Start();
+
+			return new Grid(new double[] { 0 }, x, y, hy, hx, null, null, IX, IY, gridParametrs.areas, n, m, elements, nodes);
+		}
+
+		void Start()
+		{
 			ProcessStartInfo start = new ProcessStartInfo();
 			start.FileName = "C:\\Python\\python.exe";
 			start.Arguments = string.Format("grid2.py");
 			start.UseShellExecute = false;
 			start.RedirectStandardOutput = true;
 			Process.Start(start);
-			return new Grid(new double[] { 0 }, x, y, hy, hx, null, null, IX, IY, gridParametrs.areas, n, m, elements, nodes);
 		}
 
 		/// <summary>
