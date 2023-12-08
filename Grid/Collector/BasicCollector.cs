@@ -115,7 +115,7 @@ namespace FemProducer.Assemblier
 			_matrix = M + G;
 
 			GetBoundaryConditions();
-
+			Console.WriteLine("Done with boundary " + DateTime.UtcNow);
 			return new Slae(_matrix, _vector);
 		}
 
@@ -168,11 +168,12 @@ namespace FemProducer.Assemblier
 			int area;
 			//нижняя граница
 			if (_problemParametrs.boundaryConditions[0] == 1)//первое краевое
-				for (int i = 0; i < _grid.N; i++)
+				Parallel.For(0, _grid.N, i =>
 				{
 					area = _grid.GetAreaNumber(i, 0);
-					AccountFirstCondition(i, i, 0, area);
-				}
+					var node = _grid.Nodes[i];
+					AccountFirstCondition(i, node, area);
+				});
 			else //второе краевое            
 				for (int i = 0; i < _grid.N - 1; i++)
 				{
@@ -184,7 +185,8 @@ namespace FemProducer.Assemblier
 				for (int i = _matrix.Size - 1; i > _matrix.Size - _grid.N - 1; i--)
 				{
 					area = _grid.GetAreaNumber(i % _grid.N, _grid.M - 1);
-					AccountFirstCondition(i, i % _grid.N, _grid.M - 1, area);
+					var node = _grid.Nodes[i];
+					AccountFirstCondition(i, node, area);
 				}
 			else
 				for (int i = 0; i < _grid.N - 1; i++)
@@ -197,7 +199,8 @@ namespace FemProducer.Assemblier
 				for (int i = _grid.N; i < _matrix.Size - _grid.N - 1; i += _grid.N)
 				{
 					area = _grid.GetAreaNumber(0, i / _grid.N);
-					AccountFirstCondition(i, 0, i / _grid.N, area);
+					var node = _grid.Nodes[i];
+					AccountFirstCondition(i, node, area);
 				}
 			else
 				for (int i = 0; i < _grid.N - 1; i++)
@@ -209,7 +212,8 @@ namespace FemProducer.Assemblier
 				for (int i = 2 * _grid.N - 1; i < _matrix.Size - 1; i += _grid.N)
 				{
 					area = _grid.GetAreaNumber(_grid.N - 1, i / _grid.N);
-					AccountFirstCondition(i, _grid.N - 1, i / _grid.N, area);
+					var node = _grid.Nodes[i];
+					AccountFirstCondition(i, node, area);
 				}
 			else
 				for (int i = 0; i < _grid.N - 1; i++)
@@ -233,11 +237,11 @@ namespace FemProducer.Assemblier
 		//	MakeSLau(timeLayer);
 		//	GetBoundaryConditions(timeLayer);
 		//}
-		private void AccountFirstCondition(int k, int i, int j, int area)
+		private void AccountFirstCondition(int k, Grid.Node node, int area)
 		{
 			_matrix.ZeroingRow(k);
 			_matrix.Di[k] = 1;
-			_vector[k] = _problemParametrs.Func1(_grid.X[i], _grid.Y[j], area);
+			_vector[k] = _problemParametrs.Func1(node.X, node.Y, area);
 		}
 
 		private void AccountSecondConditionHorizontal(int i, int j, int area, NormalVectorDirection normal)
