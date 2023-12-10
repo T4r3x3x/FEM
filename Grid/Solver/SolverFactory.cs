@@ -1,8 +1,6 @@
-﻿using FemProducer.DTO;
+﻿using FemProducer.Models;
 
-using ResearchPaper;
-
-namespace ReaserchPaper.Solver
+namespace FemProducer.Solver
 {
 	internal class SolverFactory
 	{

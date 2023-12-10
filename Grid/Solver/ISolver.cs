@@ -1,4 +1,8 @@
-﻿namespace ReaserchPaper.Solver
+﻿using FemProducer.Models;
+
+using Tensus;
+
+namespace FemProducer.Solver
 {
 	internal interface ISolver
 	{

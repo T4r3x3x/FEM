@@ -1,6 +1,4 @@
-﻿using ReaserchPaper.Logger;
-
-namespace FemProducer.Logger
+﻿namespace FemProducer.Logger
 {
 	internal class TxtLogger : ILogger
 	{

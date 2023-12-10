@@ -1,6 +1,6 @@
-﻿using ResearchPaper;
+﻿using Tensus;
 
-namespace ReaserchPaper
+namespace FemProducer.Models
 {
 	internal class Slae
 	{

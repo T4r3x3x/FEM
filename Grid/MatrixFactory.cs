@@ -1,8 +1,8 @@
-﻿using ReaserchPaper.Grid;
+﻿using FemProducer.Grid;
 
-using ResearchPaper;
+using Tensus;
 
-namespace Tensus
+namespace FemProducer
 {
 	public class MatrixFactory
 	{
@@ -10,9 +10,9 @@ namespace Tensus
 		private List<double> _al, _au;
 		private List<int> _ja, _ia;
 
-		private readonly Grid _grid;
+		private readonly GridModel _grid;
 
-		public MatrixFactory(Grid grid)
+		public MatrixFactory(GridModel grid)
 		{
 			_grid = grid;
 		}

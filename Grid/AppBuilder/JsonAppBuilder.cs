@@ -1,18 +1,16 @@
-﻿using FemProducer;
-using FemProducer.DTO;
+﻿using FemProducer.Logger;
+using FemProducer.Models;
 
 using Newtonsoft.Json.Linq;
 
-using ReaserchPaper.Logger;
-
-namespace ReaserchPaper
+namespace FemProducer.AppBuilder
 {
-	internal class JsonTaskBuilder : ITaskBuilder
+	internal class JsonAppBuilder : IAppBuilder
 	{
 		private readonly string _filePath;
 		private readonly ILogger _logger;
 
-		public JsonTaskBuilder(string filePath, ILogger logger)
+		public JsonAppBuilder(string filePath, ILogger logger)
 		{
 			_filePath = filePath;
 			_logger = logger;
@@ -30,9 +28,9 @@ namespace ReaserchPaper
 			return result;
 		}
 
-		GridParameters ITaskBuilder.GetGridParameters() => DeserializeJsonObject<GridParameters>(this._filePath);
+		GridParameters IAppBuilder.GetGridParameters() => DeserializeJsonObject<GridParameters>(_filePath);
 
-		ProblemParametrs ITaskBuilder.GetProblemParameters() => new ProblemParametrs();
-		SolverParameters ITaskBuilder.GetSolverParameters() => DeserializeJsonObject<SolverParameters>(this._filePath);
+		ProblemService IAppBuilder.GetProblemParameters() => new ProblemService();
+		SolverParameters IAppBuilder.GetSolverParameters() => DeserializeJsonObject<SolverParameters>(_filePath);
 	}
 }

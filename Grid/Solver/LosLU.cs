@@ -1,7 +1,8 @@
-﻿using ReaserchPaper;
-using ReaserchPaper.Solver;
+﻿using FemProducer.Models;
 
-namespace ResearchPaper
+using Tensus;
+
+namespace FemProducer.Solver
 {
 	internal class LosLU : ISolver
 	{

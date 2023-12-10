@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace ReaserchPaper
+namespace Tensus
 {
 	public class Vector : IEnumerable<double>
 	{

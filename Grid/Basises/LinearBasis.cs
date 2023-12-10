@@ -1,55 +1,29 @@
 ﻿using FemProducer.Models;
 
-using Tensus;
-
-namespace FemProducer
+namespace FemProducer.Basises
 {
-	internal class FEM
+	internal class LinearBasis
 	{
-		static double Y1(double y, double yUpper, double hy) => (yUpper - y) / hy;
-		static double Y2(double y, double yLower, double hy) => (y - yLower) / hy;
-		static double X1(double X, double xRight, double hx) => (xRight - X) / hx;
-		static double X2(double X, double xLeft, double hx) => (X - xLeft) / hx;
+		public const int NodesCount = 4;
 
-		public static double Psi(int i, Node node, Point xLimits, Point yLimits)
-		{
-			double hx = xLimits.Y - xLimits.X;
-			double hy = yLimits.Y - yLimits.X;
+		private static double Y1(double y, double yUpper, double hy) => (yUpper - y) / hy;
+		private static double Y2(double y, double yLower, double hy) => (y - yLower) / hy;
+		private static double X1(double X, double xRight, double hx) => (xRight - X) / hx;
+		private static double X2(double X, double xLeft, double hx) => (X - xLeft) / hx;
 
-			switch (i)
-			{
-				case 0:
-					return X1(node.X, xLimits.Y, hx) * Y1(node.Y, yLimits.Y, hy);
-				case 1:
-					return X2(node.X, xLimits.X, hx) * Y1(node.Y, yLimits.Y, hy);
-				case 2:
-					return X1(node.X, xLimits.Y, hx) * Y2(node.Y, yLimits.X, hy);
-				case 3:
-					return X2(node.X, xLimits.X, hx) * Y2(node.Y, yLimits.X, hy);
-				default:
-					throw new Exception("Ne verniy i!");
-			}
-		}
-
-		static double[,] G = new double[,]
+		private static double[,] G = new double[,]
 		{
 			{1,-1 },
 			{-1,1 },
 		};
-		static double[,] M = new double[,]
+		private static double[,] M = new double[,]
 		{
 			 { 2, 1 },
 			{ 1, 2 }
 		};
 
-		//static double[,] M = new double[,]
-		//{
-		//	 { 2, 1 },
-		//	{ 1, 2 }
-		//};
-
-		static int mu(int i) => ((i) % 2);
-		static int nu(int i) => ((i) / 2);
+		private static int mu(int i) => i % 2;
+		private static int nu(int i) => i / 2;
 
 		public static double[][] GetMassMatrix(double hx, double hy)// Grid.M - номер кэ 
 		{
@@ -65,6 +39,7 @@ namespace FemProducer
 
 			return result;
 		}
+
 		public static double[][] GetStiffnessMatrix(double hx, double hy)// Grid.M - номер кэ 
 		{
 			// инициализация
@@ -80,7 +55,26 @@ namespace FemProducer
 			return result;
 		}
 
-		//public static double SolutionInPoint(FiniteElement element, Point point)
+		public double[] GetLocalVector(IList<Node> nodes, Func<Node, double> func)
+		{
+			double[] result = new double[NodesCount];
+
+			var hx = nodes[1].X - nodes[0].X;
+			var hy = nodes[2].Y - nodes[0].Y;
+
+			var funcValues = new double[NodesCount];
+			for (int i = 0; i < NodesCount; i++)
+				funcValues[i] = func(nodes[i]);
+
+			result[0] = hx * hy / 36 * (4 * funcValues[0] + 2 * funcValues[1] + 2 * funcValues[2] + funcValues[3]);
+			result[1] = hx * hy / 36 * (2 * funcValues[0] + 4 * funcValues[1] + funcValues[2] + 2 * funcValues[3]);
+			result[2] = hx * hy / 36 * (2 * funcValues[0] + funcValues[1] + 4 * funcValues[2] + 2 * funcValues[3]);
+			result[3] = hx * hy / 36 * (funcValues[0] + 2 * funcValues[1] + 2 * funcValues[2] + 4 * funcValues[3]);
+
+			return result;
+		}
+
+		//public static double SolutionInPoint(Point point)
 		//{
 		//	double result = 0;
 		//	Master.Slau.p.Elements[elemNumber] * X1() * Y1(point.y, yBoundaries.y, hy)

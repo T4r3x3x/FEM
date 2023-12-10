@@ -1,6 +1,10 @@
-﻿namespace ReaserchPaper.Grid
+﻿using FemProducer.Models;
+
+using Tensus;
+
+namespace FemProducer.Grid
 {
-	public class Grid
+	public partial class GridModel
 	{
 		public double[] T { get; private set; }
 		public double[] X { get; private set; }
@@ -10,14 +14,18 @@
 		public double[] Ht { get; private set; }
 		public int[][] Boreholes { get; private set; }
 
-		public List<Element> Elements { get; private set; }
+		public List<FiniteElement> Elements { get; private set; }
 		public List<Node> Nodes { get; private set; }
+		public List<BoundaryNode> FirstBoundaryNodes { get; private set; }
+		public List<BoundaryNode> SecondBoundaryNodes { get; private set; }
+		public List<BoundaryNode> ThirdBoundaryNodes { get; private set; }
 
 		private int[] _IX, _IY;
 		private int[][] _areas;
 		private int _n, _m;
+		private readonly int nodesInElementCount = 4; //количество узлов в кэ.
 
-		public Grid(double[] t, double[] x, double[] y, double[] hy, double[] hx, double[] ht, int[][] boreholes, int[] iX, int[] iY, int[][] areas, int n, int m, List<Element> elements, List<Node> nodes)
+		public GridModel(double[] t, double[] x, double[] y, double[] hy, double[] hx, double[] ht, int[][] boreholes, int[] iX, int[] iY, int[][] areas, int n, int m, List<FiniteElement> elements, List<Node> nodes)
 		{
 			T = t;
 			X = x;
@@ -54,6 +62,39 @@
 				}
 			}
 			return -1;
+		}
+
+		public IList<Node> ElementToNode(FiniteElement element)
+		{
+			Node[] nodes = new Node[nodesInElementCount];
+
+			for (int i = 0; i < nodesInElementCount; i++)
+				nodes[i] = Nodes[element.NodesIndexes[i]];
+
+			return nodes;
+		}
+
+		/// <summary>
+		/// Возвращает кэ, в котором находится точка.
+		/// </summary>
+		/// <param name="point"></param>
+		/// <returns></returns>
+		public FiniteElement GetElement(Point point)
+		{
+			for (int i = 0; i < Elements.Count; i++)
+				if (IsElementContainPoint(Elements[i], point))
+					return Elements[i];
+
+			return null;
+		}
+
+		private bool IsElementContainPoint(FiniteElement element, Point point)
+		{
+			if (Nodes[element.NodesIndexes[0]].X < point.X && point.X < Nodes[element.NodesIndexes[1]].X)
+				if (Nodes[element.NodesIndexes[0]].Y < point.Y && point.Y < Nodes[element.NodesIndexes[3]].Y)
+					return true;
+
+			return false;
 		}
 
 		public bool IsBorehole(int xIndex, int yIndex)
@@ -99,32 +140,6 @@
 			}
 
 			return xLine + xOffset + (yLine + yOffset) * N;
-		}
-
-
-		public class Node
-		{
-			public double X, Y;
-
-			public Node(double x, double y)
-			{
-				X = x;
-				Y = y;
-			}
-
-			public override string ToString() => X + " " + Y;
-
-		}
-
-
-		public class Element
-		{
-			public int[] indexes = new int[4];
-
-			public Element(int[] indexes)
-			{
-				this.indexes = indexes;
-			}
 		}
 	}
 }

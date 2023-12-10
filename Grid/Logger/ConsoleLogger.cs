@@ -1,4 +1,4 @@
-﻿namespace ReaserchPaper.Logger
+﻿namespace FemProducer.Logger
 {
 	internal class ConsoleLogger : ILogger
 	{

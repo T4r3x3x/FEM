@@ -1,6 +1,6 @@
-﻿using ReaserchPaper;
+﻿using Tensus;
 
-namespace FemProducer.DTO
+namespace FemProducer.Models
 {
 	/// <summary>
 	/// 
@@ -12,5 +12,5 @@ namespace FemProducer.DTO
 	/// <param name="qy"></param>
 	/// <param name="xSplitsCount"></param>
 	/// <param name="ySplitsCount"></param>
-	internal record GridParameters(Point[][] linesNodes, int[][] areas, double[] qx, double[] qy, List<int> xSplitsCount, List<int> ySplitsCount);
+	public record GridParameters(Point[][] linesNodes, int[][] areas, double[] qx, double[] qy, List<int> xSplitsCount, List<int> ySplitsCount);
 }

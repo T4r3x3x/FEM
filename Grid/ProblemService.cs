@@ -1,10 +1,11 @@
-﻿namespace FemProducer
+﻿using FemProducer.Models;
+
+namespace FemProducer
 {
-	/// <summary>
-	/// Тут хранится все что касается задачи: искомая функция, краевые условия, константы и т.д.
-	/// </summary>
-	public class ProblemParametrs
+	public class ProblemService
 	{
+		private readonly ProblemParametrs _problemParametrs;
+
 		public double Lamda(int area)
 		{
 			switch (area)
@@ -37,15 +38,18 @@
 		public int[] boundaryConditions = new int[4] { 1, 1, 1, 1 };
 
 
-		public double Func1(double x, double y, int area)
+		public double Function(BoundaryNode boundaryNode)
 		{
-			switch (area)
+			var x = boundaryNode.node.X;
+			var y = boundaryNode.node.Y;
+
+			return boundaryNode.nodeIndex switch
 			{
 				//  case 0: return Math.Pow(Math.E,Math.PI*y)*Math.Sin(Math.PI*X);
 				//  case 1: return Math.Pow(Math.E, Math.PI * y) * Math.Sin(Math.PI * X)/10;
-				default: return x + y;
-					//default: return X * X * X + y * y * y;
-			}
+				_ => x + y
+				//default: return X * X * X + y * y * y;
+			};
 		}
 
 		public double DivFuncX1(double x, double y, int area)

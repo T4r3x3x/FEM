@@ -1,26 +1,19 @@
-﻿using ReaserchPaper;
-using ReaserchPaper.Assemblier;
-using ReaserchPaper.Grid;
-
-using ResearchPaper;
+﻿using FemProducer.Models;
 
 using Tensus;
 
-namespace FemProducer.Assemblier
+namespace FemProducer.Collector
 {
-	internal class BasicCollector : CollectorBase
+	internal class SimpleCollector : AbstractCollector
 	{
-		private readonly ICollector _collector;
-		private readonly Grid _grid;
+		private readonly Grid.GridModel _grid;
 		private readonly MatrixFactory _matrixFactory;
-		private readonly Slae _slae;
-		private readonly ProblemParametrs _problemParametrs;
+		private readonly ProblemService _problemParametrs;
 		private Matrix _matrix;
 		private Vector _vector;
 
-		public BasicCollector(ICollector collector, Grid grid, MatrixFactory matrixFactory, ProblemParametrs problemParametrs) : base(grid, matrixFactory, problemParametrs)
+		public SimpleCollector(ICollectorBase collector, Grid.GridModel grid, MatrixFactory matrixFactory, ProblemService problemParametrs) : base(collector)
 		{
-			_collector = collector;
 			_grid = grid;
 			_matrixFactory = matrixFactory;
 			_problemParametrs = problemParametrs;
@@ -30,10 +23,10 @@ namespace FemProducer.Assemblier
 			//Slae slae = new Slae(matrix, vector);
 		}
 
-		public Slae Collect(int timeLayer)
+		public override Slae Collect(int timeLayer)
 		{
 			ResetSlae();
-			var result = _collector.Collect();
+			var result = _collectorBase.Collect();
 			var matrixes = result.Item1;
 			_vector = result.Item2;
 			var slae = GetSlae(matrixes[0], matrixes[1]);
@@ -165,62 +158,10 @@ namespace FemProducer.Assemblier
 
 		private void GetBoundaryConditions()
 		{
-			int area;
-			//нижняя граница
-			if (_problemParametrs.boundaryConditions[0] == 1)//первое краевое
-				Parallel.For(0, _grid.N, i =>
+			Parallel.ForEach(_grid.FirstBoundaryNodes, boundaryNode =>
 				{
-					area = _grid.GetAreaNumber(i, 0);
-					var node = _grid.Nodes[i];
-					AccountFirstCondition(i, node, area);
+					AccountFirstCondition(boundaryNode);
 				});
-			else //второе краевое            
-				for (int i = 0; i < _grid.N - 1; i++)
-				{
-					area = _grid.GetAreaNumber(i, 0);
-					AccountSecondConditionVertical(i, 0, area, NormalVectorDirection.NonCoDirectional);
-				}
-
-			if (_problemParametrs.boundaryConditions[2] == 1)//верхняя граница
-				for (int i = _matrix.Size - 1; i > _matrix.Size - _grid.N - 1; i--)
-				{
-					area = _grid.GetAreaNumber(i % _grid.N, _grid.M - 1);
-					var node = _grid.Nodes[i];
-					AccountFirstCondition(i, node, area);
-				}
-			else
-				for (int i = 0; i < _grid.N - 1; i++)
-				{
-					area = _grid.GetAreaNumber(i, _grid.M - 1);
-					AccountSecondConditionVertical(i, _grid.M - 1, area, NormalVectorDirection.CoDirectional);
-				}
-
-			if (_problemParametrs.boundaryConditions[3] == 1)//левая гравнь
-				for (int i = _grid.N; i < _matrix.Size - _grid.N - 1; i += _grid.N)
-				{
-					area = _grid.GetAreaNumber(0, i / _grid.N);
-					var node = _grid.Nodes[i];
-					AccountFirstCondition(i, node, area);
-				}
-			else
-				for (int i = 0; i < _grid.N - 1; i++)
-				{
-					area = _grid.GetAreaNumber(0, i / _grid.N);
-					AccountSecondConditionHorizontal(0, i / _grid.N, area, NormalVectorDirection.NonCoDirectional);
-				}
-			if (_problemParametrs.boundaryConditions[1] == 1)//правая граница
-				for (int i = 2 * _grid.N - 1; i < _matrix.Size - 1; i += _grid.N)
-				{
-					area = _grid.GetAreaNumber(_grid.N - 1, i / _grid.N);
-					var node = _grid.Nodes[i];
-					AccountFirstCondition(i, node, area);
-				}
-			else
-				for (int i = 0; i < _grid.N - 1; i++)
-				{
-					area = _grid.GetAreaNumber(_grid.N - 1, i);
-					AccountSecondConditionHorizontal(_grid.N - 1, i, area, NormalVectorDirection.CoDirectional);
-				}
 
 		}
 		//public void Collect()
@@ -237,11 +178,11 @@ namespace FemProducer.Assemblier
 		//	MakeSLau(timeLayer);
 		//	GetBoundaryConditions(timeLayer);
 		//}
-		private void AccountFirstCondition(int k, Grid.Node node, int area)
+		private void AccountFirstCondition(BoundaryNode boundaryNode)
 		{
-			_matrix.ZeroingRow(k);
-			_matrix.Di[k] = 1;
-			_vector[k] = _problemParametrs.Func1(node.X, node.Y, area);
+			_matrix.ZeroingRow(boundaryNode.nodeIndex);
+			_matrix.Di[boundaryNode.nodeIndex] = 1;
+			_vector[boundaryNode.nodeIndex] = _problemParametrs.Function(boundaryNode);
 		}
 
 		private void AccountSecondConditionHorizontal(int i, int j, int area, NormalVectorDirection normal)
@@ -254,6 +195,8 @@ namespace FemProducer.Assemblier
 			_vector[i] += (int)normal * _problemParametrs.Lamda(area) * _grid.Hy[i] / 6 * (2 * _problemParametrs.DivFuncX1(_grid.X[i], _grid.Y[j], area) + _problemParametrs.DivFuncX1(_grid.X[i], _grid.Y[j + 1], area));
 			_vector[i + 1] += (int)normal * _problemParametrs.Lamda(area) * _grid.Hy[i] / 6 * (_problemParametrs.DivFuncX1(_grid.X[i], _grid.Y[j], area) + 2 * _problemParametrs.DivFuncX1(_grid.X[i], _grid.Y[j + 1], area));
 		}
+
+
 
 		//private void GetBoundaryConditions(int timeLayer)
 		//{

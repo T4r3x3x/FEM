@@ -1,15 +1,17 @@
 ﻿using System.Diagnostics;
 
-using FemProducer.DTO;
+using FemProducer.Models;
 
-namespace ReaserchPaper.Grid
+using Tensus;
+
+namespace FemProducer.Grid
 {
-	internal class GridFactory
+	public class GridFactory : IGridFactory
 	{
 		private const int boundariesInLineCount = 2;
 		private const int countOfNodesInElement = 4;
 
-		private int GetAreaNumber(double[][] subDomains, Grid.Node node)
+		private int GetAreaNumber(double[][] subDomains, Node node)
 		{
 			for (int i = subDomains.Length - 1; i > -1; i--)//идём в обратном порядке чтобы не было бага, когда в качестве подобласти возвращается 0 (0 - вся расчётная область, которая уже вкл. подобласти)
 				if (subDomains[i][2] <= node.Y && node.Y <= subDomains[i][3])
@@ -19,16 +21,16 @@ namespace ReaserchPaper.Grid
 			return -1;
 		}
 
-		private (List<Grid.Node>, List<int>) GetNodes(int[][] areas, double[][] subDomains, Point[][] lines, double[] x, double[] y)
+		private (List<Node>, List<int>) GetNodes(int[][] areas, double[][] subDomains, Point[][] lines, double[] x, double[] y)
 		{
-			List<Grid.Node> nodes = new List<Grid.Node>();
+			List<Node> nodes = new List<Node>();
 			List<int> missingNodes = new List<int>();
 			int missingNodesCount = 0;
-			Grid.Node node;
+			Node node;
 			for (int i = 0; i < y.Length; i++)
 				for (int j = 0; j < x.Length; j++)
 				{
-					node = new Grid.Node(x[j], y[i]);
+					node = new Node(x[j], y[i]);
 					var area = GetAreaNumber(subDomains, node);
 					if (area != -1)
 					{
@@ -68,10 +70,10 @@ namespace ReaserchPaper.Grid
 			return (XW.ToArray(), YW.ToArray());
 		}
 
-		private List<Grid.Element> GetElements(double[] x, double[] y, double[][] subDomains, List<int> missingNodes)
+		private List<FiniteElement> GetElements(double[] x, double[] y, double[][] subDomains, List<int> missingNodes)
 		{
-			List<Grid.Element> elements = new List<Grid.Element>();
-			int[] indexes = new int[4];
+			List<FiniteElement> elements = new List<FiniteElement>();
+			int[] NodesIndexes = new int[4];
 			for (int j = 0; j < y.Length - 1; j++)
 			{
 				int jx_0 = j * x.Length;
@@ -79,13 +81,13 @@ namespace ReaserchPaper.Grid
 
 				for (int i = 0; i < x.Length - 1; i++)
 				{
-					var node = new Grid.Node((x[i] + x[i + 1]) / 2.0, (y[j] + y[j + 1]) / 2.0);
+					var node = new Node((x[i] + x[i + 1]) / 2.0, (y[j] + y[j + 1]) / 2.0);
 					if (GetAreaNumber(subDomains, node) != -1)
 					{
-						indexes = new int[4] { jx_0 + i, jx_0 + i + 1, jx_1 + i, jx_1 + i + 1 };
-						for (int k = 0; k < indexes.Length; k++)
-							indexes[k] -= missingNodes[indexes[k]];
-						elements.Add(new Grid.Element(indexes));
+						NodesIndexes = new int[4] { jx_0 + i, jx_0 + i + 1, jx_1 + i, jx_1 + i + 1 };
+						for (int k = 0; k < NodesIndexes.Length; k++)
+							NodesIndexes[k] -= missingNodes[NodesIndexes[k]];
+						elements.Add(new FiniteElement(NodesIndexes));
 					}
 				}
 			}
@@ -93,7 +95,7 @@ namespace ReaserchPaper.Grid
 		}
 
 		//toDo вынести всё это в отдельный метод.
-		public Grid GetGrid(GridParameters gridParametrs)
+		public GridModel GetGrid(GridParameters gridParametrs)
 		{
 			double h;
 			int startPos = 0;
@@ -156,17 +158,17 @@ namespace ReaserchPaper.Grid
 				sw.WriteLine(elements.Count);
 				foreach (var element in elements)
 				{
-					sw.WriteLine(nodes[element.indexes[0]].ToString().Replace(",", "."));
-					sw.WriteLine(nodes[element.indexes[1]].ToString().Replace(",", "."));
-					sw.WriteLine(nodes[element.indexes[3]].ToString().Replace(",", "."));
-					sw.WriteLine(nodes[element.indexes[2]].ToString().Replace(",", "."));
+					sw.WriteLine(nodes[element.NodesIndexes[0]].ToString().Replace(",", "."));
+					sw.WriteLine(nodes[element.NodesIndexes[1]].ToString().Replace(",", "."));
+					sw.WriteLine(nodes[element.NodesIndexes[3]].ToString().Replace(",", "."));
+					sw.WriteLine(nodes[element.NodesIndexes[2]].ToString().Replace(",", "."));
 					sw.WriteLine();
 				}
 			}
 
 			Start();
 
-			return new Grid(new double[] { 0 }, x, y, hy, hx, null, null, IX, IY, gridParametrs.areas, n, m, elements, nodes);
+			return new GridModel(new double[] { 0 }, x, y, hy, hx, null, null, IX, IY, gridParametrs.areas, n, m, elements, nodes);
 		}
 
 		void Start()
@@ -201,9 +203,9 @@ namespace ReaserchPaper.Grid
 			return new double[4] { minX, maxX, minY, maxY };
 		}
 
-		Grid.Node TransformRectangleToQuadrilateral(Grid.Node node, Point xLimits, Point yLimits, Point[] points)
+		Node TransformRectangleToQuadrilateral(Node node, Point xLimits, Point yLimits, Point[] points)
 		{
-			Grid.Node newNode = new Grid.Node(0, 0);
+			Node newNode = new Node(0, 0);
 
 			for (int j = 0; j < countOfNodesInElement; j++)
 				newNode.X += FEM.Psi(j, node, xLimits, yLimits) * points[j].X;

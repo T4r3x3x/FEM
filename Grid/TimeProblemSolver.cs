@@ -1,11 +1,9 @@
-﻿using FemProducer.Assemblier;
+﻿using FemProducer.AppBuilder;
+using FemProducer.Collector;
+using FemProducer.Grid;
 using FemProducer.Logger;
-
-using ReaserchPaper;
-using ReaserchPaper.Assemblier;
-using ReaserchPaper.Grid;
-using ReaserchPaper.Logger;
-using ReaserchPaper.Solver;
+using FemProducer.Models;
+using FemProducer.Solver;
 
 using Tensus;
 
@@ -16,28 +14,28 @@ namespace FemProducer
 		void IProblemSolver.Solve(string configureFile, string outputFile)
 		{
 			ConsoleLogger consoleLogger = new();
-			ITaskBuilder taskBuilder = new JsonTaskBuilder(configureFile, consoleLogger);
+			IAppBuilder taskBuilder = new JsonAppBuilder(configureFile, consoleLogger);
 
 			var problemParameters = taskBuilder.GetProblemParameters();
 			var solverParameters = taskBuilder.GetSolverParameters();
 			var gridParameters = taskBuilder.GetGridParameters();
 
-			GridFactory gridFactory = new GridFactory();
+			IGridFactory gridFactory = new GridFactory();
 			SolverFactory solverFactory = new SolverFactory();
 
 			ISolver solver = solverFactory.CreateSolver(solverParameters);
-			Grid grid = gridFactory.GetGrid(gridParameters);
+			GridModel grid = gridFactory.GetGrid(gridParameters);
 
 			consoleLogger.Log("The grid was built!");
 
 			MatrixFactory matrixFactory = new(grid);
 
 			CollectorBase collector = new(grid, matrixFactory, problemParameters);
-			BasicCollector timeCollector = new BasicCollector(collector, grid, matrixFactory, problemParameters);
+			SimpleCollector timeCollector = new SimpleCollector(collector, grid, matrixFactory, problemParameters);
 
-			ResultProducer resultProducer = new ResultProducer(problemParameters, grid);
+			ResultService resultProducer = new ResultService(problemParameters, grid);
 
-			Outputer<TxtLogger> solvesOutputer = new(new TxtLogger("results"), grid, resultProducer, problemParameters);
+			SolutionService<TxtLogger> solvesOutputer = new(new TxtLogger("results"), grid, resultProducer, problemParameters);
 
 			Vector solve = new(grid.NodesCount);
 

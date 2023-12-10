@@ -1,4 +1,6 @@
-﻿namespace FemProducer
+﻿using System.Diagnostics;
+
+namespace MyTools
 {
 	public static class Tools
 	{
@@ -16,6 +18,7 @@
 
 			return list[l] == value ? l : -1;
 		}
+
 		/// <summary>
 		/// Умножает элементы матрицы на заданный коэффициент.
 		/// </summary>
@@ -26,6 +29,20 @@
 			for (int p = 0; p < 4; p++)
 				for (int k = 0; k < 4; k++)
 					localMatrix[p][k] *= coefficient;
+		}
+
+		/// <summary>
+		/// Запускает python скрипт.
+		/// </summary>
+		/// <param name="scriptPath">Путь, в котором находится скрипт</param>
+		public static void OpenPythonScript(string scriptPath)
+		{
+			ProcessStartInfo start = new ProcessStartInfo();
+			start.FileName = "python";
+			start.Arguments = string.Format(scriptPath);
+			start.UseShellExecute = false;
+			start.RedirectStandardOutput = true;
+			Process.Start(start);
 		}
 	}
 }

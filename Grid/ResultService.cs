@@ -1,28 +1,30 @@
-﻿using FemProducer;
+﻿using FemProducer.Grid;
 
-namespace ReaserchPaper
+using Tensus;
+
+namespace FemProducer
 {
-	internal class ResultProducer
+	internal class ResultService
 	{
 		public IList<Vector> NumericalSolves { get; private set; } = new List<Vector>();
 		public IList<Vector> AnalyticsSolves { get; private set; } = new List<Vector>();
 
-		private readonly Grid.Grid _grid;
+		private readonly GridModel _grid;
 
-		public ResultProducer(ProblemParametrs problemParametrs, Grid.Grid grid)
+		public ResultService(ProblemService problemParametrs, GridModel grid)
 		{
 			_grid = grid;
 			CalculateAnalysticsSolves(problemParametrs);
 		}
 
-		private void CalculateAnalysticsSolves(ProblemParametrs problemParametrs)
+		private void CalculateAnalysticsSolves(ProblemService problemService)
 		{
 			//for (int t = 0; t < _grid.TimeLayersCount; t++)
 			//{
 			var exactSolution = new Vector(_grid.NodesCount);
 			for (int i = 0; i < _grid.M; i++)
 				for (int j = 0; j < _grid.N; j++)
-					exactSolution[i * _grid.N + j] = problemParametrs.Func1(_grid.X[j], _grid.Y[i], _grid.GetAreaNumber(j, i));
+					exactSolution[i * _grid.N + j] = problemService.Function(_grid.X[j], _grid.Y[i], _grid.GetAreaNumber(j, i));
 			AnalyticsSolves.Add(exactSolution);
 			//}
 		}

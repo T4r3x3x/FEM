@@ -1,6 +1,4 @@
-﻿using FemProducer;
-
-namespace ResearchPaper
+﻿namespace FemProducer
 {
 	class Startup
 	{

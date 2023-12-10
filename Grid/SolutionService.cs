@@ -1,24 +1,25 @@
-﻿using System.Diagnostics;
-using System.Text;
+﻿using System.Text;
 
-using ReaserchPaper;
-using ReaserchPaper.Grid;
-using ReaserchPaper.Logger;
+using FemProducer.Grid;
+using FemProducer.Logger;
+using FemProducer.Models;
+
+using Tensus;
 
 namespace FemProducer
 {
 	/// <summary>
 	/// Класс отвечает за запись результата работы программы
 	/// </summary>
-	internal class Outputer<TLogger> where TLogger : ILogger
+	internal class SolutionService<TLogger> where TLogger : ILogger
 	{
 		private readonly TLogger _logger;
-		private readonly Grid _grid;
-		private readonly ResultProducer _resultProducer;
+		private readonly GridModel _grid;
+		private readonly ResultService _resultProducer;
 		private readonly StringBuilder stringBuilder = new StringBuilder();
-		private readonly ProblemParametrs _problemParametrs;
+		private readonly ProblemService _problemParametrs;
 
-		public Outputer(TLogger logger, Grid grid, ResultProducer resultProducer, ProblemParametrs problemParametrs)
+		public SolutionService(TLogger logger, GridModel grid, ResultService resultProducer, ProblemService problemParametrs)
 		{
 			_logger = logger;
 			_grid = grid;
@@ -69,25 +70,7 @@ namespace FemProducer
 			Console.WriteLine("\n\n");
 		}
 
-		public void Show(string filePath)
-		{
-			//WriteGrid();
-			foreach (var solve in _resultProducer.NumericalSolves)
-			{
-				WriteSolve(filePath, solve);
-			}
 
-			ProcessStartInfo start = new ProcessStartInfo();
-			start.FileName = "C:\\Python\\python.exe";
-			start.Arguments = string.Format("grid.py");
-			start.UseShellExecute = false;
-			start.RedirectStandardOutput = true;
-			Process.Start(start);
-			start.Arguments = string.Format("pressure.py");
-			Process.Start(start);
-			start.Arguments = string.Format("temperature.py");
-			Process.Start(start);
-		}
 		public void PrintResult(int timeLayer, bool isPrint)
 		{
 			Vector exactSolution = _resultProducer.AnalyticsSolves[0];

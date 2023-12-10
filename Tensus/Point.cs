@@ -1,4 +1,4 @@
-﻿namespace ReaserchPaper
+﻿namespace Tensus
 {
 	public class Point
 	{
@@ -12,7 +12,7 @@
 
 		public void Print()
 		{
-			Console.WriteLine(X + " " + Y);
+			Console.WriteLine($"{X} {Y}");
 		}
 	}
 }

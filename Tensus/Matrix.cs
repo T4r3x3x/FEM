@@ -1,8 +1,6 @@
-﻿using FemProducer;
+﻿using MyTools;
 
-using ReaserchPaper;
-
-namespace ResearchPaper
+namespace Tensus
 {
 	public class Matrix
 	{
