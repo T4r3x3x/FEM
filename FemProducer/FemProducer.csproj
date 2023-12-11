@@ -21,11 +21,24 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Grid\Grid.csproj" />
+    <ProjectReference Include="..\NumericsMethods\NumericsMethods.csproj" />
     <ProjectReference Include="..\SlaeSolver\SlaeSolver.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <None Update="Confige.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="PythonScripts\grid.py">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="PythonScripts\grid2.py">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="PythonScripts\pressure.py">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="PythonScripts\temperature.py">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

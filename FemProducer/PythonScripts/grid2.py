@@ -5,7 +5,9 @@ fig, ax = plt.subplots()
 
 # Define the vertices for the first polygon
 f = open('grid2.txt', 'r', encoding="utf-8")
-
+# boundaries = f.readline().split(' ')
+# ax.set_xlim(float(boundaries[0]), float(boundaries[1]))
+# ax.set_ylim(float(boundaries[2]), float(boundaries[3]))
 elemCount = int(f.readline())
 arrayV = []
 vertices = []
@@ -32,8 +34,7 @@ for line in range(0,elemCount):
 
 #Set plot limits and labels
 
-ax.set_xlim(-1, 5)
-ax.set_ylim(-1, 5)
+
 ax.set_xlabel('X-axis')
 ax.set_ylabel('Y-axis')
 plt.show()

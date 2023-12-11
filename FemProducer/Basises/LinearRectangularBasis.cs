@@ -2,7 +2,7 @@
 
 namespace FemProducer.Basises
 {
-	internal class LinearBasis
+	internal class LinearRectangularBasis : IBasis
 	{
 		public const int NodesCount = 4;
 
@@ -25,7 +25,7 @@ namespace FemProducer.Basises
 		private static int mu(int i) => i % 2;
 		private static int nu(int i) => i / 2;
 
-		public static double[][] GetMassMatrix(double hx, double hy)// Grid.M - номер кэ 
+		public IList<IList<double>> GetMassMatrix(IList<Node> nodes)// Grid.M - номер кэ 
 		{
 			// инициализация
 			double[][] result = new double[M.LongLength][];
@@ -40,7 +40,7 @@ namespace FemProducer.Basises
 			return result;
 		}
 
-		public static double[][] GetStiffnessMatrix(double hx, double hy)// Grid.M - номер кэ 
+		public IList<IList<double>> GetStiffnessMatrix(IList<Node> nodes)// Grid.M - номер кэ 
 		{
 			// инициализация
 			double[][] result = new double[G.LongLength][];
@@ -55,7 +55,7 @@ namespace FemProducer.Basises
 			return result;
 		}
 
-		public double[] GetLocalVector(IList<Node> nodes, Func<Node, double> func)
+		public IList<double> GetLocalVector(IList<Node> nodes, Func<Node, double> func)
 		{
 			double[] result = new double[NodesCount];
 
