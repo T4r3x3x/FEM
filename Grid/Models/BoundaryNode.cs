@@ -1,4 +1,4 @@
-﻿namespace FemProducer.Models
+﻿namespace Grid.Models
 {
 	public class BoundaryNode
 	{
