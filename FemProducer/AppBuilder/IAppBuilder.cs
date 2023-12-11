@@ -1,11 +1,13 @@
-﻿using FemProducer.Models;
+﻿using Grid.Models;
+
+using SlaeSolver.Models;
 
 namespace FemProducer.AppBuilder
 {
-	internal interface IAppBuilder
+	public interface IAppBuilder
 	{
-		internal ProblemService GetProblemParameters();
-		internal SolverParameters GetSolverParameters();
-		internal GridParameters GetGridParameters();
+		public ProblemService GetProblemParameters();
+		public SolverParameters GetSolverParameters();
+		public GridParameters GetGridParameters();
 	}
 }

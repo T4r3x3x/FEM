@@ -133,14 +133,6 @@ namespace FemProducer.Collector
 		//			AddLocalB(i, j, timeLayer);
 		//}
 
-		//private void AddLocalB(Vector vector, int i, int j, int timeLayer)
-		//{
-		//	var area = _grid.GetAreaNumber(i, j);
-		//	vector[i + j * _grid.N] += _grid.Hx[i] * _grid.Hy[j] / 36 * (4 * _problemParametrs.F2(_grid.X[i], _grid.Y[j], _grid.T[timeLayer], area) + 2 * _problemParametrs.F2(_grid.X[i + 1], _grid.Y[j], _grid.T[timeLayer], area) + 2 * _problemParametrs.F2(_grid.X[i], _grid.Y[j + 1], _grid.T[timeLayer], area) + _problemParametrs.F2(_grid.X[i + 1], _grid.Y[j + 1], _grid.T[timeLayer], area));
-		//	vector[i + j * _grid.N + 1] += _grid.Hx[i] * _grid.Hy[j] / 36 * (2 * _problemParametrs.F2(_grid.X[i], _grid.Y[j], _grid.T[timeLayer], area) + 4 * _problemParametrs.F2(_grid.X[i + 1], _grid.Y[j], _grid.T[timeLayer], area) + _problemParametrs.F2(_grid.X[i], _grid.Y[j + 1], _grid.T[timeLayer], area) + 2 * _problemParametrs.F2(_grid.X[i + 1], _grid.Y[j + 1], _grid.T[timeLayer], area));
-		//	vector[i + (j + 1) * _grid.N] += _grid.Hx[i] * _grid.Hy[j] / 36 * (2 * _problemParametrs.F2(_grid.X[i], _grid.Y[j], _grid.T[timeLayer], area) + _problemParametrs.F2(_grid.X[i + 1], _grid.Y[j], _grid.T[timeLayer], area) + 4 * _problemParametrs.F2(_grid.X[i], _grid.Y[j + 1], _grid.T[timeLayer], area) + 2 * _problemParametrs.F2(_grid.X[i + 1], _grid.Y[j + 1], _grid.T[timeLayer], area));
-		//	vector[i + (j + 1) * _grid.N + 1] += _grid.Hx[i] * _grid.Hy[j] / 36 * (_problemParametrs.F2(_grid.X[i], _grid.Y[j], _grid.T[timeLayer], area) + 2 * _problemParametrs.F2(_grid.X[i + 1], _grid.Y[j], _grid.T[timeLayer], area) + 2 * _problemParametrs.F2(_grid.X[i], _grid.Y[j + 1], _grid.T[timeLayer], area) + 4 * _problemParametrs.F2(_grid.X[i + 1], _grid.Y[j + 1], _grid.T[timeLayer], area));
-		//}
 		//private void GetTimeConditions()
 		//{
 
@@ -166,125 +158,28 @@ namespace FemProducer.Collector
 				});
 
 		}
-		//public void Collect()
-		//{
-		//	ResetSlau();
-		//	MakeSLau();
-		//	GetBoundaryConditions();
-		//}
 
-
-		//public void Collect(int timeLayer)
-		//{
-		//	ResetSlauOptimized();
-		//	MakeSLau(timeLayer);
-		//	GetBoundaryConditions(timeLayer);
-		//}
 		private void AccountFirstCondition(BoundaryNode boundaryNode)
 		{
 			_matrix.ZeroingRow(boundaryNode.nodeIndex);
 			_matrix.Di[boundaryNode.nodeIndex] = 1;
-			_vector[boundaryNode.nodeIndex] = _problemParametrs.Function(boundaryNode);
+			_vector[boundaryNode.nodeIndex] = 0;//_problemParametrs.Function(boundaryNode);
 		}
 
 		private void AccountSecondConditionHorizontal(int i, int j, int area, NormalVectorDirection normal)
 		{
-			_vector[i] += (int)normal * _problemParametrs.Lamda(area) * _grid.Hx[i] / 6 * (2 * _problemParametrs.DivFuncY1(_grid.X[i], _grid.Y[j], area) + _problemParametrs.DivFuncY1(_grid.X[i + 1], _grid.Y[j], area));
-			_vector[i + 1] += (int)normal * _problemParametrs.Lamda(area) * _grid.Hx[i] / 6 * (_problemParametrs.DivFuncY1(_grid.X[i], _grid.Y[j], area) + 2 * _problemParametrs.DivFuncY1(_grid.X[i + 1], _grid.Y[j], area));
+			//_vector[i] += (int)normal * _problemParametrs.Lamda(area) * _grid.Hx[i] / 6 * (2 * _problemParametrs.DivFuncY1(_grid.X[i], _grid.Y[j], area) + _problemParametrs.DivFuncY1(_grid.X[i + 1], _grid.Y[j], area));
+			//_vector[i + 1] += (int)normal * _problemParametrs.Lamda(area) * _grid.Hx[i] / 6 * (_problemParametrs.DivFuncY1(_grid.X[i], _grid.Y[j], area) + 2 * _problemParametrs.DivFuncY1(_grid.X[i + 1], _grid.Y[j], area));
 		}
 		private void AccountSecondConditionVertical(int i, int j, int area, NormalVectorDirection normal)
 		{
-			_vector[i] += (int)normal * _problemParametrs.Lamda(area) * _grid.Hy[i] / 6 * (2 * _problemParametrs.DivFuncX1(_grid.X[i], _grid.Y[j], area) + _problemParametrs.DivFuncX1(_grid.X[i], _grid.Y[j + 1], area));
-			_vector[i + 1] += (int)normal * _problemParametrs.Lamda(area) * _grid.Hy[i] / 6 * (_problemParametrs.DivFuncX1(_grid.X[i], _grid.Y[j], area) + 2 * _problemParametrs.DivFuncX1(_grid.X[i], _grid.Y[j + 1], area));
+			//	_vector[i] += (int)normal * _problemParametrs.Lamda(area) * _grid.Hy[i] / 6 * (2 * _problemParametrs.DivFuncX1(_grid.X[i], _grid.Y[j], area) + _problemParametrs.DivFuncX1(_grid.X[i], _grid.Y[j + 1], area));
+			//	_vector[i + 1] += (int)normal * _problemParametrs.Lamda(area) * _grid.Hy[i] / 6 * (_problemParametrs.DivFuncX1(_grid.X[i], _grid.Y[j], area) + 2 * _problemParametrs.DivFuncX1(_grid.X[i], _grid.Y[j + 1], area));
 		}
 
 
 
-		//private void GetBoundaryConditions(int timeLayer)
-		//{
-		//	int area;
-		//	//нижняя граница
-		//	if (_problemParametrs.boundaryConditions[0] == 1)//первое краевое
-		//		for (int i = 0; i < _grid.N; i++)
-		//		{
-		//			area = _grid.GetAreaNumber(i, 0);
-		//			AccountFirstCondition(i, 0, area, timeLayer);
-		//		}
-		//	else //второе краевое            
-		//		for (int i = 0; i < _grid.N - 1; i++)
-		//		{
-		//			area = _grid.GetAreaNumber(i, 0);
-		//			AccountSecondCondition(i, area, timeLayer, NormalVectorDirection.NonCoDirectional);
-		//		}
 
-		//	if (_problemParametrs.boundaryConditions[2] == 1)//верхняя граница
-		//		for (int i = _matrix.Size - 1; i > _matrix.Size - _grid.N - 1; i--)
-		//		{
-		//			area = _grid.GetAreaNumber(i % _grid.N, _grid.M - 1);
-		//			AccountFirstCondition(i % _grid.N, _grid.M - 1, area, timeLayer);
-		//		}
-		//	else
-		//		for (int i = 0; i < _grid.N - 1; i++)
-		//		{
-		//			area = _grid.GetAreaNumber(i, _grid.M - 1);
-		//			AccountSecondCondition(i, _grid.M - 1, area, timeLayer, NormalVectorDirection.CoDirectional);
-		//		}
-
-		//	if (_problemParametrs.boundaryConditions[3] == 1)//левая гравнь
-		//		for (int i = _grid.N; i < Master.Slau.A.Size - _grid.N - 1; i += _grid.N)
-		//		{
-		//			area = _grid.GetAreaNumber(0, i / _grid.N);
-		//			AccountFirstCondition(i, area, timeLayer);
-		//		}
-		//	else
-		//		for (int i = 0; i < _grid.N - 1; i++)
-		//		{
-		//			area = _grid.GetAreaNumber(0, i);
-		//			area = _grid.GetAreaNumber(i, _grid.M - 1);
-		//			AccountSecondCondition(i, area, timeLayer, NormalVectorDirection.NonCoDirectional);
-		//			Master.Slau.b.Elements[_grid.N * i] -= _grid.hy[i] * Master.Lamda / 6 * (2 * Master.DivFuncX2(_grid.X[0], _grid.Y[i], _grid.T[timeLayer], area) + Master.DivFuncX2(_grid.X[0], _grid.Y[i + 1], _grid.T[timeLayer], area));
-		//			Master.Slau.b.Elements[_grid.N * (i + 1)] -= _grid.hy[i] * Master.Lamda / 6 * (Master.DivFuncX2(_grid.X[0], _grid.Y[i], _grid.T[timeLayer], area) + 2 * Master.DivFuncX2(_grid.X[0], _grid.Y[i + 1], _grid.T[timeLayer], area));
-		//		}
-
-		//	if (Master.boundaryConditions[1] == 1)//правая граница
-		//		for (int i = 2 * _grid.N - 1; i < Master.Slau.A.Size - 1; i += _grid.N)
-		//		{
-		//			area = _grid.GetAreaNumber(_grid.N - 1, i / _grid.N);
-		//			ZeroingRow(i);
-		//			Master.Slau.A.di[i] = 1;
-		//			Master.Slau.b.Elements[i] = Master.Func2(_grid.X[_grid.N - 1], _grid.Y[i / _grid.N], _grid.T[timeLayer], area);
-		//		}
-		//    else
-		//for (int i = 0; i < _grid.N - 1; i++)
-		//{
-		//    area = _grid.GetAreaNumber(_grid.N - 1, i);
-		//    Master.Slau.b.Elements[_grid.N * (i + 1) - 1] += _grid.hy[i] * Master.Lamda / 6 * (2 * Master.DivFuncX2(_grid.X[_grid.N - 1], _grid.Y[i], _grid.T[timeLayer], area) + Master.DivFuncX2(_grid.X[0], _grid.Y[i + 1], _grid.T[timeLayer], area));
-		//    Master.Slau.b.Elements[_grid.N * (i + 2) - 1] += _grid.hy[i] * Master.Lamda / 6 * (Master.DivFuncX2(_grid.X[_grid.N - 1], _grid.Y[i], _grid.T[timeLayer], area) + 2 * Master.DivFuncX2(_grid.X[0], _grid.Y[i + 1], _grid.T[timeLayer], area));
-		//}
-		//	AccountingBoreholes(timeLayer);
-		//}
-
-		//private void AccountingBoreholes(int timeLayer)
-		//{
-		//	for (int i = 0; i < _grid.boreholes.Length; i++)
-		//	{
-		//		ZeroingRow(_grid.boreholes[i][1] * _grid.N + _grid.boreholes[i][0]);
-		//		ZeroingRow(_grid.boreholes[i][1] * _grid.N + _grid.boreholes[i][0] + 1);
-		//		ZeroingRow((_grid.boreholes[i][1] + 1) * _grid.N + _grid.boreholes[i][0]);
-		//		ZeroingRow((_grid.boreholes[i][1] + 1) * _grid.N + _grid.boreholes[i][0] + 1);
-
-		//		Master.Slau.A.di[_grid.boreholes[i][1] * _grid.N + _grid.boreholes[i][0]] = 1;
-		//		Master.Slau.A.di[_grid.boreholes[i][1] * _grid.N + _grid.boreholes[i][0] + 1] = 1;
-		//		Master.Slau.A.di[(_grid.boreholes[i][1] + 1) * _grid.N + _grid.boreholes[i][0]] = 1;
-		//		Master.Slau.A.di[(_grid.boreholes[i][1] + 1) * _grid.N + _grid.boreholes[i][0] + 1] = 1;
-
-		//		Master.Slau.b.Elements[_grid.boreholes[i][1] * _grid.N + _grid.boreholes[i][0]] = Master.Func2(_grid.X[_grid.boreholes[i][0]], _grid.Y[_grid.boreholes[i][1]], timeLayer, 0);
-		//		Master.Slau.b.Elements[_grid.boreholes[i][1] * _grid.N + _grid.boreholes[i][0] + 1] = Master.Func2(_grid.X[_grid.boreholes[i][0] + 1], _grid.Y[_grid.boreholes[i][1]], timeLayer, 0);
-		//		Master.Slau.b.Elements[(_grid.boreholes[i][1] + 1) * _grid.N + _grid.boreholes[i][0]] = Master.Func2(_grid.X[_grid.boreholes[i][0]], _grid.Y[_grid.boreholes[i][1] + 1], timeLayer, 0);
-		//		Master.Slau.b.Elements[(_grid.boreholes[i][1] + 1) * _grid.N + _grid.boreholes[i][0] + 1] = Master.Func2(_grid.X[_grid.boreholes[i][0] + 1], _grid.Y[_grid.boreholes[i][1] + 1], timeLayer, 0);
-
-		//	}
-		//}
 		#endregion
 
 		enum NormalVectorDirection

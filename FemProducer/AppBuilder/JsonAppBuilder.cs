@@ -1,19 +1,18 @@
-﻿using FemProducer.Logger;
-using FemProducer.Models;
+﻿using Grid.Models;
 
 using Newtonsoft.Json.Linq;
+
+using SlaeSolver.Models;
 
 namespace FemProducer.AppBuilder
 {
 	internal class JsonAppBuilder : IAppBuilder
 	{
 		private readonly string _filePath;
-		private readonly ILogger _logger;
 
-		public JsonAppBuilder(string filePath, ILogger logger)
+		public JsonAppBuilder(string filePath)
 		{
 			_filePath = filePath;
-			_logger = logger;
 		}
 
 		private ObjectType DeserializeJsonObject<ObjectType>(string filePath)

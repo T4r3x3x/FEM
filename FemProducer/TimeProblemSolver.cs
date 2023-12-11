@@ -19,7 +19,7 @@ namespace FemProducer
 		void IProblemSolver.Solve(string configureFile, string outputFile)
 		{
 			ConsoleLogger consoleLogger = new();
-			IAppBuilder taskBuilder = new JsonAppBuilder(configureFile, consoleLogger);
+			IAppBuilder taskBuilder = new JsonAppBuilder(configureFile);
 
 			var problemParameters = taskBuilder.GetProblemParameters();
 			var solverParameters = taskBuilder.GetSolverParameters();
@@ -42,13 +42,12 @@ namespace FemProducer
 
 			ProgramResultsService<TxtLogger> solvesOutputer = new(new TxtLogger("results"), grid, resultProducer, problemParameters);
 
-			Vector solve = new(grid.NodesCount);
 
 			Slae slae = timeCollector.Collect(-1);
 			consoleLogger.Log(message: "The slae was collected!");
 
 			//	solvesOutputer.PrintSlae(slae);
-			solve = solver.Solve(slae);
+			Vector solve = solver.Solve(slae);
 			consoleLogger.Log(message: "The slae was solved!");
 			resultProducer.NumericalSolves.Add(solve);
 

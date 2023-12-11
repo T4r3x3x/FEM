@@ -16,5 +16,24 @@
 
 			return list[l] == value ? l : -1;
 		}
+
+		public static double GetMinValueInCollection(IEnumerable<double> collection)
+		{
+			var min = Double.MaxValue;
+			foreach (var item in collection)
+				if (item < min)
+					min = item;
+
+			return min;
+		}
+		public static double GetMaxValueInCollection(IEnumerable<double> collection)
+		{
+			var max = Double.MinValue;
+			foreach (var item in collection)
+				if (item > max)
+					max = item;
+
+			return max;
+		}
 	}
 }

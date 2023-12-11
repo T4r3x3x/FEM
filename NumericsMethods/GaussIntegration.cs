@@ -1,7 +1,7 @@
 ﻿
 using System.ComponentModel;
 
-using ReaserchPaper;
+using MathModels;
 
 namespace NumericsMethods
 {

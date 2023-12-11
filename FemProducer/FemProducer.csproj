@@ -21,9 +21,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Grid\Grid.csproj" />
-    <ProjectReference Include="..\MathModels\MathModels.csproj" />
     <ProjectReference Include="..\SlaeSolver\SlaeSolver.csproj" />
-    <ProjectReference Include="..\Tensus\MathModels.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Confige.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

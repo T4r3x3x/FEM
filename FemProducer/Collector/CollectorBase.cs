@@ -41,7 +41,7 @@ namespace FemProducer.Collector
 				var hx = _grid.Nodes[j].X - _grid.Nodes[i].X;
 				var hy = _grid.Nodes[element.NodesIndexes[2]].Y - _grid.Nodes[i].Y;
 
-				int area = _grid.GetAreaNumber(i, j);
+				int area = 0;// _grid.GetAreaNumber(i, j);
 
 				var localMatrix = FEM.GetMassMatrix(hx, hy);
 				localMatrix.MultiplyLocalMatrix(_problemParametrs.Gamma(area));

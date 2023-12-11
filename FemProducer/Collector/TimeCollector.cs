@@ -1,4 +1,4 @@
-﻿using FemProducer.Models;
+﻿using MathModels.Models;
 
 namespace FemProducer.Collector
 {
