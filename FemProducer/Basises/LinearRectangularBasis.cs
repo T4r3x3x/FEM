@@ -27,6 +27,9 @@ namespace FemProducer.Basises
 
 		public IList<IList<double>> GetMassMatrix(IList<Node> nodes)// Grid.M - номер кэ 
 		{
+			var hx = nodes[1].X - nodes[0].X;
+			var hy = nodes[2].Y - nodes[0].Y;
+
 			// инициализация
 			double[][] result = new double[M.LongLength][];
 			for (int i = 0; i < result.Length; i++)
@@ -42,6 +45,9 @@ namespace FemProducer.Basises
 
 		public IList<IList<double>> GetStiffnessMatrix(IList<Node> nodes)// Grid.M - номер кэ 
 		{
+			var hx = nodes[1].X - nodes[0].X;
+			var hy = nodes[2].Y - nodes[0].Y;
+
 			// инициализация
 			double[][] result = new double[G.LongLength][];
 			for (int i = 0; i < result.Length; i++)
