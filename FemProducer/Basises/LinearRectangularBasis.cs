@@ -80,6 +80,16 @@ namespace FemProducer.Basises
 			return result;
 		}
 
+		public Dictionary<string, IList<IList<double>>> GetLocalMatrixes(IList<Node> nodes)
+		{
+			return new()
+			{
+				{ "G", GetStiffnessMatrix(nodes) },
+				{ "M", GetMassMatrix(nodes) }
+			};
+		}
+
+
 		//public static double SolutionInPoint(Point point)
 		//{
 		//	double result = 0;

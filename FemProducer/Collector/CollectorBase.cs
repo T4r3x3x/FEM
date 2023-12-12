@@ -22,12 +22,12 @@ namespace FemProducer.Collector
 			_problemParametrs = problemParametrs;
 		}
 
-		public (IList<Matrix>, Vector) Collect()
+		public (Dictionary<string, Matrix>, Vector) Collect()
 		{
 			return GetMatrixesMG();
 		}
 
-		private (IList<Matrix>, Vector) GetMatrixesMG()
+		private (Dictionary<string, Matrix>, Vector) GetMatrixesMG()
 		{
 			Matrix M = _matrixFactory.CreateMatrix(_grid);
 			Matrix G = _matrixFactory.CreateMatrix(_grid);
@@ -54,24 +54,10 @@ namespace FemProducer.Collector
 				AddLocalVector(vector, element, area, hx, hy);
 			}
 			);
-			//for (int j = 0; j < _grid.M - 1; j++)
-			//{
-			//	for (int i = 0; i < _grid.N - 1; i++) //X | проходим по КЭ 
-			//										  //if (!_grid.IsBorehole(i, j))
-			//	{
-			//		int area = _grid.GetAreaNumber(i, j);
 
-			//		localMatrix = FEM.GetMassMatrix(_grid.Hx[i], _grid.Hy[j]);
-			//		Tools.MultiplyLocalMatrix(localMatrix, _problemParametrs.Gamma(area));
-			//		AddLocalMatrix(M, localMatrix, i, j);
+			Dictionary<string, Matrix> matrixes = new() { { "M", M }, { "G", G } };
+			return (matrixes, vector);
 
-			//		localMatrix = FEM.GetStiffnessMatrix(_grid.Hx[i], _grid.Hy[j]);
-			//		Tools.MultiplyLocalMatrix(localMatrix, _problemParametrs.Lamda(area));
-			//		AddLocalMatrix(G, localMatrix, i, j);
-			//	}
-			//}
-			Console.WriteLine("Done with matrixes " + DateTime.UtcNow);
-			return (new Matrix[] { M, G }, vector);
 		}
 
 		//public void GetMatrixH()
@@ -122,6 +108,7 @@ namespace FemProducer.Collector
 				}
 			}
 		}
+
 
 		//private double[][] GetGradTMatrix(int elemNumber, double hx, double hy, double xLeft, double yLower)
 		//{

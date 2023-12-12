@@ -2,8 +2,8 @@
 
 namespace FemProducer.Collector
 {
-    internal interface ICollectorBase
+	internal interface ICollectorBase
 	{
-		(IList<Matrix>, Vector) Collect();
+		(Dictionary<string, Matrix>, Vector) Collect();
 	}
 }

@@ -31,7 +31,7 @@ namespace FemProducer.Collector
 			var result = _collectorBase.Collect();
 			var matrixes = result.Item1;
 			_vector = result.Item2;
-			var slae = GetSlae(matrixes[0], matrixes[1]);
+			var slae = GetSlae(matrixes.GetValueOrDefault("M"), matrixes.GetValueOrDefault("G"));
 			return slae;
 		}
 
