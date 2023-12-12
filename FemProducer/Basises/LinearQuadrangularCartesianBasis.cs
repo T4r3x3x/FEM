@@ -1,4 +1,6 @@
-﻿using Grid.Models;
+﻿using FemProducer.Basises.BasisFunctions;
+
+using Grid.Models;
 
 using MathModels;
 
@@ -6,7 +8,7 @@ using NumericsMethods;
 
 namespace FemProducer.Basises
 {
-	public class LineaQuadrangularBasis : IBasis
+	public class LinearQuadrangularCartesianBasis : IBasis
 	{
 		List<Func<double, double, double>> fitasKsi = [
 			(ksi, nu) => nu - 1,
@@ -40,9 +42,32 @@ namespace FemProducer.Basises
 			return Math.Sign(a0) * ((a * b / J(ksi, nu)) + (c * d) / J(ksi, nu));
 		}
 
+		private double[][][] M = [
+			[[4, 2, 2, 1], [2, 4, 1, 2], [2, 1, 4, 2], [1, 2, 2, 4]],
 
-		public IList<double> GetLocalVector(IList<Node> nodes, Func<Node, double> func) => throw new NotImplementedException();
-		public IList<IList<double>> GetMassMatrix(IList<Node> nodes) => throw new NotImplementedException();
+			[[2, 2, 1, 1], [2, 6, 1, 3], [1, 1, 2, 2], [1, 3, 2, 6]],
+
+			[[2, 1, 2, 1], [1, 2, 1, 2], [2, 1, 6, 3], [1, 2, 3, 6]]
+			];
+
+		public IList<double> GetLocalVector(IList<Node> nodes, Func<Node, double> func) => LinearBasisFunctions.GetLocalVector(nodes, func);
+		public IList<IList<double>> GetMassMatrix(IList<Node> nodes)
+		{
+			var hx = nodes[1].X - nodes[0].X;
+			var hy = nodes[2].Y - nodes[0].Y;
+
+			// инициализация
+			double[][] result = new double[M.LongLength][];
+			for (int i = 0; i < result.Length; i++)
+				result[i] = new double[result.Length];
+
+			//матрица масс
+			for (int i = 0; i < result.Length; i++)
+				for (int j = 0; j < result.Length; j++)
+					result[i][j] += (a0 / 36 * M[0][i][j] + a1 / 72 * M[1][i][j] + a2 / 72 * M[2][i][j]) * Math.Sign(a0);
+
+			return result;
+		}
 
 		public IList<IList<double>> GetStiffnessMatrix(IList<Node> nodes)
 		{
@@ -73,6 +98,15 @@ namespace FemProducer.Basises
 			a0 = (p2.X - p1.X) * (p3.Y - p1.Y) - (p2.Y - p1.Y) * (p3.X - p1.X);
 			a1 = (p2.X - p1.X) * (p4.Y - p3.Y) - (p2.Y - p1.Y) * (p4.X - p3.X);
 			a2 = (p3.Y - p1.Y) * (p4.X - p2.X) - (p3.X - p1.X) * (p4.Y - p2.Y);
+		}
+
+		public Dictionary<string, IList<IList<double>>> GetLocalMatrixes(IList<Node> nodes)
+		{
+			return new()
+			{
+				{ "M", GetMassMatrix(nodes)},
+				{ "G", GetStiffnessMatrix(nodes)}
+			};
 		}
 	}
 }

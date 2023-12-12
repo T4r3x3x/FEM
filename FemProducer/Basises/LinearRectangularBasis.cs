@@ -1,4 +1,6 @@
-﻿using Grid.Models;
+﻿using FemProducer.Basises.BasisFunctions;
+
+using Grid.Models;
 
 namespace FemProducer.Basises
 {
@@ -6,10 +8,6 @@ namespace FemProducer.Basises
 	{
 		public const int NodesCount = 4;
 
-		private static double Y1(double y, double yUpper, double hy) => (yUpper - y) / hy;
-		private static double Y2(double y, double yLower, double hy) => (y - yLower) / hy;
-		private static double X1(double X, double xRight, double hx) => (xRight - X) / hx;
-		private static double X2(double X, double xLeft, double hx) => (X - xLeft) / hx;
 
 		private static double[,] G = new double[,]
 		{
@@ -61,24 +59,7 @@ namespace FemProducer.Basises
 			return result;
 		}
 
-		public IList<double> GetLocalVector(IList<Node> nodes, Func<Node, double> func)
-		{
-			double[] result = new double[NodesCount];
-
-			var hx = nodes[1].X - nodes[0].X;
-			var hy = nodes[2].Y - nodes[0].Y;
-
-			var funcValues = new double[NodesCount];
-			for (int i = 0; i < NodesCount; i++)
-				funcValues[i] = func(nodes[i]);
-
-			result[0] = hx * hy / 36 * (4 * funcValues[0] + 2 * funcValues[1] + 2 * funcValues[2] + funcValues[3]);
-			result[1] = hx * hy / 36 * (2 * funcValues[0] + 4 * funcValues[1] + funcValues[2] + 2 * funcValues[3]);
-			result[2] = hx * hy / 36 * (2 * funcValues[0] + funcValues[1] + 4 * funcValues[2] + 2 * funcValues[3]);
-			result[3] = hx * hy / 36 * (funcValues[0] + 2 * funcValues[1] + 2 * funcValues[2] + 4 * funcValues[3]);
-
-			return result;
-		}
+		public IList<double> GetLocalVector(IList<Node> nodes, Func<Node, double> func) => LinearBasisFunctions.GetLocalVector(nodes, func);
 
 		public Dictionary<string, IList<IList<double>>> GetLocalMatrixes(IList<Node> nodes)
 		{
