@@ -5,9 +5,9 @@ fig, ax = plt.subplots()
 
 # Define the vertices for the first polygon
 f = open('grid2.txt', 'r', encoding="utf-8")
-# boundaries = f.readline().split(' ')
-# ax.set_xlim(float(boundaries[0]), float(boundaries[1]))
-# ax.set_ylim(float(boundaries[2]), float(boundaries[3]))
+boundaries = f.readline().split(' ')
+ax.set_xlim(float(boundaries[0]), float(boundaries[1]))
+ax.set_ylim(float(boundaries[2]), float(boundaries[3]))
 elemCount = int(f.readline())
 arrayV = []
 vertices = []

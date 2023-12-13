@@ -31,16 +31,16 @@ namespace FemProducer
 			}
 		}
 
-		static double[][] G =
-		[
-			[1, -1],
-			[-1, 1],
-		];
-		static double[][] M =
-		[
-			[2, 1],
-			[1, 2]
-		];
+		static double[,] G =
+		{
+			{ 1, -1},
+			{ -1, 1},
+		};
+		static double[,] M =
+		{
+			{ 2, 1},
+			{ 1, 2}
+		};
 
 		static int mu(int i) => ((i) % 2);
 		static int nu(int i) => ((i) / 2);
@@ -55,7 +55,7 @@ namespace FemProducer
 			//матрица масс
 			for (int i = 0; i < result.Length; i++)
 				for (int j = 0; j < result.Length; j++)
-					result[i][j] += M[mu(i)][mu(j)] * hx / 6 * M[nu(i)][nu(j)] * hy / 6;
+					result[i][j] += M[mu(i), mu(j)] * hx / 6 * M[nu(i), nu(j)] * hy / 6;
 
 			return result;
 		}
@@ -69,7 +69,7 @@ namespace FemProducer
 			//матрица жесткости
 			for (int i = 0; i < result.Length; i++)
 				for (int j = 0; j < result.Length; j++)
-					result[i][j] = G[mu(i)][mu(j)] / hx * M[nu(i)][nu(j)] * hy / 6 + M[mu(i)][mu(j)] * hx / 6 * G[nu(i)][nu(j)] / hy;
+					result[i][j] = G[mu(i), mu(j)] / hx * M[nu(i), nu(j)] * hy / 6 + M[mu(i), mu(j)] * hx / 6 * G[nu(i), nu(j)] / hy;
 
 			return result;
 		}

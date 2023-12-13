@@ -8,16 +8,16 @@ namespace Grid.Models
 		public readonly IReadOnlyList<double> Ht;
 		public int[][] Boreholes { get; private set; }
 
-		public List<FiniteElement> Elements { get; private set; }
-		public List<Node> Nodes { get; private set; }
-		public List<BoundaryNode> FirstBoundaryNodes { get; private set; }
-		public List<BoundaryNode> SecondBoundaryNodes { get; private set; }
-		public List<BoundaryNode> ThirdBoundaryNodes { get; private set; }
+		public IList<FiniteElement> Elements { get; private set; }
+		public IList<Node> Nodes { get; private set; }
+		public IEnumerable<int> FirstBoundaryNodes { get; private set; }
+		public IEnumerable<int> SecondBoundaryNodes { get; private set; }
+		public IEnumerable<int> ThirdBoundaryNodes { get; private set; }
 
 		private readonly int nodesInElementCount = 4; //количество узлов в кэ.
 
-		public GridModel(List<FiniteElement> elements, List<Node> nodes,
-			List<BoundaryNode> firstBoundaryNodes, List<BoundaryNode> secondBoundaryNodes, List<BoundaryNode> thirdBoundaryNodes,
+		public GridModel(IList<FiniteElement> elements, IList<Node> nodes,
+			IEnumerable<int> firstBoundaryNodes, IEnumerable<int> secondBoundaryNodes, IEnumerable<int> thirdBoundaryNodes,
 			List<double> t = null, List<double> ht = null)
 		{
 			FirstBoundaryNodes = firstBoundaryNodes;

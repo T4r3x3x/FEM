@@ -152,18 +152,18 @@ namespace FemProducer.Collector
 
 		private void GetBoundaryConditions()
 		{
-			Parallel.ForEach(_grid.FirstBoundaryNodes, boundaryNode =>
+			Parallel.ForEach(_grid.FirstBoundaryNodes, boundaryNodeIndex =>
 				{
-					AccountFirstCondition(boundaryNode);
+					AccountFirstCondition(_grid.Nodes[boundaryNodeIndex], boundaryNodeIndex);
 				});
 
 		}
 
-		private void AccountFirstCondition(BoundaryNode boundaryNode)
+		private void AccountFirstCondition(Node node, int nodeIndex)
 		{
-			_matrix.ZeroingRow(boundaryNode.nodeIndex);
-			_matrix.Di[boundaryNode.nodeIndex] = 1;
-			_vector[boundaryNode.nodeIndex] = 0;//_problemParametrs.Function(boundaryNode);
+			_matrix.ZeroingRow(nodeIndex);
+			_matrix.Di[nodeIndex] = 1;
+			_vector[nodeIndex] = _problemParametrs.Function(node, nodeIndex);
 		}
 
 		private void AccountSecondConditionHorizontal(int i, int j, int area, NormalVectorDirection normal)

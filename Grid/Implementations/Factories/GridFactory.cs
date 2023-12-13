@@ -18,7 +18,7 @@ namespace Grid.Implementations.Factories
 		{
 			(var XW, var YW) = GetSegmetnsBoundaries(gridParametrs.linesNodes);
 
-			double[][] subDomains = new double[gridParametrs.linesNodes.Length][];
+			double[][] subDomains = new double[gridParametrs.areas.Length][];
 
 			var lines = gridParametrs.linesNodes;
 			var areas = gridParametrs.areas;
@@ -38,6 +38,7 @@ namespace Grid.Implementations.Factories
 
 			var elements = GetElements(x, y, subDomains, missingNodesIndexes);
 
+			var boundaryNodes = GetBoundaryNodes(gridParametrs.boundaryConditions, x, y, gridParametrs.xSplitsCount, gridParametrs.ySplitsCount, missingNodesIndexes);
 			//if (q == 1)
 			//	_h = (_t[layersCount - 1] - _t[0]) / (layersCount - 1);
 			//else
@@ -51,8 +52,8 @@ namespace Grid.Implementations.Factories
 			//}
 			using (StreamWriter sw = new StreamWriter("grid2.txt"))
 			{
-				//	sw.Write(string.Format("{0} {1} {2} {3}", XW[0] - 1, XW[XW.Length - 1] + 1, YW[0] - 1, YW[YW.Length - 1] + 1));
-				//	sw.Write('\n');
+				sw.Write(string.Format("{0} {1} {2} {3}", XW[0] - 1, XW[XW.Length - 1] + 1, YW[0] - 1, YW[YW.Length - 1] + 1).Replace(',', '.'));
+				sw.Write('\n');
 				sw.WriteLine(elements.Count);
 				foreach (var element in elements)
 				{
@@ -63,8 +64,8 @@ namespace Grid.Implementations.Factories
 					sw.WriteLine();
 				}
 			}
-			Processes.OpenPythonScript("grid2.py");
-			return null;
+			Processes.OpenPythonScript(@"PythonScripts\grid2d.py");
+			return new GridModel(elements, nodes, boundaryNodes, null, null);
 		}
 
 		/// <summary>
@@ -186,27 +187,68 @@ namespace Grid.Implementations.Factories
 
 			return (XW.ToArray(), YW.ToArray());
 		}
-		private (int, int)[] CalculationLimitsBoundaryEdge(int[] boundaries)
+
+		private (int, int) GetAxisLimitIndexes(int leftLimit, int rightLimit, List<int> SplitsCount)
 		{
-			(int, int)[] limitsBoundaryEdge;
+			int firstLimit = 0, secondLimit, i;
 
-			for (int i = 0; i < limitsBoundaryEdge.Length; i++)
+			for (i = 0; i < leftLimit; i++)
+				firstLimit += SplitsCount[i] - 1;
+
+			secondLimit = firstLimit;
+
+			for (; i < rightLimit; i++)
+				secondLimit += SplitsCount[i] - 1;
+
+			return (firstLimit, secondLimit);
+		}
+
+		/// <summary>
+		/// Возвращает индексы x'ов и y'ов которые являются границами указанной подобласти
+		/// </summary>
+		/// <param name="boundaryConditions"></param>
+		/// <param name="xSplitsCount"></param>
+		/// <param name="ySplitsCount"></param>
+		/// <returns></returns>
+		private IList<int> GetAreaLimitIndexes(IList<int> limits, List<int> xSplitsCount, List<int> ySplitsCount)
+		{
+			var xLimits = GetAxisLimitIndexes(limits[0], limits[1], xSplitsCount);
+			var yLimits = GetAxisLimitIndexes(limits[2], limits[3], ySplitsCount);
+
+			return [xLimits.Item1, xLimits.Item2, yLimits.Item1, yLimits.Item2];
+		}
+
+		private IList<IList<int>> GetBoundaryLimitsIndexes(IList<IList<int>> boundaryConditionsLimits, List<int> xSplitsCount, List<int> ySplitsCount)
+		{
+			IList<IList<int>> boundaryLimitsIndexes = new List<IList<int>>();
+
+			for (int i = 0; i < boundaryConditionsLimits.Count; i++)
 			{
-				(int, int) limit = (0, 0);
-				for (int j = 0; j < boundaries[2 * i]; j++)
-					limit.Item1 += m_splittingGrid[i][j].numIntervals;
-
-				for (int j = 0; j < boundaries[2 * i + 1]; j++)
-					limit.Item2 += m_splittingGrid[i][j].numIntervals;
-
-				limitsBoundaryEdge[i] = limit;
+				boundaryLimitsIndexes.Add(GetAreaLimitIndexes(boundaryConditionsLimits[i], xSplitsCount, ySplitsCount));
 			}
 
-			return limitsBoundaryEdge;
+			return boundaryLimitsIndexes;
 		}
-		private IList<BoundaryNode> GetBoundaryNodes(IList<int> missingNodes, IList<int> missingElements)
-		{
 
+		private HashSet<int> GetBoundaryNodes(IList<IList<int>> boundaryIndexes, IList<double> x, IList<double> y, List<int> xSplitsCount, List<int> ySplitsCount, IList<int> missingNodesIndexes)
+		{
+			HashSet<int> boundaryNodes = new HashSet<int>();
+			var limits = GetBoundaryLimitsIndexes(boundaryIndexes, xSplitsCount, ySplitsCount);
+
+			for (int k = 0; k < boundaryIndexes.Count; k++)
+			{
+				for (int i = limits[k][2]; i <= limits[k][3]; i++)
+				{
+					for (int j = limits[k][0]; j <= limits[k][1]; j++)
+					{
+						var index = i * x.Count + j;
+						var realIndex = index - missingNodesIndexes[index];
+						boundaryNodes.Add(realIndex);
+					}
+				}
+			}
+
+			return boundaryNodes;
 		}
 
 		private List<FiniteElement> GetElements(double[] x, double[] y, double[][] subDomains, List<int> missingNodes)

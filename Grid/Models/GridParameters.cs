@@ -10,5 +10,6 @@ namespace Grid.Models
 		public double[] qy;
 		public List<int> xSplitsCount;
 		public List<int> ySplitsCount;
+		public int[][] boundaryConditions;
 	}
 }
