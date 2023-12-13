@@ -70,12 +70,23 @@ namespace FemProducer
 		}
 		public double F1(double x, double y, int area)
 		{
-			switch (area)
-			{
-				//      case 0: return X + y;
-				//        case 1: return 2 * X + 2 * y;
-				default: return 5 * (x + y);
-			}
+			//switch (area)
+			//{
+			//      case 0: return X + y;
+			//        case 1: return 2 * X + 2 * y;
+			/*default:*/
+			return 5 * (x + y);
+			//}
+		}
+		public double F1(Node node)
+		{
+			//switch (area)
+			//{
+			//      case 0: return X + y;
+			//        case 1: return 2 * X + 2 * y;
+			/*default:*/
+			return 5 * (node.X + node.Y);
+			//}
 		}
 
 

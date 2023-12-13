@@ -23,7 +23,7 @@ namespace NumericsMethods
 					break;
 
 				case PointsCount.Three:
-					q = [8 / 9, 5 / 9, 5 / 9];
+					q = [8 / 9.0, 5 / 9.0, 5 / 9.0];
 					x = [0, 0.77459666924148337, -0.77459666924148337];
 					break;
 

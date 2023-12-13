@@ -10,8 +10,8 @@
     ],
     "qx": [ 1, 1, 1 ],
     "qy": [ 1, 1, 1 ],
-    "xSplitsCount": [ 3, 3, 3 ],
-    "ySplitsCount": [ 3, 3, 3 ],
+    "xSplitsCount": [ 2, 2, 2 ],
+    "ySplitsCount": [ 2, 2, 2 ],
     "linesNodes": [
       [
         {

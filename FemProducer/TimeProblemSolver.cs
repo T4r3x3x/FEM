@@ -35,7 +35,7 @@ namespace FemProducer
 
 			MatrixFactory matrixFactory = new();
 
-			CollectorBase collector = new(grid, matrixFactory, problemParameters);
+			CollectorBase collector = new(grid, matrixFactory, problemParameters, new());
 			SimpleCollector timeCollector = new SimpleCollector(collector, grid, matrixFactory, problemParameters);
 
 			SolutionService resultProducer = new SolutionService(problemParameters, grid);

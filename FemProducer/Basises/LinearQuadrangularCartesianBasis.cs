@@ -13,8 +13,6 @@ namespace FemProducer.Basises
 	{
 		public const int NodesCount = 4;
 
-
-
 		private int i, j;
 		private double b1, b2, b3, b4, b5, b6;
 		private double a0, a1, a2;
@@ -24,10 +22,10 @@ namespace FemProducer.Basises
 
 		private double Jacobian(double ksi, double nu) => a0 + ksi * a1 + nu * a2;
 
-		private double StiffnessIntegrationFunc(double ksi, double nu)
+		public double StiffnessIntegrationFunc(double ksi, double nu)
 		{
 			var IfitasKsi = LinearQuarangularBasisFunctions.fitasKsi[i](ksi, nu);
-			var JfitasKsi = LinearQuarangularBasisFunctions.fitasKsi[i](ksi, nu);
+			var JfitasKsi = LinearQuarangularBasisFunctions.fitasKsi[j](ksi, nu);
 			var IfitasNu = LinearQuarangularBasisFunctions.fitasNu[i](ksi, nu);
 			var JfitasNu = LinearQuarangularBasisFunctions.fitasNu[j](ksi, nu);
 			var J = Jacobian(ksi, nu);
@@ -54,9 +52,13 @@ namespace FemProducer.Basises
 		public IList<IList<double>> GetMassMatrix(IList<Node> nodes)
 		{
 			// инициализация
-			double[][] result = new double[M.LongLength][];
+			double[][] result = new double[NodesCount][];
 			for (int i = 0; i < result.Length; i++)
 				result[i] = new double[result.Length];
+
+			CalcultaeVariables(nodes);
+
+			var a = M[0][0][0];
 
 			//матрица масс
 			for (int i = 0; i < result.Length; i++)
@@ -72,9 +74,11 @@ namespace FemProducer.Basises
 			CalcultaeVariables(nodes);
 
 			for (i = 0; i < nodes.Count; i++)
+			{
+				result[i] = new double[nodes.Count];
 				for (j = 0; j < nodes.Count; j++)
-					Integration.GaussIntegration(singleSquareFirstPoint, singleSquareFourthPoint, StiffnessIntegrationFunc, Integration.PointsCount.Three);
-
+					result[i][j] = Integration.GaussIntegration(singleSquareFirstPoint, singleSquareFourthPoint, StiffnessIntegrationFunc, Integration.PointsCount.Three);
+			}
 			return result;
 		}
 
@@ -109,11 +113,11 @@ namespace FemProducer.Basises
 		public IList<double> GetLocalVector(IList<Node> nodes, Func<Node, double> func)
 		{
 			double[] localVector = new double[NodesCount];
-
+			CalcultaeVariables(nodes);
 			for (int i = 0; i < NodesCount; i++)
 			{
 				LocalVectorIntegrationFuncClass intF = new(func, Jacobian, i);
-				localVector[i] = Integration.GaussIntegration(singleSquareFirstPoint, singleSquareFourthPoint, intF.LocalVectorIntegrationFunc, Integration.PointsCount.Three);
+				localVector[i] += Integration.GaussIntegration(singleSquareFirstPoint, singleSquareFourthPoint, intF.LocalVectorIntegrationFunc, Integration.PointsCount.Three);
 			}
 
 			return localVector;
@@ -136,7 +140,8 @@ namespace FemProducer.Basises
 
 			public double LocalVectorIntegrationFunc(double ksi, double nu)
 			{
-				return _func(new Node(ksi, nu)) * _jacobian(ksi, nu) * LinearQuarangularBasisFunctions.Fita[_i](ksi, nu);
+				var res = _func(new Node(ksi, nu)) * _jacobian(ksi, nu) * LinearQuarangularBasisFunctions.Fita[_i](ksi, nu);
+				return res;
 			}
 		}
 	}
