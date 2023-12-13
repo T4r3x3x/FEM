@@ -42,12 +42,6 @@ namespace FemProducer
 			[1, 2]
 		];
 
-		//static double[,] M = new double[,]
-		//{
-		//	 { 2, 1 },
-		//	{ 1, 2 }
-		//};
-
 		static int mu(int i) => ((i) % 2);
 		static int nu(int i) => ((i) / 2);
 

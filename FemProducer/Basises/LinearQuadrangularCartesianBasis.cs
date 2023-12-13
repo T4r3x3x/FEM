@@ -6,23 +6,14 @@ using MathModels;
 
 using NumericsMethods;
 
+
 namespace FemProducer.Basises
 {
 	public class LinearQuadrangularCartesianBasis : IBasis
 	{
-		List<Func<double, double, double>> fitasKsi = [
-			(ksi, nu) => nu - 1,
-			(ksi, nu) => 1 - nu,
-			(ksi, nu) => -nu,
-			(ksi, nu) => nu,
-		];
+		public const int NodesCount = 4;
 
-		List<Func<double, double, double>> fitasNu = [
-			(ksi, nu) => ksi - 1,
-			(ksi, nu) => -ksi,
-			(ksi, nu) => 1 - ksi,
-			(ksi, nu) => ksi,
-		];
+
 
 		private int i, j;
 		private double b1, b2, b3, b4, b5, b6;
@@ -31,16 +22,26 @@ namespace FemProducer.Basises
 		private readonly Point singleSquareFirstPoint = new Point(0, 0);
 		private readonly Point singleSquareFourthPoint = new Point(1, 1);
 
-		private double J(double ksi, double nu) => a0 + ksi * a1 + nu * a2;
+		private double Jacobian(double ksi, double nu) => a0 + ksi * a1 + nu * a2;
 
-		private double IntegrationFunc(double ksi, double nu)
+		private double StiffnessIntegrationFunc(double ksi, double nu)
 		{
-			var a = fitasKsi[i](ksi, nu) * (b6 * ksi + b3) - fitasNu[i](ksi, nu) * (b6 * nu + b4);
-			var b = fitasKsi[j](ksi, nu) * (b6 * ksi + b3) - fitasNu[j](ksi, nu) * (b6 * nu + b4);
-			var c = fitasNu[i](ksi, nu) * (b5 * nu + b2) - fitasKsi[i](ksi, nu) * (b5 * ksi + b1);
-			var d = fitasNu[j](ksi, nu) * (b5 * nu + b2) - fitasKsi[j](ksi, nu) * (b5 * ksi + b1);
-			return Math.Sign(a0) * ((a * b / J(ksi, nu)) + (c * d) / J(ksi, nu));
+			var IfitasKsi = LinearQuarangularBasisFunctions.fitasKsi[i](ksi, nu);
+			var JfitasKsi = LinearQuarangularBasisFunctions.fitasKsi[i](ksi, nu);
+			var IfitasNu = LinearQuarangularBasisFunctions.fitasNu[i](ksi, nu);
+			var JfitasNu = LinearQuarangularBasisFunctions.fitasNu[j](ksi, nu);
+			var J = Jacobian(ksi, nu);
+
+
+			var a = IfitasKsi * (b6 * ksi + b3) - IfitasNu * (b6 * nu + b4);
+			var b = JfitasKsi * (b6 * ksi + b3) - JfitasNu * (b6 * nu + b4);
+			var c = IfitasNu * (b5 * nu + b2) - IfitasKsi * (b5 * ksi + b1);
+			var d = JfitasNu * (b5 * nu + b2) - JfitasKsi * (b5 * ksi + b1);
+
+			return Math.Sign(a0) * ((a * b / J) + (c * d / J));
 		}
+
+
 
 		private double[][][] M = [
 			[[4, 2, 2, 1], [2, 4, 1, 2], [2, 1, 4, 2], [1, 2, 2, 4]],
@@ -50,12 +51,8 @@ namespace FemProducer.Basises
 			[[2, 1, 2, 1], [1, 2, 1, 2], [2, 1, 6, 3], [1, 2, 3, 6]]
 			];
 
-		public IList<double> GetLocalVector(IList<Node> nodes, Func<Node, double> func) => LinearBasisFunctions.GetLocalVector(nodes, func);
 		public IList<IList<double>> GetMassMatrix(IList<Node> nodes)
 		{
-			var hx = nodes[1].X - nodes[0].X;
-			var hy = nodes[2].Y - nodes[0].Y;
-
 			// инициализация
 			double[][] result = new double[M.LongLength][];
 			for (int i = 0; i < result.Length; i++)
@@ -76,7 +73,7 @@ namespace FemProducer.Basises
 
 			for (i = 0; i < nodes.Count; i++)
 				for (j = 0; j < nodes.Count; j++)
-					Integration.GaussIntegration(singleSquareFirstPoint, singleSquareFourthPoint, IntegrationFunc, Integration.PointsCount.Three);
+					Integration.GaussIntegration(singleSquareFirstPoint, singleSquareFourthPoint, StiffnessIntegrationFunc, Integration.PointsCount.Three);
 
 			return result;
 		}
@@ -107,6 +104,40 @@ namespace FemProducer.Basises
 				{ "M", GetMassMatrix(nodes)},
 				{ "G", GetStiffnessMatrix(nodes)}
 			};
+		}
+
+		public IList<double> GetLocalVector(IList<Node> nodes, Func<Node, double> func)
+		{
+			double[] localVector = new double[NodesCount];
+
+			for (int i = 0; i < NodesCount; i++)
+			{
+				LocalVectorIntegrationFuncClass intF = new(func, Jacobian, i);
+				localVector[i] = Integration.GaussIntegration(singleSquareFirstPoint, singleSquareFourthPoint, intF.LocalVectorIntegrationFunc, Integration.PointsCount.Three);
+			}
+
+			return localVector;
+		}
+		/// <summary>
+		/// костыль нужный для частичной передачи параметров, а именно для передачи функции правой части уравнения, так как GaussIntegration принимает только функции со сигнатурой <double, (double,double)>.
+		/// </summary>
+		class LocalVectorIntegrationFuncClass
+		{
+			private Func<Node, double> _func;
+			private Func<double, double, double> _jacobian;
+			private int _i = 0;
+
+			public LocalVectorIntegrationFuncClass(Func<Node, double> func, Func<double, double, double> jacobian, int i)
+			{
+				_func = func;
+				_jacobian = jacobian;
+				_i = i;
+			}
+
+			public double LocalVectorIntegrationFunc(double ksi, double nu)
+			{
+				return _func(new Node(ksi, nu)) * _jacobian(ksi, nu) * LinearQuarangularBasisFunctions.Fita[_i](ksi, nu);
+			}
 		}
 	}
 }

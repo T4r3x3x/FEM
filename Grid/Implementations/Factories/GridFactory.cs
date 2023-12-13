@@ -186,6 +186,28 @@ namespace Grid.Implementations.Factories
 
 			return (XW.ToArray(), YW.ToArray());
 		}
+		private (int, int)[] CalculationLimitsBoundaryEdge(int[] boundaries)
+		{
+			(int, int)[] limitsBoundaryEdge;
+
+			for (int i = 0; i < limitsBoundaryEdge.Length; i++)
+			{
+				(int, int) limit = (0, 0);
+				for (int j = 0; j < boundaries[2 * i]; j++)
+					limit.Item1 += m_splittingGrid[i][j].numIntervals;
+
+				for (int j = 0; j < boundaries[2 * i + 1]; j++)
+					limit.Item2 += m_splittingGrid[i][j].numIntervals;
+
+				limitsBoundaryEdge[i] = limit;
+			}
+
+			return limitsBoundaryEdge;
+		}
+		private IList<BoundaryNode> GetBoundaryNodes(IList<int> missingNodes, IList<int> missingElements)
+		{
+
+		}
 
 		private List<FiniteElement> GetElements(double[] x, double[] y, double[][] subDomains, List<int> missingNodes)
 		{

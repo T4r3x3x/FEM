@@ -9,7 +9,7 @@ using MathModels.Models;
 namespace FemProducer
 {
 	/// <summary>
-	/// Класс отвечает за запись результата работы программы
+	/// Класс отвечает за запись результатов работы программы
 	/// </summary>
 	internal class ProgramResultsService<TLogger> where TLogger : ILogger
 	{

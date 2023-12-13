@@ -4,7 +4,7 @@ using Grid.Models;
 
 namespace FemProducer.Basises
 {
-	internal class LinearQuadrangularCylindricalBasis : IBasis
+	internal class LinearRectangularCylindricalBasis : IBasis
 	{
 		private double MassIntegrationalFunction(double r, double z)
 		{

@@ -1,4 +1,5 @@
-﻿using MathModels.Models;
+﻿using MathModels.Extensions;
+using MathModels.Models;
 
 using SlaeSolver.Interfaces;
 
@@ -34,15 +35,15 @@ namespace SlaeSolver.Implementations.Solvers
 
 			int k = 0;
 
-			r = ForwardStepModi(slae.Matrix, slae.Vector, D, L); //+                      
+			r = ForwardStepModi(slae.Matrix, slae.Vector, D, L);
 			z = BackStepModi(slae.Matrix, r, U);
-			p = ForwardStepModi(slae.Matrix, slae.Matrix * z, D, L);//+
+			p = ForwardStepModi(slae.Matrix, slae.Matrix * z, D, L);
 
 			do
 			{
 				k++;
 
-				a = GetCoefficent(p, r, p, p); //+
+				a = GetCoefficent(p, r, p, p);
 				solve += a * z;
 				r -= a * p;
 
@@ -51,8 +52,9 @@ namespace SlaeSolver.Implementations.Solvers
 
 				b = -GetCoefficent(p, LAUr, p, p);
 
-				z = Ur + b * z;
-				p = LAUr + b * p;
+				z = Ur.Add(b * z);//+
+
+				p = LAUr.Add(b * p);//+
 
 			} while (r * r > eps && k <= maxItCount);
 
