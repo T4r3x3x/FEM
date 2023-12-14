@@ -36,15 +36,9 @@ namespace FemProducer.Collector
 			Matrix G = _matrixFactory.CreateMatrix(_grid);
 			Vector vector = new Vector(M.Size);
 
-			//Parallel.ForEach(_grid.Elements, element =>
-			foreach (var element in _grid.Elements)
+			Parallel.ForEach(_grid.Elements, element =>
+			//foreach (var element in _grid.Elements)
 			{
-				var i = element.NodesIndexes[0];
-				var j = element.NodesIndexes[1];
-
-				var hx = _grid.Nodes[j].X - _grid.Nodes[i].X;
-				var hy = _grid.Nodes[element.NodesIndexes[2]].Y - _grid.Nodes[i].Y;
-
 				int area = 0;// _grid.GetAreaNumber(i, j);
 
 				var nodes = _grid.ElementToNode(element);
@@ -59,8 +53,7 @@ namespace FemProducer.Collector
 
 				var localVector = _basis.GetLocalVector(nodes, _problemParametrs.F1);
 				AddLocalVector(vector, localVector, element);
-				//		AddLocalVector(vector, hx, hy, 0, element);
-			}
+			});
 
 			Dictionary<string, Matrix> matrixes = new() { { "M", M }, { "G", G } };
 			return (matrixes, vector);
@@ -79,47 +72,12 @@ namespace FemProducer.Collector
 		//			}
 		//}
 
-		private void AddLocalVector(Vector vector, double hx, double hy, int area, FiniteElement element)
-		{
-			lock (_lock)
-			{
-				//for (int i = 0; i < localVector.Count; i++)
-				//{
-				//	vector[element.NodesIndexes[i]] += localVector[i];
-				//}
-
-				var x1 = _grid.Nodes[element.NodesIndexes[0]].X;
-				var x2 = _grid.Nodes[element.NodesIndexes[1]].X;
-				var y1 = _grid.Nodes[element.NodesIndexes[0]].Y;
-				var y2 = _grid.Nodes[element.NodesIndexes[2]].Y;
-
-				var a = hx * hy / 36 * (4 * _problemParametrs.F1(x1, y1, area) + 2 * _problemParametrs.F1(x2, y1, area) + 2 * _problemParametrs.F1(x1, y2, area) + _problemParametrs.F1(x2, y2, area));
-				vector[element.NodesIndexes[0]] += hx * hy / 36 * (4 * _problemParametrs.F1(x1, y1, area) + 2 * _problemParametrs.F1(x2, y1, area) + 2 * _problemParametrs.F1(x1, y2, area) + _problemParametrs.F1(x2, y2, area));
-				vector[element.NodesIndexes[1]] += hx * hy / 36 * (2 * _problemParametrs.F1(x1, y1, area) + 4 * _problemParametrs.F1(x2, y1, area) + _problemParametrs.F1(x1, y2, area) + 2 * _problemParametrs.F1(x2, y2, area));
-				vector[element.NodesIndexes[2]] += hx * hy / 36 * (2 * _problemParametrs.F1(x1, y1, area) + _problemParametrs.F1(x2, y1, area) + 4 * _problemParametrs.F1(x1, y2, area) + 2 * _problemParametrs.F1(x2, y2, area));
-				vector[element.NodesIndexes[3]] += hx * hy / 36 * (_problemParametrs.F1(x1, y1, area) + 2 * _problemParametrs.F1(x2, y1, area) + 2 * _problemParametrs.F1(x1, y2, area) + 4 * _problemParametrs.F1(x2, y2, area));
-			}
-		}
-
 		private void AddLocalVector(Vector vector, IList<double> localVector, FiniteElement element)
 		{
 			lock (_lock)
-			{
 				for (int i = 0; i < localVector.Count; i++)
-				{
 					vector[element.NodesIndexes[i]] += localVector[i];
-				}
 
-				//var x1 = _grid.Nodes[element.NodesIndexes[0]].X;
-				//var x2 = _grid.Nodes[element.NodesIndexes[1]].X;
-				//var y1 = _grid.Nodes[element.NodesIndexes[0]].Y;
-				//var y2 = _grid.Nodes[element.NodesIndexes[2]].Y;
-
-				//vector[element.NodesIndexes[0]] += hx * hy / 36 * (4 * _problemParametrs.F1(x1, y1, area) + 2 * _problemParametrs.F1(x2, y1, area) + 2 * _problemParametrs.F1(x1, y2, area) + _problemParametrs.F1(x2, y2, area));
-				//vector[element.NodesIndexes[1]] += hx * hy / 36 * (2 * _problemParametrs.F1(x1, y1, area) + 4 * _problemParametrs.F1(x2, y1, area) + _problemParametrs.F1(x1, y2, area) + 2 * _problemParametrs.F1(x2, y2, area));
-				//vector[element.NodesIndexes[2]] += hx * hy / 36 * (2 * _problemParametrs.F1(x1, y1, area) + _problemParametrs.F1(x2, y1, area) + 4 * _problemParametrs.F1(x1, y2, area) + 2 * _problemParametrs.F1(x2, y2, area));
-				//vector[element.NodesIndexes[3]] += hx * hy / 36 * (_problemParametrs.F1(x1, y1, area) + 2 * _problemParametrs.F1(x2, y1, area) + 2 * _problemParametrs.F1(x1, y2, area) + 4 * _problemParametrs.F1(x2, y2, area));
-			}
 		}
 		private void AddLocalMatrix(Matrix matrix, IList<IList<double>> localMatrix, FiniteElement element)
 		{
