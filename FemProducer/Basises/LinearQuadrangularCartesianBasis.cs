@@ -116,7 +116,7 @@ namespace FemProducer.Basises
 			CalcultaeVariables(nodes);
 			for (int i = 0; i < NodesCount; i++)
 			{
-				LocalVectorIntegrationFuncClass intF = new(func, Jacobian, i);
+				LocalVectorIntegrationFuncClass intF = new(func, Jacobian, i, nodes);
 				localVector[i] += Integration.GaussIntegration(singleSquareFirstPoint, singleSquareFourthPoint, intF.LocalVectorIntegrationFunc, Integration.PointsCount.Three);
 			}
 
@@ -127,20 +127,31 @@ namespace FemProducer.Basises
 		/// </summary>
 		class LocalVectorIntegrationFuncClass
 		{
+			private IList<Node> _nodes;
 			private Func<Node, double> _func;
 			private Func<double, double, double> _jacobian;
 			private int _i = 0;
 
-			public LocalVectorIntegrationFuncClass(Func<Node, double> func, Func<double, double, double> jacobian, int i)
+			public LocalVectorIntegrationFuncClass(Func<Node, double> func, Func<double, double, double> jacobian, int i, IList<Node> nodes)
 			{
 				_func = func;
 				_jacobian = jacobian;
 				_i = i;
+				_nodes = nodes;
+			}
+
+			private (double, double) ReverseCoordinateSubstitution(double ksi, double nu)
+			{
+				var x = (1 - ksi) * (1 - nu) * _nodes[0].X + ksi * (1 - nu) * _nodes[1].X + (1 - ksi) * nu * _nodes[2].X + ksi * nu * _nodes[3].X;
+				var y = (1 - ksi) * (1 - nu) * _nodes[0].Y + ksi * (1 - nu) * _nodes[1].Y + (1 - ksi) * nu * _nodes[2].Y + ksi * nu * _nodes[3].Y;
+
+				return (x, y);
 			}
 
 			public double LocalVectorIntegrationFunc(double ksi, double nu)
 			{
-				var res = _func(new Node(ksi, nu)) * _jacobian(ksi, nu) * LinearQuarangularBasisFunctions.Fita[_i](ksi, nu);
+				var xy = ReverseCoordinateSubstitution(ksi, nu);
+				var res = _func(new Node(xy.Item1, xy.Item2)) * _jacobian(ksi, nu) * LinearQuarangularBasisFunctions.Fita[_i](ksi, nu);
 				return res;
 			}
 		}

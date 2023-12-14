@@ -58,8 +58,8 @@ namespace FemProducer.Collector
 				AddLocalMatrix(G, localMatrix, element);
 
 				var localVector = _basis.GetLocalVector(nodes, _problemParametrs.F1);
-				//	AddLocalVector(vector, localVector, element);
-				AddLocalVector(vector, hx, hy, 0, element);
+				AddLocalVector(vector, localVector, element);
+				//		AddLocalVector(vector, hx, hy, 0, element);
 			}
 
 			Dictionary<string, Matrix> matrixes = new() { { "M", M }, { "G", G } };
