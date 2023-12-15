@@ -79,13 +79,16 @@ namespace FemProducer
 
 		public void WriteSolve(string path, Vector solve)
 		{
-			using (StreamWriter sw = new StreamWriter(path))
+			using (var file = File.Open(path, FileMode.OpenOrCreate))
+			using (StreamWriter sw = new StreamWriter(file))
 				foreach (var value in solve)
 					sw.WriteLine(value.ToString().Replace(",", "."));
 		}
+
 		public void WriteGrid(string path)
 		{
-			using (StreamWriter sw = new StreamWriter(path))
+			using (var file = File.Open(path, FileMode.OpenOrCreate))
+			using (StreamWriter sw = new StreamWriter(file))
 			{
 				//	sw.Write(string.Format("{0} {1} {2} {3}", XW[0] - 1, XW[XW.Length - 1] + 1, YW[0] - 1, YW[YW.Length - 1] + 1));
 				//	sw.Write('\n');

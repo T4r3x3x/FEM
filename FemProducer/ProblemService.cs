@@ -14,7 +14,7 @@ namespace FemProducer
 			{
 				//    case 0: return 1;
 				//   case 1: return 10;
-				default: return 1;
+				default: return 0;
 			}
 		}
 		public double Gamma(int area)
@@ -37,9 +37,6 @@ namespace FemProducer
 			}
 		}
 
-		public int[] boundaryConditions = new int[4] { 1, 1, 1, 1 };
-
-
 		public double Function(Node node, int nodeIndex)
 		{
 			var x = node.X;
@@ -49,7 +46,7 @@ namespace FemProducer
 			{
 				//  case 0: return Math.Pow(Math.E,Math.PI*y)*Math.Sin(Math.PI*X);
 				//  case 1: return Math.Pow(Math.E, Math.PI * y) * Math.Sin(Math.PI * X)/10;
-				_ => x + y
+				_ => 1
 				//default: return X * X * X + y * y * y;
 			};
 		}
@@ -68,16 +65,7 @@ namespace FemProducer
 				default: return 0;
 			}
 		}
-		public double F1(double x, double y, int area)
-		{
-			//switch (area)
-			//{
-			//      case 0: return X + y;
-			//        case 1: return 2 * X + 2 * y;
-			/*default:*/
-			return 5 * (x + y);
-			//}
-		}
+
 		public double F1(Node node)
 		{
 			//switch (area)
@@ -85,7 +73,7 @@ namespace FemProducer
 			//      case 0: return X + y;
 			//        case 1: return 2 * X + 2 * y;
 			/*default:*/
-			return 5 * (node.X + node.Y);
+			return 5;
 			//}
 		}
 

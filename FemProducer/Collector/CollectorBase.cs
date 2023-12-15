@@ -15,9 +15,9 @@ namespace FemProducer.Collector
 		private readonly MatrixFactory _matrixFactory;
 		private readonly ProblemService _problemParametrs;
 		private object _lock = new object();
-		private readonly LinearQuadrangularCartesianBasis _basis;
+		private readonly IBasis _basis;
 
-		public CollectorBase(GridModel grid, MatrixFactory matrixFactory, ProblemService problemParametrs, LinearQuadrangularCartesianBasis basis)
+		public CollectorBase(GridModel grid, MatrixFactory matrixFactory, ProblemService problemParametrs, IBasis basis)
 		{
 			_grid = grid;
 			_matrixFactory = matrixFactory;
@@ -36,8 +36,8 @@ namespace FemProducer.Collector
 			Matrix G = _matrixFactory.CreateMatrix(_grid);
 			Vector vector = new Vector(M.Size);
 
-			Parallel.ForEach(_grid.Elements, element =>
-			//foreach (var element in _grid.Elements)
+			//Parallel.ForEach(_grid.Elements, element =>
+			foreach (var element in _grid.Elements)
 			{
 				int area = 0;// _grid.GetAreaNumber(i, j);
 
@@ -53,7 +53,7 @@ namespace FemProducer.Collector
 
 				var localVector = _basis.GetLocalVector(nodes, _problemParametrs.F1);
 				AddLocalVector(vector, localVector, element);
-			});
+			}//);
 
 			Dictionary<string, Matrix> matrixes = new() { { "M", M }, { "G", G } };
 			return (matrixes, vector);

@@ -35,7 +35,7 @@ namespace FemProducer
 
 			MatrixFactory matrixFactory = new();
 
-			CollectorBase collector = new(grid, matrixFactory, problemParameters, new());
+			CollectorBase collector = new(grid, matrixFactory, problemParameters, new Basises.LinearRectangularCylindricalBasis());
 			SimpleCollector timeCollector = new SimpleCollector(collector, grid, matrixFactory, problemParameters);
 
 			SolutionService resultProducer = new SolutionService(problemParameters, grid);

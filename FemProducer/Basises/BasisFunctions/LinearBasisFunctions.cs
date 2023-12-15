@@ -1,6 +1,4 @@
-﻿using System.Drawing;
-
-using Grid.Models;
+﻿using Grid.Models;
 
 namespace FemProducer.Basises.BasisFunctions
 {
@@ -19,7 +17,49 @@ namespace FemProducer.Basises.BasisFunctions
 			(double X, double xLeft, double hx) => (X - xLeft) / hx,
 		];
 
-		public static double GetBasisFunctionValue(int functionIndex, Node node, Point xLimits, Point yLimits)
+		private static List<Func<double, double>> XBasisFunctionDerivative = [
+
+			(double hx) => -1 / hx,
+			(double hx) => 1 / hx,
+		];
+
+		private static List<Func<double, double>> YBasisFunctionDerivative = [
+
+			(double hy) => -1 / hy,
+			(double hy) => 1 / hy,
+		];
+
+		public static double XDerivativeBasisFunction(int functionIndex, Node node, Node xLimits, Node yLimits)
+		{
+			double hy = yLimits.Y - yLimits.X;
+			double hx = xLimits.Y - xLimits.X;
+
+			return functionIndex switch
+			{
+				0 => XBasisFunctionDerivative[0](hx) * YFunctions[0](node.Y, yLimits.Y, hy),
+				1 => XBasisFunctionDerivative[1](hx) * YFunctions[0](node.Y, yLimits.Y, hy),
+				2 => XBasisFunctionDerivative[0](hx) * YFunctions[1](node.Y, yLimits.X, hy),
+				3 => XBasisFunctionDerivative[1](hx) * YFunctions[1](node.Y, yLimits.X, hy),
+				_ => throw new ArgumentException($"The argument i = {functionIndex} is an invalid value."),
+			};
+		}
+
+		public static double YDerivativeBasisFunction(int functionIndex, Node node, Node xLimits, Node yLimits)
+		{
+			double hx = xLimits.Y - xLimits.X;
+			double hy = yLimits.Y - yLimits.X;
+
+			return functionIndex switch
+			{
+				0 => XFunctions[0](node.X, xLimits.Y, hx) * YBasisFunctionDerivative[0](hy),
+				1 => XFunctions[1](node.X, xLimits.X, hx) * YBasisFunctionDerivative[0](hy),
+				2 => XFunctions[0](node.X, xLimits.Y, hx) * YBasisFunctionDerivative[1](hy),
+				3 => XFunctions[1](node.X, xLimits.X, hx) * YBasisFunctionDerivative[1](hy),
+				_ => throw new ArgumentException($"The argument i = {functionIndex} is an invalid value."),
+			};
+		}
+
+		public static double GetBasisFunctionValue(int functionIndex, Node node, Node xLimits, Node yLimits)
 		{
 			double hx = xLimits.Y - xLimits.X;
 			double hy = yLimits.Y - yLimits.X;
@@ -33,6 +73,22 @@ namespace FemProducer.Basises.BasisFunctions
 				_ => throw new ArgumentException($"The argument i = {functionIndex} is an invalid value."),
 			};
 		}
+
+		public static double GetBasisFunctionValue2(int functionIndex, Node node, Node xLimits, Node yLimits)
+		{
+			double hx = xLimits.Y - xLimits.X;
+			double hy = yLimits.Y - yLimits.X;
+
+			return functionIndex switch
+			{
+				0 => XFunctions[0](node.X, xLimits.Y, hx),// * YFunctions[0](node.Y, yLimits.Y, hy),
+				1 => XFunctions[1](node.X, xLimits.X, hx),// * YFunctions[0](node.Y, yLimits.Y, hy),
+														  //	2 => XFunctions[0](node.X, xLimits.Y, hx) * YFunctions[1](node.Y, yLimits.X, hy),
+														  //3 => XFunctions[1](node.X, xLimits.X, hx) * YFunctions[1](node.Y, yLimits.X, hy),
+				_ => throw new ArgumentException($"The argument i = {functionIndex} is an invalid value."),
+			};
+		}
+
 
 		public static IList<double> GetLocalVector(IList<Node> nodes, Func<Node, double> func)
 		{

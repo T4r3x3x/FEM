@@ -1,12 +1,14 @@
 ﻿using System.ComponentModel;
 
+using Grid.Models;
+
 using MathModels;
 
 namespace NumericsMethods
 {
 	public static class Integration
 	{
-		public static double GaussIntegration(Point leftLowerPoint, Point rightUpperPoint, Func<double, double, double> func, PointsCount pointsCount)
+		public static double GaussIntegration(Node leftLowerPoint, Node rightUpperPoint, Func<double, double, double> func, PointsCount pointsCount)
 		{
 			double result = 0;
 			Point point;

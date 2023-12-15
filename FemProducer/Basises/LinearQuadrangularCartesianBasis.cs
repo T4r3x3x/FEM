@@ -2,8 +2,6 @@
 
 using Grid.Models;
 
-using MathModels;
-
 using NumericsMethods;
 
 
@@ -13,13 +11,8 @@ namespace FemProducer.Basises
 	{
 		public const int NodesCount = 4;
 
-
-		private readonly Point singleSquareFirstPoint = new Point(0, 0);
-		private readonly Point singleSquareFourthPoint = new Point(1, 1);
-
-
-
-
+		private readonly Node singleSquareFirstPoint = new Node(0, 0);
+		private readonly Node singleSquareFourthPoint = new Node(1, 1);
 
 		private double[][][] M = [
 			[[4, 2, 2, 1], [2, 4, 1, 2], [2, 1, 4, 2], [1, 2, 2, 4]],
@@ -65,6 +58,28 @@ namespace FemProducer.Basises
 			}
 			return result;
 		}
+		public IList<double> GetLocalVector(IList<Node> nodes, Func<Node, double> func)
+		{
+			double[] localVector = new double[NodesCount];
+			var coefficents = GetCoefficients(nodes);
+
+			for (int i = 0; i < NodesCount; i++)
+			{
+				LocalVectorIntegrationFuncClass intF = new LocalVectorIntegrationFuncClass(func, Jacobian, i, nodes, coefficents);
+				localVector[i] += Integration.GaussIntegration(singleSquareFirstPoint, singleSquareFourthPoint, intF.LocalVectorIntegrationFunc, Integration.PointsCount.Three);
+			}
+
+			return localVector;
+		}
+
+		public Dictionary<string, IList<IList<double>>> GetLocalMatrixes(IList<Node> nodes)
+		{
+			return new()
+			{
+				{ "M", GetMassMatrix(nodes)},
+				{ "G", GetStiffnessMatrix(nodes)}
+			};
+		}
 
 		private Coefficients GetCoefficients(IList<Node> nodes)
 		{
@@ -87,29 +102,6 @@ namespace FemProducer.Basises
 			return new Coefficients(b1, b2, b3, b4, b5, b6, a0, a1, a2);
 		}
 
-		public Dictionary<string, IList<IList<double>>> GetLocalMatrixes(IList<Node> nodes)
-		{
-			return new()
-			{
-				{ "M", GetMassMatrix(nodes)},
-				{ "G", GetStiffnessMatrix(nodes)}
-			};
-		}
-
-		public IList<double> GetLocalVector(IList<Node> nodes, Func<Node, double> func)
-		{
-			double[] localVector = new double[NodesCount];
-			var coefficents = GetCoefficients(nodes);
-			for (int i = 0; i < NodesCount; i++)
-			{
-				LocalVectorIntegrationFuncClass intF = new LocalVectorIntegrationFuncClass(func, Jacobian, i, nodes, coefficents);
-				localVector[i] += Integration.GaussIntegration(singleSquareFirstPoint, singleSquareFourthPoint, intF.LocalVectorIntegrationFunc, Integration.PointsCount.Three);
-			}
-
-			return localVector;
-		}
-
-
 		class Coefficients
 		{
 			public double b1, b2, b3, b4, b5, b6, a0, a1, a2;
@@ -127,7 +119,6 @@ namespace FemProducer.Basises
 				this.a2 = a2;
 			}
 		}
-
 
 		/// <summary>
 		/// костыль нужный для частичной передачи параметров, а именно для передачи функции правой части уравнения, так как GaussIntegration принимает только функции со сигнатурой <double, (double,double)>.
