@@ -59,7 +59,7 @@ namespace FemProducer.Basises
 			return result;
 		}
 
-		public IList<double> GetLocalVector(IList<Node> nodes, Func<Node, double> func) => LinearBasisFunctions.GetLocalVector(nodes, func);
+		public IList<double> GetLocalVector(IList<Node> nodes, Func<Node, int, double> func, int formulaNumber) => LinearBasisFunctions.GetLocalVector(nodes, func, formulaNumber);
 
 		public Dictionary<string, IList<IList<double>>> GetLocalMatrixes(IList<Node> nodes)
 		{

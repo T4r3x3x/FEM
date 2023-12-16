@@ -39,19 +39,19 @@ namespace FemProducer.Collector
 			//Parallel.ForEach(_grid.Elements, element =>
 			foreach (var element in _grid.Elements)
 			{
-				int area = 0;// _grid.GetAreaNumber(i, j);
+				int formulaNumber = element.formulaNumber;
 
 				var nodes = _grid.ElementToNode(element);
 
 				var localMatrix = _basis.GetMassMatrix(nodes);
-				localMatrix.MultiplyLocalMatrix(_problemParametrs.Gamma(area));
+				localMatrix.MultiplyLocalMatrix(_problemParametrs.Gamma(formulaNumber));
 				AddLocalMatrix(M, localMatrix, element);
 
 				localMatrix = _basis.GetStiffnessMatrix(nodes);
-				localMatrix.MultiplyLocalMatrix(_problemParametrs.Lamda(area));
+				localMatrix.MultiplyLocalMatrix(_problemParametrs.Lamda(formulaNumber));
 				AddLocalMatrix(G, localMatrix, element);
 
-				var localVector = _basis.GetLocalVector(nodes, _problemParametrs.F1);
+				var localVector = _basis.GetLocalVector(nodes, _problemParametrs.F1, formulaNumber);
 				AddLocalVector(vector, localVector, element);
 			}//);
 
@@ -59,18 +59,6 @@ namespace FemProducer.Collector
 			return (matrixes, vector);
 
 		}
-
-		//public void GetMatrixH()
-		//{
-		//	double[][] localMatrix;
-		//	for (int j = 0; j < _grid.M - 1; j++)
-		//		for (int i = 0; i < _grid.N - 1; i++) // проходим по КЭ 
-		//			if (!_grid.IsBorehole(i, j))
-		//			{
-		//				localMatrix = GetGradTMatrix(_grid.LocalNumToGlobal(i, j, 0), _grid.Hx[i], _grid.Hy[j], _grid.X[i], _grid.Y[j]);
-		//				AddLocalMatrix(_H, localMatrix, i, j);
-		//			}
-		//}
 
 		private void AddLocalVector(Vector vector, IList<double> localVector, FiniteElement element)
 		{
@@ -102,20 +90,41 @@ namespace FemProducer.Collector
 		}
 
 
-		//private double[][] GetGradTMatrix(int elemNumber, double hx, double hy, double xLeft, double yLower)
-		//{
-		//	double[][] matrix = new double[4][];
-		//	Point xBoundaries = new Point(xLeft, xLeft + hx);
-		//	Point yBoundaries = new Point(yLower, yLower + hy);
 
-		//	for (int i = 0; i < 4; i++)
-		//	{
-		//		matrix[i] = new double[4];
-		//		for (int j = 0; j < 4; j++)
-		//			matrix[i][j] = NumericalMethods.GaussIntegration(elemNumber, i, j, xBoundaries, yBoundaries, hx, hy);
-		//	}
 
-		//	return matrix;
-		//}
+
+
+		public void GetBoundaryConditions(Slae slae)
+		{
+			Parallel.ForEach(_grid.FirstBoundaryNodes, boundaryNodeIndex =>
+			{
+				AccountFirstCondition(slae, _grid.Nodes[boundaryNodeIndex], boundaryNodeIndex);
+			});
+
+		}
+
+		private void AccountFirstCondition(Slae slae, Node node, int nodeIndex)
+		{
+			slae.Matrix.ZeroingRow(nodeIndex);
+			slae.Matrix.Di[nodeIndex] = 1;
+			slae.Vector[nodeIndex] = _problemParametrs.Function(node);
+		}
+
+		private void AccountSecondConditionHorizontal(int i, int j, int area, NormalVectorDirection normal)
+		{
+			//_vector[i] += (int)normal * _problemParametrs.Lamda(area) * _grid.Hx[i] / 6 * (2 * _problemParametrs.DivFuncY1(_grid.X[i], _grid.Y[j], area) + _problemParametrs.DivFuncY1(_grid.X[i + 1], _grid.Y[j], area));
+			//_vector[i + 1] += (int)normal * _problemParametrs.Lamda(area) * _grid.Hx[i] / 6 * (_problemParametrs.DivFuncY1(_grid.X[i], _grid.Y[j], area) + 2 * _problemParametrs.DivFuncY1(_grid.X[i + 1], _grid.Y[j], area));
+		}
+		private void AccountSecondConditionVertical(int i, int j, int area, NormalVectorDirection normal)
+		{
+			//	_vector[i] += (int)normal * _problemParametrs.Lamda(area) * _grid.Hy[i] / 6 * (2 * _problemParametrs.DivFuncX1(_grid.X[i], _grid.Y[j], area) + _problemParametrs.DivFuncX1(_grid.X[i], _grid.Y[j + 1], area));
+			//	_vector[i + 1] += (int)normal * _problemParametrs.Lamda(area) * _grid.Hy[i] / 6 * (_problemParametrs.DivFuncX1(_grid.X[i], _grid.Y[j], area) + 2 * _problemParametrs.DivFuncX1(_grid.X[i], _grid.Y[j + 1], area));
+		}
+
+		enum NormalVectorDirection
+		{
+			NonCoDirectional = -1,
+			CoDirectional = 1,
+		}
 	}
 }

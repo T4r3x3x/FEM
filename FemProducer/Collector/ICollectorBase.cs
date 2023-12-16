@@ -2,8 +2,9 @@
 
 namespace FemProducer.Collector
 {
-	internal interface ICollectorBase
+	public interface ICollectorBase
 	{
 		(Dictionary<string, Matrix>, Vector) Collect();
+		void GetBoundaryConditions(Slae slae);
 	}
 }

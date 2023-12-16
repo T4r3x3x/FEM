@@ -58,14 +58,14 @@ namespace FemProducer.Basises
 			}
 			return result;
 		}
-		public IList<double> GetLocalVector(IList<Node> nodes, Func<Node, double> func)
+		public IList<double> GetLocalVector(IList<Node> nodes, Func<Node, int, double> func, int formulaNumber)
 		{
 			double[] localVector = new double[NodesCount];
 			var coefficents = GetCoefficients(nodes);
 
 			for (int i = 0; i < NodesCount; i++)
 			{
-				LocalVectorIntegrationFuncClass intF = new LocalVectorIntegrationFuncClass(func, Jacobian, i, nodes, coefficents);
+				LocalVectorIntegrationFuncClass intF = new LocalVectorIntegrationFuncClass(func, Jacobian, i, nodes, coefficents, formulaNumber);
 				localVector[i] += Integration.GaussIntegration(singleSquareFirstPoint, singleSquareFourthPoint, intF.LocalVectorIntegrationFunc, Integration.PointsCount.Three);
 			}
 
@@ -161,18 +161,20 @@ namespace FemProducer.Basises
 		class LocalVectorIntegrationFuncClass
 		{
 			private IList<Node> _nodes;
-			private Func<Node, double> _func;
+			private Func<Node, int, double> _func;
 			private Func<double, double, Coefficients, double> _jacobian;
 			private int _i = 0;
+			private int _formulaNumber;
 			private Coefficients _coefficients;
 
-			public LocalVectorIntegrationFuncClass(Func<Node, double> func, Func<double, double, Coefficients, double> jacobian, int i, IList<Node> nodes, Coefficients coefficients)
+			public LocalVectorIntegrationFuncClass(Func<Node, int, double> func, Func<double, double, Coefficients, double> jacobian, int i, IList<Node> nodes, Coefficients coefficients, int formulaNumber)
 			{
 				_func = func;
 				_jacobian = jacobian;
 				_i = i;
 				_nodes = nodes;
 				_coefficients = coefficients;
+				_formulaNumber = formulaNumber;
 			}
 
 			private (double, double) ReverseCoordinateSubstitution(double ksi, double nu)
@@ -186,7 +188,7 @@ namespace FemProducer.Basises
 			public double LocalVectorIntegrationFunc(double ksi, double nu)
 			{
 				var xy = ReverseCoordinateSubstitution(ksi, nu);
-				var res = _func(new Node(xy.Item1, xy.Item2)) * _jacobian(ksi, nu, _coefficients) * LinearQuarangularBasisFunctions.Fita[_i](ksi, nu);
+				var res = _func(new Node(xy.Item1, xy.Item2), _formulaNumber) * _jacobian(ksi, nu, _coefficients) * LinearQuarangularBasisFunctions.Fita[_i](ksi, nu);
 				return res;
 			}
 		}

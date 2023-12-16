@@ -14,9 +14,15 @@
 				IProblemSolver problemSolver = new TimeProblemSolver();
 				problemSolver.Solve(configureFile, outputFile);
 			}
-			catch (Exception ex)
+			catch (InvalidCastException ex)
 			{
 				Console.WriteLine(ex.Message, Console.BackgroundColor = ConsoleColor.DarkRed);
+
+				Console.BackgroundColor = ConsoleColor.Gray;
+			}
+			catch
+			{
+				Console.WriteLine("Inner unknown error :(", Console.BackgroundColor = ConsoleColor.DarkRed);
 
 				Console.BackgroundColor = ConsoleColor.Gray;
 			}

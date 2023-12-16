@@ -35,7 +35,6 @@ namespace FemProducer.Collector
 			return slae;
 		}
 
-		#region to refactory
 		//private void SubstractM()
 		//{
 		//	Master.Slau.A -= _M * timeCoef;
@@ -109,9 +108,10 @@ namespace FemProducer.Collector
 		{
 			_matrix = M + G;
 
-			GetBoundaryConditions();
-			Console.WriteLine("Done with boundary " + DateTime.UtcNow);
-			return new Slae(_matrix, _vector);
+			var slae = new Slae(_matrix, _vector);
+			_collectorBase.GetBoundaryConditions(slae);
+
+			return slae;
 		}
 
 		//private void MakeSLau(int timeLayer)
@@ -147,45 +147,5 @@ namespace FemProducer.Collector
 		//				Master.Slau.q[p].Elements[i + (j + 1) * _grid.N + 1] = Master.Func2(_grid.X[i + 1], _grid.Y[j + 1], _grid.T[p], area);
 		//			}
 		//}
-
-
-
-		private void GetBoundaryConditions()
-		{
-			Parallel.ForEach(_grid.FirstBoundaryNodes, boundaryNodeIndex =>
-				{
-					AccountFirstCondition(_grid.Nodes[boundaryNodeIndex], boundaryNodeIndex);
-				});
-
-		}
-
-		private void AccountFirstCondition(Node node, int nodeIndex)
-		{
-			_matrix.ZeroingRow(nodeIndex);
-			_matrix.Di[nodeIndex] = 1;
-			_vector[nodeIndex] = _problemParametrs.Function(node, nodeIndex);
-		}
-
-		private void AccountSecondConditionHorizontal(int i, int j, int area, NormalVectorDirection normal)
-		{
-			//_vector[i] += (int)normal * _problemParametrs.Lamda(area) * _grid.Hx[i] / 6 * (2 * _problemParametrs.DivFuncY1(_grid.X[i], _grid.Y[j], area) + _problemParametrs.DivFuncY1(_grid.X[i + 1], _grid.Y[j], area));
-			//_vector[i + 1] += (int)normal * _problemParametrs.Lamda(area) * _grid.Hx[i] / 6 * (_problemParametrs.DivFuncY1(_grid.X[i], _grid.Y[j], area) + 2 * _problemParametrs.DivFuncY1(_grid.X[i + 1], _grid.Y[j], area));
-		}
-		private void AccountSecondConditionVertical(int i, int j, int area, NormalVectorDirection normal)
-		{
-			//	_vector[i] += (int)normal * _problemParametrs.Lamda(area) * _grid.Hy[i] / 6 * (2 * _problemParametrs.DivFuncX1(_grid.X[i], _grid.Y[j], area) + _problemParametrs.DivFuncX1(_grid.X[i], _grid.Y[j + 1], area));
-			//	_vector[i + 1] += (int)normal * _problemParametrs.Lamda(area) * _grid.Hy[i] / 6 * (_problemParametrs.DivFuncX1(_grid.X[i], _grid.Y[j], area) + 2 * _problemParametrs.DivFuncX1(_grid.X[i], _grid.Y[j + 1], area));
-		}
-
-
-
-
-		#endregion
-
-		enum NormalVectorDirection
-		{
-			NonCoDirectional = -1,
-			CoDirectional = 1,
-		}
 	}
 }

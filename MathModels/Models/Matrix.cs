@@ -2,7 +2,7 @@
 
 namespace MathModels.Models
 {
-	public class Matrix
+	public class Matrix : ICloneable
 	{
 		public double[] Di;
 		public double[] Al, Au;
@@ -168,5 +168,7 @@ namespace MathModels.Models
 			for (int i = 0; i < Al.Count(); i++)
 				Al[i] = 0;
 		}
+
+		public object Clone() => new Matrix(Di, Al, Au, Ja, Ia);
 	}
 }

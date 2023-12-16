@@ -2,6 +2,8 @@
 
 using MathModels;
 
+using Tools;
+
 namespace Grid.Models
 {
 	public class GridParameters : IValidatableObject
@@ -26,16 +28,10 @@ namespace Grid.Models
 
 			var results = new List<ValidationResult>();
 			var context = new ValidationContext(this);
+
 			if (!Validator.TryValidateObject(this, context, results, true))
-			{
-				//foreach (var error in results)
-				//{
-				//	Console.WriteLine(error.ErrorMessage);
-				//}
-				//	throw new ValidationException(validationResult: results[0]);
-				//Environment.FailFast("Application failed.");
-				//	Console.ReadLine();
-			}
+				throw new ValidationException(results.ToCommonLine());
+
 
 		}
 
@@ -43,8 +39,11 @@ namespace Grid.Models
 		{
 			List<ValidationResult> errors = new List<ValidationResult>();
 
-			if (linesNodes[0].Length != qx.Length)
-				errors.Add(new ValidationResult("Количество коэффициентов разрядки и интервалов разбиений не совпадает!"));
+			if (linesNodes[0].Length != qx.Length + 1)
+				errors.Add(new ValidationResult("Количество коэффициентов разрядки qx и количество интервалов разбиений не совпадает!"));
+
+			if (linesNodes.Length != qy.Length + 1)
+				errors.Add(new ValidationResult("Количество коэффициентов разрядки qy и количество интервалов разбиений не совпадает!"));
 
 			//if (string.IsNullOrWhiteSpace(Name))
 			//	errors.Add(new ValidationResult("Не указано имя"));

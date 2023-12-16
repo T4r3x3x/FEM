@@ -12,18 +12,18 @@ namespace FemProducer
 		{
 			switch (area)
 			{
-				//    case 0: return 1;
-				//   case 1: return 10;
-				default: return 0;
+				case 0: return 1;
+				case 1: return 1;
+				default: throw new ArgumentException("Попытка обратится к подобласти, которой не существует!");
 			}
 		}
 		public double Gamma(int area)
 		{
 			switch (area)
 			{
-				// case 0: return 1;
-				// case 1: return 2;
-				default: return 5;
+				case 0: return 1;
+				case 1: return 1;
+				default: throw new ArgumentException("Попытка обратится к подобласти, которой не существует!");
 			}
 		}
 
@@ -37,18 +37,12 @@ namespace FemProducer
 			}
 		}
 
-		public double Function(Node node, int nodeIndex)
+		public double Function(Node node)
 		{
 			var x = node.X;
 			var y = node.Y;
 
-			return nodeIndex switch
-			{
-				//  case 0: return Math.Pow(Math.E,Math.PI*y)*Math.Sin(Math.PI*X);
-				//  case 1: return Math.Pow(Math.E, Math.PI * y) * Math.Sin(Math.PI * X)/10;
-				_ => 1
-				//default: return X * X * X + y * y * y;
-			};
+			return x + y;
 		}
 
 		public double DivFuncX1(double x, double y, int area)
@@ -66,15 +60,17 @@ namespace FemProducer
 			}
 		}
 
-		public double F1(Node node)
+		public double F1(Node node, int formulaIndex)
 		{
-			//switch (area)
-			//{
-			//      case 0: return X + y;
-			//        case 1: return 2 * X + 2 * y;
-			/*default:*/
-			return 5;
-			//}
+			var x = node.X;
+			var y = node.Y;
+
+			return formulaIndex switch
+			{
+				0 => Function(node) - 1 / x,
+				1 => Function(node) - 1 / x,
+				_ => throw new ArgumentException("Попытка обратится к подобласти, которой не существует!"),
+			};
 		}
 
 

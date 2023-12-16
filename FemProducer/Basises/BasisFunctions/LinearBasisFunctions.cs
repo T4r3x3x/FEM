@@ -90,7 +90,7 @@ namespace FemProducer.Basises.BasisFunctions
 		}
 
 
-		public static IList<double> GetLocalVector(IList<Node> nodes, Func<Node, double> func)
+		public static IList<double> GetLocalVector(IList<Node> nodes, Func<Node, int, double> func, int formulaNumber)
 		{
 			double[] result = new double[NodesCount];
 
@@ -99,7 +99,7 @@ namespace FemProducer.Basises.BasisFunctions
 
 			var funcValues = new double[NodesCount];
 			for (int i = 0; i < NodesCount; i++)
-				funcValues[i] = func(nodes[i]);
+				funcValues[i] = func(nodes[i], formulaNumber);
 
 			result[0] = hx * hy / 36 * (4 * funcValues[0] + 2 * funcValues[1] + 2 * funcValues[2] + funcValues[3]);
 			result[1] = hx * hy / 36 * (2 * funcValues[0] + 4 * funcValues[1] + funcValues[2] + 2 * funcValues[3]);

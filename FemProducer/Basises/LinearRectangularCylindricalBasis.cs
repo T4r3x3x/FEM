@@ -11,7 +11,7 @@ namespace FemProducer.Basises
 		private const int NodesCount = 4;
 
 		public Dictionary<string, IList<IList<double>>> GetLocalMatrixes(IList<Node> nodes) => throw new NotImplementedException();
-		public IList<double> GetLocalVector(IList<Node> nodes, Func<Node, double> func)
+		public IList<double> GetLocalVector(IList<Node> nodes, Func<Node, int, double> func, int formulaNumber)
 		{
 			double[] localVector = new double[NodesCount];
 			Node xLimits = new Node(nodes[0].X, nodes[1].X);
@@ -19,7 +19,7 @@ namespace FemProducer.Basises
 
 			for (int i = 0; i < NodesCount; i++)
 			{
-				LocalVectorIntegrationFuncClass intF = new LocalVectorIntegrationFuncClass(nodes, xLimits, yLimits, func, i);
+				LocalVectorIntegrationFuncClass intF = new LocalVectorIntegrationFuncClass(xLimits, yLimits, func, i, formulaNumber);
 				localVector[i] += Integration.GaussIntegration(nodes[0], nodes[3], intF.LocalVectorIntegrationFunc, Integration.PointsCount.Two);
 			}
 
@@ -29,14 +29,14 @@ namespace FemProducer.Basises
 		public IList<IList<double>> GetStiffnessMatrix(IList<Node> nodes)
 		{
 			double[][] stiffnessMatrix = new double[NodesCount][];
+			var xLimits = new Node(nodes[0].X, nodes[1].X);
+			var yLimits = new Node(nodes[0].Y, nodes[2].Y);
 
 			for (int i = 0; i < NodesCount; i++)
 			{
 				stiffnessMatrix[i] = new double[NodesCount];
 				for (int j = 0; j < NodesCount; j++)
 				{
-					var xLimits = new Node(nodes[0].X, nodes[1].X);
-					var yLimits = new Node(nodes[0].Y, nodes[2].Y);
 					StiffnessIntegrationFuncClass intFunc = new StiffnessIntegrationFuncClass(i, j, xLimits, yLimits);
 					stiffnessMatrix[i][j] += Integration.GaussIntegration(nodes[0], nodes[3], intFunc.StiffnessIntegrationFunction, Integration.PointsCount.Two);
 				}
@@ -48,14 +48,15 @@ namespace FemProducer.Basises
 		public IList<IList<double>> GetMassMatrix(IList<Node> nodes)
 		{
 			double[][] massMatrix = new double[NodesCount][];
+			var xLimits = new Node(nodes[0].X, nodes[1].X);
+			var yLimits = new Node(nodes[0].Y, nodes[2].Y);
 
 			for (int i = 0; i < NodesCount; i++)
 			{
 				massMatrix[i] = new double[NodesCount];
 				for (int j = 0; j < NodesCount; j++)
 				{
-					var xLimits = new Node(nodes[0].X, nodes[1].X);
-					var yLimits = new Node(nodes[0].Y, nodes[2].Y);
+
 					MassIntegrationFuncClass intFunc = new(i, j, xLimits, yLimits);
 					massMatrix[i][j] += Integration.GaussIntegration(nodes[0], nodes[3], intFunc.MassIntegrationalFunction, Integration.PointsCount.Two);
 				}
@@ -66,24 +67,23 @@ namespace FemProducer.Basises
 
 		class LocalVectorIntegrationFuncClass
 		{
-			private IList<Node> _nodes;
 			private Node _xLimits, _yLimits;
-			private Func<Node, double> _func;
+			private Func<Node, int, double> _func;
 			private int _i = 0;
-
-			public LocalVectorIntegrationFuncClass(IList<Node> nodes, Node xLimits, Node yLimits, Func<Node, double> func, int i)
+			private int _formulaNumber;
+			public LocalVectorIntegrationFuncClass(Node xLimits, Node yLimits, Func<Node, int, double> func, int i, int formulaNumber)
 			{
-				this._nodes = nodes;
 				_xLimits = xLimits;
 				_yLimits = yLimits;
 				_func = func;
 				_i = i;
+				_formulaNumber = formulaNumber;
 			}
 
 			public double LocalVectorIntegrationFunc(double r, double z)
 			{
 				var node = new Node(r, z);
-				var res = _func(node) * LinearBasisFunctions.GetBasisFunctionValue(_i, node, _xLimits, _yLimits) * r;
+				var res = _func(node, _formulaNumber) * LinearBasisFunctions.GetBasisFunctionValue(_i, node, _xLimits, _yLimits) * r;
 				return res;
 			}
 		}
@@ -104,9 +104,13 @@ namespace FemProducer.Basises
 			public double StiffnessIntegrationFunction(double r, double z)
 			{
 				Node node = new Node(r, z);
-				return (LinearBasisFunctions.XDerivativeBasisFunction(_i, node, _xLimits, _yLimits) * LinearBasisFunctions.XDerivativeBasisFunction(_j, node, _xLimits, _yLimits)
-					+ LinearBasisFunctions.YDerivativeBasisFunction(_i, node, _xLimits, _yLimits) * LinearBasisFunctions.YDerivativeBasisFunction(_j, node, _xLimits, _yLimits)) * r;
+				var xW1 = LinearBasisFunctions.XDerivativeBasisFunction(_i, node, _xLimits, _yLimits);
+				var xW2 = LinearBasisFunctions.XDerivativeBasisFunction(_j, node, _xLimits, _yLimits);
+				var yW1 = LinearBasisFunctions.YDerivativeBasisFunction(_i, node, _xLimits, _yLimits);
+				var yW2 = LinearBasisFunctions.YDerivativeBasisFunction(_j, node, _xLimits, _yLimits);
+				var result = (xW1 * xW2 + yW1 * yW2) * r;
 
+				return result;
 			}
 		}
 

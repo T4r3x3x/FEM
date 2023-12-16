@@ -36,7 +36,7 @@ namespace Grid.Implementations.Factories
 
 			(var nodes, var missingNodesIndexes) = GetNodes(gridParametrs.areas, subDomains, gridParametrs.linesNodes, x, y);
 
-			var elements = GetElements(x, y, subDomains, missingNodesIndexes);
+			var elements = GetElements(x, y, subDomains, missingNodesIndexes, gridParametrs.areas);
 
 			var boundaryNodes = GetBoundaryNodes(gridParametrs.boundaryConditions, x, y, gridParametrs.xSplitsCount, gridParametrs.ySplitsCount, missingNodesIndexes);
 			//if (q == 1)
@@ -251,7 +251,8 @@ namespace Grid.Implementations.Factories
 			return boundaryNodes;
 		}
 
-		private List<FiniteElement> GetElements(double[] x, double[] y, double[][] subDomains, List<int> missingNodes)
+
+		private List<FiniteElement> GetElements(double[] x, double[] y, double[][] subDomains, List<int> missingNodes, int[][] areas)
 		{
 			List<FiniteElement> elements = new List<FiniteElement>();
 			int[] NodesIndexes = new int[4];
@@ -264,14 +265,15 @@ namespace Grid.Implementations.Factories
 				for (int i = 0; i < x.Length - 1; i++)
 				{
 					var node = new Node((x[i] + x[i + 1]) / 2.0, (y[j] + y[j + 1]) / 2.0);
-					if (GetAreaNumber(subDomains, node) != -1)
+					int areaNumber = GetAreaNumber(subDomains, node);
+					if (areaNumber != -1)
 					{
 						NodesIndexes = [jx0 + i, jx0 + i + 1, jx1 + i, jx1 + i + 1];
 
 						for (int k = 0; k < NodesIndexes.Length; k++)
 							NodesIndexes[k] -= missingNodes[NodesIndexes[k]];
 
-						elements.Add(new FiniteElement(NodesIndexes));
+						elements.Add(new FiniteElement(NodesIndexes, areas[areaNumber][4]));
 					}
 				}
 			}
