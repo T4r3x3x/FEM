@@ -1,12 +1,15 @@
-﻿using Grid.Models;
+﻿using FemProducer.Models;
 
+using Grid.Models;
+
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using SlaeSolver.Models;
 
 namespace FemProducer.AppBuilder
 {
-	internal class JsonAppBuilder : IAppBuilder
+	public class JsonAppBuilder : IAppBuilder
 	{
 		private readonly string _filePath;
 
@@ -21,15 +24,17 @@ namespace FemProducer.AppBuilder
 
 			var jObject = JObject.Parse(streamReader.ReadToEnd());
 			var jToken = jObject.GetValue(typeof(ObjectType).Name);
+
 			if (jToken == null)
-				throw new Exception("Cound't read object " + typeof(ObjectType).Name);
+				throw new JsonReaderException("Can't read object " + typeof(ObjectType).Name);
+
 			ObjectType result = jToken.ToObject<ObjectType>();
 			return result;
+
 		}
 
 		GridParameters IAppBuilder.GetGridParameters() => DeserializeJsonObject<GridParameters>(_filePath);
-
-		ProblemService IAppBuilder.GetProblemParameters() => new ProblemService();
+		ProblemParameters IAppBuilder.GetProblemParameters() => DeserializeJsonObject<ProblemParameters>(_filePath);
 		SolverParameters IAppBuilder.GetSolverParameters() => DeserializeJsonObject<SolverParameters>(_filePath);
 	}
 }

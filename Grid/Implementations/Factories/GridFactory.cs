@@ -13,7 +13,6 @@ namespace Grid.Implementations.Factories
 	{
 		private const int countOfNodesInElement = 4;
 
-		//toDo вынести всё это в отдельный метод.
 		public GridModel GetGrid(GridParameters gridParametrs)
 		{
 			(var XW, var YW) = GetSegmetnsBoundaries(gridParametrs.linesNodes);
@@ -33,23 +32,16 @@ namespace Grid.Implementations.Factories
 
 			var x = BaseMethods.GetPointsInAxis(gridParametrs.qx, XW, gridParametrs.xSplitsCount);
 			var y = BaseMethods.GetPointsInAxis(gridParametrs.qy, YW, gridParametrs.ySplitsCount);
+			var t = BaseMethods.GetPointsInAxis(new double[] { gridParametrs.qt }, gridParametrs.tLimits, new List<int> { gridParametrs.tSplitsCount });
 
 			(var nodes, var missingNodesIndexes) = GetNodes(gridParametrs.areas, subDomains, gridParametrs.linesNodes, x, y);
 
 			var elements = GetElements(x, y, subDomains, missingNodesIndexes, gridParametrs.areas);
 
 			var boundaryNodes = GetBoundaryNodes(gridParametrs.boundaryConditions, x, y, gridParametrs.xSplitsCount, gridParametrs.ySplitsCount, missingNodesIndexes);
-			//if (q == 1)
-			//	_h = (_t[layersCount - 1] - _t[0]) / (layersCount - 1);
-			//else
-			//	_h = (_t[layersCount - 1] - _t[0]) * (q - 1) / (Math.Pow(q, layersCount - 1) - 1);
 
-			//for (int i = 1; i < layersCount; i++)
-			//{
-			//	_t[i] = _t[i - 1] + _h;
-			//	_ht[i - 1] = _h;
-			//	_h *= q;
-			//}
+
+
 			using (StreamWriter sw = new StreamWriter("grid2.txt"))
 			{
 				sw.Write(string.Format("{0} {1} {2} {3}", XW[0] - 1, XW[XW.Length - 1] + 1, YW[0] - 1, YW[YW.Length - 1] + 1).Replace(',', '.'));
@@ -64,8 +56,8 @@ namespace Grid.Implementations.Factories
 					sw.WriteLine();
 				}
 			}
-			Processes.OpenPythonScript(@"PythonScripts\grid2d.py");
-			return new GridModel(elements, nodes, boundaryNodes, null, null);
+
+			return new GridModel(elements, nodes, boundaryNodes, null, null, x.Length, y.Length, subDomains, t);
 		}
 
 		/// <summary>
@@ -237,6 +229,7 @@ namespace Grid.Implementations.Factories
 
 			for (int k = 0; k < boundaryIndexes.Count; k++)
 			{
+
 				for (int i = limits[k][2]; i <= limits[k][3]; i++)
 				{
 					for (int j = limits[k][0]; j <= limits[k][1]; j++)

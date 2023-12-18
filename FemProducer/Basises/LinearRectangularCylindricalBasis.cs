@@ -2,16 +2,22 @@
 
 using Grid.Models;
 
+using MathModels.Models;
+
 using NumericsMethods;
 
 namespace FemProducer.Basises
 {
-	internal class LinearRectangularCylindricalBasis : IBasis
+	internal class LinearRectangularCylindricalBasis : AbstractBasis
 	{
 		private const int NodesCount = 4;
 
-		public Dictionary<string, IList<IList<double>>> GetLocalMatrixes(IList<Node> nodes) => throw new NotImplementedException();
-		public IList<double> GetLocalVector(IList<Node> nodes, Func<Node, int, double> func, int formulaNumber)
+		public LinearRectangularCylindricalBasis(ProblemService problemService) : base(problemService)
+		{
+		}
+
+		public override Dictionary<string, IList<IList<double>>> GetLocalMatrixes(IList<Node> nodes) => throw new NotImplementedException();
+		public override IList<double> GetLocalVector(IList<Node> nodes, Func<Node, int, double> func, int formulaNumber)
 		{
 			double[] localVector = new double[NodesCount];
 			Node xLimits = new Node(nodes[0].X, nodes[1].X);
@@ -26,7 +32,7 @@ namespace FemProducer.Basises
 			return localVector;
 		}
 
-		public IList<IList<double>> GetStiffnessMatrix(IList<Node> nodes)
+		public override IList<IList<double>> GetStiffnessMatrix(IList<Node> nodes)
 		{
 			double[][] stiffnessMatrix = new double[NodesCount][];
 			var xLimits = new Node(nodes[0].X, nodes[1].X);
@@ -45,7 +51,7 @@ namespace FemProducer.Basises
 			return stiffnessMatrix;
 		}
 
-		public IList<IList<double>> GetMassMatrix(IList<Node> nodes)
+		public override IList<IList<double>> GetMassMatrix(IList<Node> nodes)
 		{
 			double[][] massMatrix = new double[NodesCount][];
 			var xLimits = new Node(nodes[0].X, nodes[1].X);
@@ -64,6 +70,9 @@ namespace FemProducer.Basises
 
 			return massMatrix;
 		}
+
+		public override void ConsiderSecondBoundaryCondition(Slae slae, Node node, int nodeIndex) => throw new NotImplementedException();
+		public override void ConsiderThirdBoundaryCondition(Slae slae, Node node, int nodeIndex) => throw new NotImplementedException();
 
 		class LocalVectorIntegrationFuncClass
 		{
@@ -113,7 +122,6 @@ namespace FemProducer.Basises
 				return result;
 			}
 		}
-
 
 		class MassIntegrationFuncClass
 		{

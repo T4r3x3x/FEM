@@ -26,10 +26,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Confige.json">
+    <None Update="ConfigureTask.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Configure.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="PythonScripts\grid.py">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="PythonScripts\isolines.py">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="PythonScripts\grid2d.py">

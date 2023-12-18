@@ -1,4 +1,6 @@
-﻿using Grid.Models;
+﻿using FemProducer.Models;
+
+using Grid.Models;
 
 using SlaeSolver.Models;
 
@@ -6,7 +8,7 @@ namespace FemProducer.AppBuilder
 {
 	public interface IAppBuilder
 	{
-		public ProblemService GetProblemParameters();
+		public ProblemParameters GetProblemParameters();
 		public SolverParameters GetSolverParameters();
 		public GridParameters GetGridParameters();
 	}

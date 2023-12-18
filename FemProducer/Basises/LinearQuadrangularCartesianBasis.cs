@@ -2,12 +2,14 @@
 
 using Grid.Models;
 
+using MathModels.Models;
+
 using NumericsMethods;
 
 
 namespace FemProducer.Basises
 {
-	public class LinearQuadrangularCartesianBasis : IBasis
+	public class LinearQuadrangularCartesianBasis : AbstractBasis
 	{
 		public const int NodesCount = 4;
 
@@ -22,9 +24,13 @@ namespace FemProducer.Basises
 			[[2, 1, 2, 1], [1, 2, 1, 2], [2, 1, 6, 3], [1, 2, 3, 6]]
 			];
 
+		public LinearQuadrangularCartesianBasis(ProblemService problemService) : base(problemService)
+		{
+		}
+
 		private double Jacobian(double ksi, double nu, Coefficients coefficients) => coefficients.a0 + ksi * coefficients.a1 + nu * coefficients.a2;
 
-		public IList<IList<double>> GetMassMatrix(IList<Node> nodes)
+		public override IList<IList<double>> GetMassMatrix(IList<Node> nodes)
 		{
 			// инициализация
 			double[][] result = new double[NodesCount][];
@@ -43,7 +49,7 @@ namespace FemProducer.Basises
 			return result;
 		}
 
-		public IList<IList<double>> GetStiffnessMatrix(IList<Node> nodes)
+		public override IList<IList<double>> GetStiffnessMatrix(IList<Node> nodes)
 		{
 			double[][] result = new double[nodes.Count][];
 			var coefficents = GetCoefficients(nodes);
@@ -58,7 +64,7 @@ namespace FemProducer.Basises
 			}
 			return result;
 		}
-		public IList<double> GetLocalVector(IList<Node> nodes, Func<Node, int, double> func, int formulaNumber)
+		public override IList<double> GetLocalVector(IList<Node> nodes, Func<Node, int, double> func, int formulaNumber)
 		{
 			double[] localVector = new double[NodesCount];
 			var coefficents = GetCoefficients(nodes);
@@ -72,7 +78,7 @@ namespace FemProducer.Basises
 			return localVector;
 		}
 
-		public Dictionary<string, IList<IList<double>>> GetLocalMatrixes(IList<Node> nodes)
+		public override Dictionary<string, IList<IList<double>>> GetLocalMatrixes(IList<Node> nodes)
 		{
 			return new()
 			{
@@ -101,6 +107,9 @@ namespace FemProducer.Basises
 
 			return new Coefficients(b1, b2, b3, b4, b5, b6, a0, a1, a2);
 		}
+
+		public override void ConsiderSecondBoundaryCondition(Slae slae, Node node, int nodeIndex) => throw new NotImplementedException();
+		public override void ConsiderThirdBoundaryCondition(Slae slae, Node node, int nodeIndex) => throw new NotImplementedException();
 
 		class Coefficients
 		{

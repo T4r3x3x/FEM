@@ -6,35 +6,24 @@ namespace FemProducer
 {
 	public class ProblemService
 	{
-		private readonly ProblemParametrs _problemParametrs;
+		private readonly ProblemParameters _problemParameters;
 
-		public double Lamda(int area)
+		public ProblemService(ProblemParameters problemParameters) => _problemParameters = problemParameters;
+
+		public double Lambda(int formulaNumber)
 		{
-			switch (area)
-			{
-				case 0: return 1;
-				case 1: return 1;
-				default: throw new ArgumentException("Попытка обратится к подобласти, которой не существует!");
-			}
-		}
-		public double Gamma(int area)
-		{
-			switch (area)
-			{
-				case 0: return 1;
-				case 1: return 1;
-				default: throw new ArgumentException("Попытка обратится к подобласти, которой не существует!");
-			}
+			if (formulaNumber > _problemParameters.Lambda.Count - 1)
+				throw new ArgumentException($"Лямбда для формулы {formulaNumber} не задана!");
+
+			return _problemParameters.Lambda[formulaNumber];
 		}
 
-		public double Sigma(int area)
+		public double Gamma(int formulaNumber)
 		{
-			switch (area)
-			{
-				//    case 0: return 1;
-				//  case 1: return 2;
-				default: return 1;
-			}
+			if (formulaNumber > _problemParameters.Gamma.Count - 1)
+				throw new ArgumentException($"Гамма для формулы {formulaNumber} не задана!");
+
+			return _problemParameters.Gamma[formulaNumber];
 		}
 
 		public double Function(Node node)
@@ -42,7 +31,7 @@ namespace FemProducer
 			var x = node.X;
 			var y = node.Y;
 
-			return x + y;
+			return (x + y);
 		}
 
 		public double DivFuncX1(double x, double y, int area)
@@ -60,54 +49,17 @@ namespace FemProducer
 			}
 		}
 
-		public double F1(Node node, int formulaIndex)
+		public double F(Node node, int formulaIndex)
 		{
 			var x = node.X;
 			var y = node.Y;
 
 			return formulaIndex switch
 			{
-				0 => Function(node) - 1 / x,
-				1 => Function(node) - 1 / x,
+				0 => Gamma(formulaIndex) * Function(node),
+				1 => Gamma(formulaIndex) * Function(node),
 				_ => throw new ArgumentException("Попытка обратится к подобласти, которой не существует!"),
 			};
 		}
-
-
-		//public double Func2(double x, double y, double t, int area)
-		//{
-		//	switch (area)
-		//	{
-		//		//    case 0: return -X * y * T;
-		//		//    case 1: return X * y * T;
-		//		default: return x + y + t;
-		//	}
-		//}
-		//public double DivFuncX2(double x, double y, double t, int area)
-		//{
-		//	switch (area)
-		//	{
-		//		default:
-		//			return y * t;
-		//	}
-		//}
-		//public double DivFuncY2(double x, double y, double t, int area)
-		//{
-		//	switch (area)
-		//	{
-		//		default:
-		//			return x * t;
-		//	}
-		//}
-		//public double F2(double x, double y, double t, int area)
-		//{
-		//	switch (area)
-		//	{
-		//		//    case 0: return -1;
-		//		// case 1: return 0;
-		//		//       default: return 1 -6 * X - 6 * y  -9* X * X * X*X -9*y* y * y * y;
-		//		default: return -1;
-		//	}
-		//}
 	}
 }

@@ -4,20 +4,20 @@ using MathModels.Models;
 
 namespace FemProducer
 {
-	internal class SolutionService
+	public class SolutionService
 	{
 		public IList<Vector> NumericalSolves { get; private set; } = new List<Vector>();
 		public IList<Vector> AnalyticsSolves { get; private set; } = new List<Vector>();
 
 		private readonly GridModel _grid;
 
-		public SolutionService(ProblemService problemParametrs, GridModel grid)
+		public SolutionService(ProblemService problemParameters, GridModel grid)
 		{
 			_grid = grid;
-			CalculateAnalysticsSolves(problemParametrs);
+			CalculateAnalyticsSolves(problemParameters);
 		}
 
-		private void CalculateAnalysticsSolves(ProblemService problemService)
+		private void CalculateAnalyticsSolves(ProblemService problemService)
 		{
 			for (int t = 0; t < _grid.TimeLayersCount; t++)
 			{

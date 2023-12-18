@@ -13,15 +13,15 @@ namespace FemProducer.Collector
 	{
 		private readonly GridModel _grid;
 		private readonly MatrixFactory _matrixFactory;
-		private readonly ProblemService _problemParametrs;
+		private readonly ProblemService _problemService;
 		private object _lock = new object();
-		private readonly IBasis _basis;
+		private readonly AbstractBasis _basis;
 
-		public CollectorBase(GridModel grid, MatrixFactory matrixFactory, ProblemService problemParametrs, IBasis basis)
+		public CollectorBase(GridModel grid, MatrixFactory matrixFactory, ProblemService problemService, AbstractBasis basis)
 		{
 			_grid = grid;
 			_matrixFactory = matrixFactory;
-			_problemParametrs = problemParametrs;
+			_problemService = problemService;
 			_basis = basis;
 		}
 
@@ -36,7 +36,7 @@ namespace FemProducer.Collector
 			Matrix G = _matrixFactory.CreateMatrix(_grid);
 			Vector vector = new Vector(M.Size);
 
-			//Parallel.ForEach(_grid.Elements, element =>
+			//	Parallel.ForEach(_grid.Elements, element =>
 			foreach (var element in _grid.Elements)
 			{
 				int formulaNumber = element.formulaNumber;
@@ -44,20 +44,19 @@ namespace FemProducer.Collector
 				var nodes = _grid.ElementToNode(element);
 
 				var localMatrix = _basis.GetMassMatrix(nodes);
-				localMatrix.MultiplyLocalMatrix(_problemParametrs.Gamma(formulaNumber));
+				localMatrix.MultiplyLocalMatrix(_problemService.Gamma(formulaNumber));
 				AddLocalMatrix(M, localMatrix, element);
 
 				localMatrix = _basis.GetStiffnessMatrix(nodes);
-				localMatrix.MultiplyLocalMatrix(_problemParametrs.Lamda(formulaNumber));
+				localMatrix.MultiplyLocalMatrix(_problemService.Lambda(formulaNumber));
 				AddLocalMatrix(G, localMatrix, element);
 
-				var localVector = _basis.GetLocalVector(nodes, _problemParametrs.F1, formulaNumber);
+				var localVector = _basis.GetLocalVector(nodes, _problemService.F, formulaNumber);
 				AddLocalVector(vector, localVector, element);
 			}//);
 
 			Dictionary<string, Matrix> matrixes = new() { { "M", M }, { "G", G } };
 			return (matrixes, vector);
-
 		}
 
 		private void AddLocalVector(Vector vector, IList<double> localVector, FiniteElement element)
@@ -65,8 +64,8 @@ namespace FemProducer.Collector
 			lock (_lock)
 				for (int i = 0; i < localVector.Count; i++)
 					vector[element.NodesIndexes[i]] += localVector[i];
-
 		}
+
 		private void AddLocalMatrix(Matrix matrix, IList<IList<double>> localMatrix, FiniteElement element)
 		{
 			lock (_lock)
@@ -89,42 +88,35 @@ namespace FemProducer.Collector
 			}
 		}
 
-
-
-
-
-
 		public void GetBoundaryConditions(Slae slae)
+		{
+			ConsiderFirstBoundaryConditions(slae);
+			ConsiderSecondBoundaryConditions(slae);
+			ConsiderThirdBoundaryConditions(slae);
+		}
+
+		private void ConsiderFirstBoundaryConditions(Slae slae)
 		{
 			Parallel.ForEach(_grid.FirstBoundaryNodes, boundaryNodeIndex =>
 			{
-				AccountFirstCondition(slae, _grid.Nodes[boundaryNodeIndex], boundaryNodeIndex);
+				_basis.ConsiderFirstBoundaryCondition(slae, _grid.Nodes[boundaryNodeIndex], boundaryNodeIndex);
 			});
-
 		}
 
-		private void AccountFirstCondition(Slae slae, Node node, int nodeIndex)
+		private void ConsiderSecondBoundaryConditions(Slae slae)
 		{
-			slae.Matrix.ZeroingRow(nodeIndex);
-			slae.Matrix.Di[nodeIndex] = 1;
-			slae.Vector[nodeIndex] = _problemParametrs.Function(node);
+			Parallel.ForEach(_grid.FirstBoundaryNodes, boundaryNodeIndex =>
+			{
+				_basis.ConsiderFirstBoundaryCondition(slae, _grid.Nodes[boundaryNodeIndex], boundaryNodeIndex);
+			});
 		}
 
-		private void AccountSecondConditionHorizontal(int i, int j, int area, NormalVectorDirection normal)
+		private void ConsiderThirdBoundaryConditions(Slae slae)
 		{
-			//_vector[i] += (int)normal * _problemParametrs.Lamda(area) * _grid.Hx[i] / 6 * (2 * _problemParametrs.DivFuncY1(_grid.X[i], _grid.Y[j], area) + _problemParametrs.DivFuncY1(_grid.X[i + 1], _grid.Y[j], area));
-			//_vector[i + 1] += (int)normal * _problemParametrs.Lamda(area) * _grid.Hx[i] / 6 * (_problemParametrs.DivFuncY1(_grid.X[i], _grid.Y[j], area) + 2 * _problemParametrs.DivFuncY1(_grid.X[i + 1], _grid.Y[j], area));
-		}
-		private void AccountSecondConditionVertical(int i, int j, int area, NormalVectorDirection normal)
-		{
-			//	_vector[i] += (int)normal * _problemParametrs.Lamda(area) * _grid.Hy[i] / 6 * (2 * _problemParametrs.DivFuncX1(_grid.X[i], _grid.Y[j], area) + _problemParametrs.DivFuncX1(_grid.X[i], _grid.Y[j + 1], area));
-			//	_vector[i + 1] += (int)normal * _problemParametrs.Lamda(area) * _grid.Hy[i] / 6 * (_problemParametrs.DivFuncX1(_grid.X[i], _grid.Y[j], area) + 2 * _problemParametrs.DivFuncX1(_grid.X[i], _grid.Y[j + 1], area));
-		}
-
-		enum NormalVectorDirection
-		{
-			NonCoDirectional = -1,
-			CoDirectional = 1,
+			Parallel.ForEach(_grid.FirstBoundaryNodes, boundaryNodeIndex =>
+			{
+				_basis.ConsiderFirstBoundaryCondition(slae, _grid.Nodes[boundaryNodeIndex], boundaryNodeIndex);
+			});
 		}
 	}
 }

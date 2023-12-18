@@ -1,4 +1,9 @@
 {
+  "ProblemParameters": {
+    "Lambda": [ 1, 1 ],
+    "Gamma": [ 2, 3 ]
+  },
+
   "SolverParameters": {
     "SolverType": "LOSLU",
     "MaxIterCount": 10000,
@@ -6,13 +11,12 @@
   },
   "GridParameters": {
     "areas": [
-      [ 0, 2, 0, 3, 0 ],
-      [ 1, 3, 0, 3, 1 ]
+      [ 0, 3, 0, 3, 0 ],
     ],
-    "qx": [ 1, 1, 1],
+    "qx": [ 1, 1, 1 ],
     "qy": [ 1, 1, 1 ],
-    "xSplitsCount": [ 2, 2, 2 ],
-    "ySplitsCount": [ 2, 2, 2 ],
+    "xSplitsCount": [ 4, 4, 4 ],
+    "ySplitsCount": [ 4, 4, 4 ],
     "linesNodes": [
       [
         {
@@ -91,7 +95,7 @@
       [ 0, 0, 0, 3 ],
       [ 0, 3, 0, 0 ],
       [ 3, 3, 0, 3 ],
-      [ 0, 3, 3, 3 ],
+      [ 0, 3, 3, 3 ]
     ]
   }
 }

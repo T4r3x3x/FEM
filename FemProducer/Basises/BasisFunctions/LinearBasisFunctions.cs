@@ -6,27 +6,16 @@ namespace FemProducer.Basises.BasisFunctions
 	{
 		private const int NodesCount = 4;
 
-		private static List<Func<double, double, double, double>> YFunctions = [
-			(double y, double yUpper, double hy) => (yUpper - y) / hy,
-			(double y, double yLower, double hy) => (y - yLower) / hy,
-		];
-
-		private static List<Func<double, double, double, double>> XFunctions = [
+		private static List<Func<double, double, double, double>> Functions = [
 
 			(double X, double xRight, double hx) => (xRight - X) / hx,
 			(double X, double xLeft, double hx) => (X - xLeft) / hx,
 		];
 
-		private static List<Func<double, double>> XBasisFunctionDerivative = [
+		private static List<Func<double, double>> FunctionDerivative = [
 
-			(double hx) => -1 / hx,
-			(double hx) => 1 / hx,
-		];
-
-		private static List<Func<double, double>> YBasisFunctionDerivative = [
-
-			(double hy) => -1 / hy,
-			(double hy) => 1 / hy,
+			(double h) => -1 / h,
+			(double h) => 1 / h,
 		];
 
 		public static double XDerivativeBasisFunction(int functionIndex, Node node, Node xLimits, Node yLimits)
@@ -36,10 +25,10 @@ namespace FemProducer.Basises.BasisFunctions
 
 			return functionIndex switch
 			{
-				0 => XBasisFunctionDerivative[0](hx) * YFunctions[0](node.Y, yLimits.Y, hy),
-				1 => XBasisFunctionDerivative[1](hx) * YFunctions[0](node.Y, yLimits.Y, hy),
-				2 => XBasisFunctionDerivative[0](hx) * YFunctions[1](node.Y, yLimits.X, hy),
-				3 => XBasisFunctionDerivative[1](hx) * YFunctions[1](node.Y, yLimits.X, hy),
+				0 => FunctionDerivative[0](hx) * Functions[0](node.Y, yLimits.Y, hy),
+				1 => FunctionDerivative[1](hx) * Functions[0](node.Y, yLimits.Y, hy),
+				2 => FunctionDerivative[0](hx) * Functions[1](node.Y, yLimits.X, hy),
+				3 => FunctionDerivative[1](hx) * Functions[1](node.Y, yLimits.X, hy),
 				_ => throw new ArgumentException($"The argument i = {functionIndex} is an invalid value."),
 			};
 		}
@@ -51,10 +40,10 @@ namespace FemProducer.Basises.BasisFunctions
 
 			return functionIndex switch
 			{
-				0 => XFunctions[0](node.X, xLimits.Y, hx) * YBasisFunctionDerivative[0](hy),
-				1 => XFunctions[1](node.X, xLimits.X, hx) * YBasisFunctionDerivative[0](hy),
-				2 => XFunctions[0](node.X, xLimits.Y, hx) * YBasisFunctionDerivative[1](hy),
-				3 => XFunctions[1](node.X, xLimits.X, hx) * YBasisFunctionDerivative[1](hy),
+				0 => Functions[0](node.X, xLimits.Y, hx) * FunctionDerivative[0](hy),
+				1 => Functions[1](node.X, xLimits.X, hx) * FunctionDerivative[0](hy),
+				2 => Functions[0](node.X, xLimits.Y, hx) * FunctionDerivative[1](hy),
+				3 => Functions[1](node.X, xLimits.X, hx) * FunctionDerivative[1](hy),
 				_ => throw new ArgumentException($"The argument i = {functionIndex} is an invalid value."),
 			};
 		}
@@ -66,29 +55,13 @@ namespace FemProducer.Basises.BasisFunctions
 
 			return functionIndex switch
 			{
-				0 => XFunctions[0](node.X, xLimits.Y, hx) * YFunctions[0](node.Y, yLimits.Y, hy),
-				1 => XFunctions[1](node.X, xLimits.X, hx) * YFunctions[0](node.Y, yLimits.Y, hy),
-				2 => XFunctions[0](node.X, xLimits.Y, hx) * YFunctions[1](node.Y, yLimits.X, hy),
-				3 => XFunctions[1](node.X, xLimits.X, hx) * YFunctions[1](node.Y, yLimits.X, hy),
+				0 => Functions[0](node.X, xLimits.Y, hx) * Functions[0](node.Y, yLimits.Y, hy),
+				1 => Functions[1](node.X, xLimits.X, hx) * Functions[0](node.Y, yLimits.Y, hy),
+				2 => Functions[0](node.X, xLimits.Y, hx) * Functions[1](node.Y, yLimits.X, hy),
+				3 => Functions[1](node.X, xLimits.X, hx) * Functions[1](node.Y, yLimits.X, hy),
 				_ => throw new ArgumentException($"The argument i = {functionIndex} is an invalid value."),
 			};
 		}
-
-		public static double GetBasisFunctionValue2(int functionIndex, Node node, Node xLimits, Node yLimits)
-		{
-			double hx = xLimits.Y - xLimits.X;
-			double hy = yLimits.Y - yLimits.X;
-
-			return functionIndex switch
-			{
-				0 => XFunctions[0](node.X, xLimits.Y, hx),// * YFunctions[0](node.Y, yLimits.Y, hy),
-				1 => XFunctions[1](node.X, xLimits.X, hx),// * YFunctions[0](node.Y, yLimits.Y, hy),
-														  //	2 => XFunctions[0](node.X, xLimits.Y, hx) * YFunctions[1](node.Y, yLimits.X, hy),
-														  //3 => XFunctions[1](node.X, xLimits.X, hx) * YFunctions[1](node.Y, yLimits.X, hy),
-				_ => throw new ArgumentException($"The argument i = {functionIndex} is an invalid value."),
-			};
-		}
-
 
 		public static IList<double> GetLocalVector(IList<Node> nodes, Func<Node, int, double> func, int formulaNumber)
 		{

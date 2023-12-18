@@ -11,7 +11,7 @@ namespace FemProducer
 	/// <summary>
 	/// Класс отвечает за запись результатов работы программы
 	/// </summary>
-	internal class ProgramResultsService<TLogger> where TLogger : ILogger
+	internal class ResultsService<TLogger> where TLogger : ILogger
 	{
 		private readonly TLogger _logger;
 		private readonly GridModel _grid;
@@ -19,7 +19,7 @@ namespace FemProducer
 		private readonly StringBuilder stringBuilder = new StringBuilder();
 		private readonly ProblemService _problemParametrs;
 
-		public ProgramResultsService(TLogger logger, GridModel grid, SolutionService resultProducer, ProblemService problemParametrs)
+		public ResultsService(TLogger logger, GridModel grid, SolutionService resultProducer, ProblemService problemParametrs)
 		{
 			_logger = logger;
 			_grid = grid;
@@ -60,8 +60,8 @@ namespace FemProducer
 
 		public void PrintResult(int timeLayer, bool printSolution)
 		{
-			Vector exactSolution = _resultProducer.AnalyticsSolves[0];
-			var solution = _resultProducer.NumericalSolves[0];
+			Vector exactSolution = _resultProducer.AnalyticsSolves[timeLayer];
+			var solution = _resultProducer.NumericalSolves[timeLayer];
 
 			if (printSolution)
 			{
@@ -73,8 +73,56 @@ namespace FemProducer
 				for (int i = 0; i < solution.Length; i++)
 					Console.WriteLine("u{0} = {1:E16} | u*{0} = {2:E16} | {3:E16}", i + 1, solution[i], exactSolution[i], Math.Abs(exactSolution[i] - solution[i]));
 
-			Console.WriteLine("Относительная погрешность: " + _resultProducer.GetSolveDifference(0));
+			Console.WriteLine("Относительная погрешность: " + _resultProducer.GetSolveDifference(timeLayer));
+		}
 
+		public void WriteSolveWithGrid(string path, Vector solve)
+		{
+			using (var file = File.Open(path, FileMode.OpenOrCreate))
+			using (StreamWriter sw = new StreamWriter(file))
+			{
+				var _x = _grid.Nodes.Select(node => Math.Round(node.X, 4)).ToList();
+				_x.Sort();
+				HashSet<double> x = new HashSet<double>(_x);
+				var _y = _grid.Nodes.Select(node => Math.Round(node.Y, 4)).ToList();
+				_y.Sort();
+				HashSet<double> y = new HashSet<double>(_y);
+
+				_x = x.ToList();
+				_y = y.ToList();
+				_grid.Nodes.Add(new Node(10000, 10000));
+				int k = 0;
+
+				sw.WriteLine(_grid.Subdomains.Length);
+				foreach (var subDomain in _grid.Subdomains)
+				{
+					foreach (var value in subDomain)
+					{
+						sw.Write(value.ToString().Replace(',', '.') + " ");
+					}
+					sw.WriteLine();
+				}
+
+				sw.WriteLine(x.Count);
+				sw.WriteLine(y.Count);
+
+				for (int i = 0; i < y.Count; i++)
+				{
+					for (int j = 0; j < x.Count; j++)
+					{
+						sw.Write((_x[j] + " " + _y[i].ToString("E4") + " ").Replace(',', '.'));
+						var aX = Math.Round(_grid.Nodes[k].X, 4);
+						var aY = Math.Round(_grid.Nodes[k].Y, 4);
+						if (aX == _x[j] && aY == _y[i])
+						{
+							sw.Write(solve[i].ToString().Replace(",", ".") + "\n");
+							k++;
+						}
+						else
+							sw.Write("0" + "\n");
+					}
+				}
+			}
 		}
 
 		public void WriteSolve(string path, Vector solve)
@@ -90,8 +138,16 @@ namespace FemProducer
 			using (var file = File.Open(path, FileMode.OpenOrCreate))
 			using (StreamWriter sw = new StreamWriter(file))
 			{
-				//	sw.Write(string.Format("{0} {1} {2} {3}", XW[0] - 1, XW[XW.Length - 1] + 1, YW[0] - 1, YW[YW.Length - 1] + 1));
-				//	sw.Write('\n');
+				sw.WriteLine(_grid.Subdomains.Length);
+				foreach (var subDomain in _grid.Subdomains)
+				{
+					foreach (var value in subDomain)
+					{
+						sw.Write(value.ToString().Replace(',', '.') + " ");
+					}
+					sw.WriteLine();
+				}
+
 				sw.WriteLine(_grid.Elements.Count);
 				foreach (var element in _grid.Elements)
 				{
