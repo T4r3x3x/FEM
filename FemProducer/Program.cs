@@ -45,7 +45,7 @@ namespace FemProducer
 			//}
 			sw.Stop();
 			Messages.PrintSuccessMessage("program work time: " + sw.ElapsedMilliseconds);
-			Processes.OpenPythonScript(@"PythonScripts\grid2d.py");
+
 			//Tools.Processes.OpenPythonScript("isolines.py");
 		}
 	}

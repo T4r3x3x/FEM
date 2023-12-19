@@ -39,7 +39,7 @@ namespace Grid.Implementations.Factories
 			var elements = GetElements(x, y, subDomains, missingNodesIndexes, gridParametrs.areas);
 
 			var boundaryNodes = GetBoundaryNodes(gridParametrs.boundaryConditions, x, y, gridParametrs.xSplitsCount, gridParametrs.ySplitsCount, missingNodesIndexes);
-
+			boundaryNodes = boundaryNodes.Order().ToHashSet();
 
 
 			using (StreamWriter sw = new StreamWriter("grid2.txt"))
@@ -56,7 +56,7 @@ namespace Grid.Implementations.Factories
 					sw.WriteLine();
 				}
 			}
-
+			Processes.OpenPythonScript(@"PythonScripts\grid2d.py");
 			return new GridModel(elements, nodes, boundaryNodes, null, null, x.Length, y.Length, subDomains, t);
 		}
 

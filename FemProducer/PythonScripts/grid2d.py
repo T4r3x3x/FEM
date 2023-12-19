@@ -5,8 +5,8 @@ from matplotlib.patches import Polygon
 fig, ax = plt.subplots()
 
 # Define the vertices for the first polygon
-f = open('grid.txt', 'r', encoding="utf-8")
-subdomainsCount = int(f.readline())
+f = open('grid2.txt', 'r', encoding="utf-8")
+# subdomainsCount = int(f.readline())
 
 colors = ["orange","red","green"]
 
@@ -15,15 +15,17 @@ vertices = []
 polygons = []
 subdomains = []
 temp = []
+boundaries = f.readline().split(' ')
+ax.set_xlim(float(boundaries[0]), float(boundaries[1]))
+ax.set_ylim(float(boundaries[2]), float(boundaries[3]))
 
-
-for i in range(0,subdomainsCount):
-	point = f.readline().split(' ')
-	temp.append(float(point[0]))
-	temp.append(float(point[1]))		
-	temp.append(float(point[2]))
-	temp.append(float(point[3]))
-	subdomains.append(temp)
+# for i in range(0,subdomainsCount):
+# 	point = f.readline().split(' ')
+# 	temp.append(float(point[0]))
+# 	temp.append(float(point[1]))		
+# 	temp.append(float(point[2]))
+# 	temp.append(float(point[3]))
+# 	subdomains.append(temp)
 
 elemCount = int(f.readline())
 for line in range(0,elemCount):
