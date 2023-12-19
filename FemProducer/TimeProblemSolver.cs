@@ -41,20 +41,20 @@ namespace FemProducer
 			MatrixFactory matrixFactory = new();
 
 			CollectorBase collector = new(grid, matrixFactory, problemService, new Basises.LinearQuadrangularCartesianBasis(problemService));
-			TimeCollector timeCollector = new TimeCollector(solutionService, collector, grid, matrixFactory);
+			EllipticCollector timeCollector = new EllipticCollector(collector, grid, matrixFactory);
 
 			ResultsService<TxtLogger> solvesOutputer = new(new TxtLogger("results"), grid, solutionService, problemService);
 
-			solutionService.NumericalSolves.Add(solutionService.AnalyticsSolves[0]);
-			solutionService.NumericalSolves.Add(solutionService.AnalyticsSolves[1]);
+			//		solutionService.NumericalSolves.Add(solutionService.AnalyticsSolves[0]);
+			//		solutionService.NumericalSolves.Add(solutionService.AnalyticsSolves[1]);
 
-			for (int timeLayer = 2; timeLayer < grid.T.Count; timeLayer++)
-			{
-				Slae slae = timeCollector.Collect(timeLayer);
-				Vector solve = solver.Solve(slae);
-				solutionService.NumericalSolves.Add(solve);
-				solvesOutputer.PrintResult(timeLayer, true);
-			}
+			//	for (int timeLayer = 2; timeLayer < grid.T.Count; timeLayer++)
+			//	{
+			Slae slae = timeCollector.Collect(0);
+			Vector solve = solver.Solve(slae);
+			solutionService.NumericalSolves.Add(solve);
+			solvesOutputer.PrintResult(0, true);
+			//	}
 
 			solvesOutputer.WriteSolve("solve.txt", solutionService.NumericalSolves[0]);
 			solvesOutputer.WriteGrid("grid.txt");

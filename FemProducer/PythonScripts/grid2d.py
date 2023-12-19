@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 
 fig, ax = plt.subplots()
-
+fig.set_size_inches(12,8)
 # Define the vertices for the first polygon
 f = open('grid2.txt', 'r', encoding="utf-8")
 # subdomainsCount = int(f.readline())
