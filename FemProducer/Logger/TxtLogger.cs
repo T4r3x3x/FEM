@@ -1,6 +1,6 @@
 ﻿namespace FemProducer.Logger
 {
-	internal class TxtLogger : ILogger
+	public class TxtLogger : ILogger
 	{
 		private readonly string _path;
 

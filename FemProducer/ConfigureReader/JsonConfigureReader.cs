@@ -7,13 +7,13 @@ using Newtonsoft.Json.Linq;
 
 using SlaeSolver.Models;
 
-namespace FemProducer.AppBuilder
+namespace FemProducer.ConfigureReader
 {
-	public class JsonAppBuilder : IAppBuilder
+	public class JsonConfigureReader : IConfigureReader
 	{
 		private readonly string _filePath;
 
-		public JsonAppBuilder(string filePath)
+		public JsonConfigureReader(string filePath)
 		{
 			_filePath = filePath;
 		}
@@ -30,11 +30,10 @@ namespace FemProducer.AppBuilder
 
 			ObjectType result = jToken.ToObject<ObjectType>();
 			return result;
-
 		}
 
-		GridParameters IAppBuilder.GetGridParameters() => DeserializeJsonObject<GridParameters>(_filePath);
-		ProblemParameters IAppBuilder.GetProblemParameters() => DeserializeJsonObject<ProblemParameters>(_filePath);
-		SolverParameters IAppBuilder.GetSolverParameters() => DeserializeJsonObject<SolverParameters>(_filePath);
+		GridParameters IConfigureReader.GetGridParameters() => DeserializeJsonObject<GridParameters>(_filePath);
+		ProblemParameters IConfigureReader.GetProblemParameters() => DeserializeJsonObject<ProblemParameters>(_filePath);
+		SolverParameters IConfigureReader.GetSolverParameters() => DeserializeJsonObject<SolverParameters>(_filePath);
 	}
 }

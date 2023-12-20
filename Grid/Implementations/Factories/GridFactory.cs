@@ -15,12 +15,14 @@ namespace Grid.Implementations.Factories
 
 		public GridModel GetGrid(GridParameters gridParametrs)
 		{
-			(var XW, var YW) = GetSegmetnsBoundaries(gridParametrs.linesNodes);
+			(var XW, var YW) = GetSegmentsBoundaries(gridParametrs.LinesNodes);
 
-			double[][] subDomains = new double[gridParametrs.areas.Length][];
+			var ZW = gridParametrs.ZW;
 
-			var lines = gridParametrs.linesNodes;
-			var areas = gridParametrs.areas;
+			double[][] subDomains = new double[gridParametrs.Areas.Length][];
+
+			var lines = gridParametrs.LinesNodes;
+			var areas = gridParametrs.Areas;
 
 			for (int i = 0; i < subDomains.Length; i++)
 			{
@@ -30,35 +32,39 @@ namespace Grid.Implementations.Factories
 					lines[areas[i][3]][areas[i][1]]]);
 			}
 
-			var x = BaseMethods.GetPointsInAxis(gridParametrs.qx, XW, gridParametrs.xSplitsCount);
-			var y = BaseMethods.GetPointsInAxis(gridParametrs.qy, YW, gridParametrs.ySplitsCount);
-			var t = BaseMethods.GetPointsInAxis(new double[] { gridParametrs.qt }, gridParametrs.tLimits, new List<int> { gridParametrs.tSplitsCount });
+			var x = BaseMethods.GetPointsInAxis(gridParametrs.Qx, XW, gridParametrs.XSplitsCount);
+			var y = BaseMethods.GetPointsInAxis(gridParametrs.Qy, YW, gridParametrs.YSplitsCount);
+			var z = BaseMethods.GetPointsInAxis(gridParametrs.Qz, ZW, gridParametrs.ZSplitsCount);
+			var t = BaseMethods.GetPointsInAxis([gridParametrs.Qt], gridParametrs.TLimits, [gridParametrs.TSplitsCount]);
 
-			(var nodes, var missingNodesIndexes) = GetNodes(gridParametrs.areas, subDomains, gridParametrs.linesNodes, x, y);
+			(var nodes, var missingNodesIndexes) = GetNodes(gridParametrs.Areas, subDomains, gridParametrs.LinesNodes, x, y);
 
-			var elements = GetElements(x, y, subDomains, missingNodesIndexes, gridParametrs.areas);
+			var elements = GetElements(x, y, subDomains, missingNodesIndexes, gridParametrs.Areas);
 
-			var boundaryNodes = GetBoundaryNodes(gridParametrs.boundaryConditions, x, y, gridParametrs.xSplitsCount, gridParametrs.ySplitsCount, missingNodesIndexes);
-			boundaryNodes = boundaryNodes.Order().ToHashSet();
+			var boundaryNodes = GetBoundaryNodes(gridParametrs.BoundaryConditions, x, y, gridParametrs.XSplitsCount, gridParametrs.YSplitsCount, missingNodesIndexes);
 
 
-			using (StreamWriter sw = new StreamWriter("grid2.txt"))
-			{
-				sw.Write(string.Format("{0} {1} {2} {3}", XW[0] - 1, XW[XW.Length - 1] + 1, YW[0] - 1, YW[YW.Length - 1] + 1).Replace(',', '.'));
-				sw.Write('\n');
-				sw.WriteLine(elements.Count);
-				foreach (var element in elements)
-				{
-					sw.WriteLine(nodes[element.NodesIndexes[0]]);
-					sw.WriteLine(nodes[element.NodesIndexes[1]]);
-					sw.WriteLine(nodes[element.NodesIndexes[3]]);
-					sw.WriteLine(nodes[element.NodesIndexes[2]]);
-					sw.WriteLine();
-				}
-			}
-			Processes.OpenPythonScript(@"PythonScripts\grid2d.py");
-			return new GridModel(elements, nodes, boundaryNodes, null, null, x.Length, y.Length, subDomains, t);
+			var realSubDomains = GetRealSubdomians(lines, gridParametrs.Areas);
+
+			return new GridModel(elements, nodes, boundaryNodes, null, null, x.Length, y.Length, realSubDomains.ToArray(), 4, x, y, t);
 		}
+
+		private List<Point[]> GetRealSubdomians(Point[][] lines, int[][] areas)
+		{
+			List<Point[]> subdomains = new();
+			Point[] points;
+			for (int i = 0; i < areas.Length; i++)
+			{
+				points = [lines[areas[i][2]][areas[i][0]],
+					lines[areas[i][2]][areas[i][1]],
+					lines[areas[i][3]][areas[i][0]],
+					lines[areas[i][3]][areas[i][1]]];
+				subdomains.Add(points);
+			}
+
+			return subdomains;
+		}
+
 
 		/// <summary>
 		/// Метод определяет границы прямоугольной области, в которую вписана данная четырёхугольная область
@@ -94,7 +100,6 @@ namespace Grid.Implementations.Factories
 
 			return newNode;
 		}
-
 
 		private int GetAreaNumber(double[][] subDomains, Node node)
 		{
@@ -144,16 +149,16 @@ namespace Grid.Implementations.Factories
 				lines[areas[areaNumber][3]][areas[areaNumber][1]]];
 		}
 
-		private (double[], double[]) GetSegmetnsBoundaries(Point[][] lines)
+		private (double[], double[]) GetSegmentsBoundaries(Point[][] lines)
 		{
-			HashSet<double> XW = new(), YW = new();
+			HashSet<double> xw = new(), yw = new();
 
-			YW.Add(SearchingAlghoritms.GetMinValueInCollection(lines[0].Select(point => point.Y)));
+			yw.Add(SearchingAlghoritms.GetMinValueInCollection(lines[0].Select(point => point.Y)));
 
 			for (int i = 1; i < lines.Length - 1; i++)
-				YW.Add(lines[i][0].Y);
+				yw.Add(lines[i][0].Y);
 
-			YW.Add(SearchingAlghoritms.GetMaxValueInCollection(lines[lines.Length - 1].Select(point => point.Y)));
+			yw.Add(SearchingAlghoritms.GetMaxValueInCollection(lines[lines.Length - 1].Select(point => point.Y)));
 
 			double min = double.MaxValue;
 			for (int j = 0; j < lines[0].Length; j++)
@@ -162,10 +167,10 @@ namespace Grid.Implementations.Factories
 					min = lines[0][j].X;
 
 			}
-			XW.Add(min);
+			xw.Add(min);
 
 			for (int i = 1; i < lines[0].Length - 1; i++)
-				XW.Add(lines[0][i].X);
+				xw.Add(lines[0][i].X);
 
 			double max = double.MinValue;
 			for (int j = 0; j < lines[0].Length; j++)
@@ -173,11 +178,9 @@ namespace Grid.Implementations.Factories
 				if (lines[lines.Length - 1][j].X > max)
 					max = lines[lines.Length - 1][j].X;
 			}
-			XW.Add(max);
+			xw.Add(max);
 
-
-
-			return (XW.ToArray(), YW.ToArray());
+			return (xw.ToArray(), yw.ToArray());
 		}
 
 		private (int, int) GetAxisLimitIndexes(int leftLimit, int rightLimit, List<int> SplitsCount)
@@ -243,7 +246,6 @@ namespace Grid.Implementations.Factories
 
 			return boundaryNodes;
 		}
-
 
 		private List<FiniteElement> GetElements(double[] x, double[] y, double[][] subDomains, List<int> missingNodes, int[][] areas)
 		{

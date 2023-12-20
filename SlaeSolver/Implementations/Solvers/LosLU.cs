@@ -5,7 +5,7 @@ using SlaeSolver.Interfaces;
 
 namespace SlaeSolver.Implementations.Solvers
 {
-	internal class LosLU : ISolver
+	public class LosLU : ISolver
 	{
 		private readonly int maxItCount;
 		private readonly double eps;

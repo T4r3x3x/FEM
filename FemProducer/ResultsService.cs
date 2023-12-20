@@ -11,7 +11,7 @@ namespace FemProducer
 	/// <summary>
 	/// Класс отвечает за запись результатов работы программы
 	/// </summary>
-	internal class ResultsService<TLogger> where TLogger : ILogger
+	public class ResultsService<TLogger> where TLogger : ILogger
 	{
 		private readonly TLogger _logger;
 		private readonly GridModel _grid;
@@ -81,19 +81,7 @@ namespace FemProducer
 			using (var file = File.Open(path, FileMode.OpenOrCreate))
 			using (StreamWriter sw = new StreamWriter(file))
 			{
-				var _x = _grid.Nodes.Select(node => Math.Round(node.X, 4)).ToList();
-				_x.Sort();
-				HashSet<double> x = new HashSet<double>(_x);
-				var _y = _grid.Nodes.Select(node => Math.Round(node.Y, 4)).ToList();
-				_y.Sort();
-				HashSet<double> y = new HashSet<double>(_y);
-
-				_x = x.ToList();
-				_y = y.ToList();
-				_grid.Nodes.Add(new Node(10000, 10000));
-				int k = 0;
-
-				sw.WriteLine(_grid.Subdomains.Length);
+				sw.WriteLine(_grid.Subdomains.Count);
 				foreach (var subDomain in _grid.Subdomains)
 				{
 					foreach (var value in subDomain)
@@ -103,24 +91,12 @@ namespace FemProducer
 					sw.WriteLine();
 				}
 
-				sw.WriteLine(x.Count);
-				sw.WriteLine(y.Count);
+				sw.WriteLine(_grid.Nodes.Count);
 
-				for (int i = 0; i < y.Count; i++)
+				for (int i = 0; i < _grid.Nodes.Count; i++)
 				{
-					for (int j = 0; j < x.Count; j++)
-					{
-						sw.Write((_x[j] + " " + _y[i].ToString("E4") + " ").Replace(',', '.'));
-						var aX = Math.Round(_grid.Nodes[k].X, 4);
-						var aY = Math.Round(_grid.Nodes[k].Y, 4);
-						if (aX == _x[j] && aY == _y[i])
-						{
-							sw.Write(solve[i].ToString().Replace(",", ".") + "\n");
-							k++;
-						}
-						else
-							sw.Write("0" + "\n");
-					}
+					sw.Write(_grid.Nodes[i].ToString().Replace(",", ".") + " ");
+					sw.Write(solve[i].ToString().Replace(",", ".") + "\n");
 				}
 			}
 		}
@@ -133,21 +109,11 @@ namespace FemProducer
 					sw.WriteLine(value.ToString().Replace(",", "."));
 		}
 
-		public void WriteGrid(string path)
+		public void WriteGrid(string path, GridParameters gridParameter)
 		{
 			using (var file = File.Open(path, FileMode.OpenOrCreate))
 			using (StreamWriter sw = new StreamWriter(file))
 			{
-				sw.WriteLine(_grid.Subdomains.Length);
-				foreach (var subDomain in _grid.Subdomains)
-				{
-					foreach (var value in subDomain)
-					{
-						sw.Write(value.ToString().Replace(',', '.') + " ");
-					}
-					sw.WriteLine();
-				}
-
 				sw.WriteLine(_grid.Elements.Count);
 				foreach (var element in _grid.Elements)
 				{

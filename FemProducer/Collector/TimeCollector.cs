@@ -27,8 +27,7 @@ namespace FemProducer.Collector
 
 			var results = _collectorBase.Collect();
 
-			if (!results.Item1.TryGetValue("M", out M))
-				throw new Exception("Не ");
+			results.Item1.TryGetValue("M", out M);
 			results.Item1.TryGetValue("G", out G);
 
 			Vector vector1 = M * _solutionService.NumericalSolves[timeLayer - 2];

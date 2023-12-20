@@ -4,9 +4,9 @@ using Grid.Models;
 
 using SlaeSolver.Models;
 
-namespace FemProducer.AppBuilder
+namespace FemProducer.ConfigureReader
 {
-	public interface IAppBuilder
+	public interface IConfigureReader
 	{
 		public ProblemParameters GetProblemParameters();
 		public SolverParameters GetSolverParameters();

@@ -40,16 +40,18 @@ namespace FemProducer.Collector
 			foreach (var element in _grid.Elements)
 			{
 				int formulaNumber = element.formulaNumber;
-
 				var nodes = _grid.ElementToNode(element);
+
 
 				var localMatrix = _basis.GetMassMatrix(nodes);
 				localMatrix.MultiplyLocalMatrix(_problemService.Gamma(formulaNumber));
 				AddLocalMatrix(M, localMatrix, element);
 
+
 				localMatrix = _basis.GetStiffnessMatrix(nodes);
 				localMatrix.MultiplyLocalMatrix(_problemService.Lambda(formulaNumber));
 				AddLocalMatrix(G, localMatrix, element);
+
 
 				var localVector = _basis.GetLocalVector(nodes, _problemService.F, formulaNumber);
 				AddLocalVector(vector, localVector, element);

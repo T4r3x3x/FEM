@@ -10,9 +10,9 @@
 			this.Y = Y;
 		}
 
-		public void Print()
+		public override string ToString()
 		{
-			Console.WriteLine($"{X} {Y}");
+			return $"{X} {Y}";
 		}
 	}
 }

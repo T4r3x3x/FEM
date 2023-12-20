@@ -31,7 +31,7 @@ namespace FemProducer
 			var x = node.X;
 			var y = node.Y;
 
-			return x * x + y * y;
+			return x + y;
 		}
 
 		public double DivFuncX1(double x, double y, int area)
@@ -56,10 +56,8 @@ namespace FemProducer
 
 			return formulaIndex switch
 			{
-				0 => Gamma(formulaIndex) * Function(node) - 4,
-				1 => Gamma(formulaIndex) * Function(node) - 4,
-				2 => Gamma(formulaIndex) * Function(node) - 4,
-				_ => throw new ArgumentException("Попытка обратится к подобласти, которой не существует!"),
+				_ => Gamma(formulaIndex) * Function(node),
+				//_ => throw new ArgumentException(),
 			};
 		}
 	}

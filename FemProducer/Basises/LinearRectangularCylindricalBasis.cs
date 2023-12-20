@@ -92,7 +92,7 @@ namespace FemProducer.Basises
 			public double LocalVectorIntegrationFunc(double r, double z)
 			{
 				var node = new Node(r, z);
-				var res = _func(node, _formulaNumber) * LinearBasisFunctions.GetBasisFunctionValue(_i, node, _xLimits, _yLimits) * r;
+				var res = _func(node, _formulaNumber) * LinearBasisFunctions2D.GetBasisFunctionValue(_i, node, _xLimits, _yLimits) * r;
 				return res;
 			}
 		}
@@ -113,10 +113,10 @@ namespace FemProducer.Basises
 			public double StiffnessIntegrationFunction(double r, double z)
 			{
 				Node node = new Node(r, z);
-				var xW1 = LinearBasisFunctions.XDerivativeBasisFunction(_i, node, _xLimits, _yLimits);
-				var xW2 = LinearBasisFunctions.XDerivativeBasisFunction(_j, node, _xLimits, _yLimits);
-				var yW1 = LinearBasisFunctions.YDerivativeBasisFunction(_i, node, _xLimits, _yLimits);
-				var yW2 = LinearBasisFunctions.YDerivativeBasisFunction(_j, node, _xLimits, _yLimits);
+				var xW1 = LinearBasisFunctions2D.XDerivativeBasisFunction(_i, node, _xLimits, _yLimits);
+				var xW2 = LinearBasisFunctions2D.XDerivativeBasisFunction(_j, node, _xLimits, _yLimits);
+				var yW1 = LinearBasisFunctions2D.YDerivativeBasisFunction(_i, node, _xLimits, _yLimits);
+				var yW2 = LinearBasisFunctions2D.YDerivativeBasisFunction(_j, node, _xLimits, _yLimits);
 				var result = (xW1 * xW2 + yW1 * yW2) * r;
 
 				return result;
@@ -139,7 +139,7 @@ namespace FemProducer.Basises
 			public double MassIntegrationalFunction(double r, double z)
 			{
 				Node node = new Node(r, z);
-				return LinearBasisFunctions.GetBasisFunctionValue(_i, node, _xLimits, _yLimits) * LinearBasisFunctions.GetBasisFunctionValue(_j, node, _xLimits, _yLimits) * r;
+				return LinearBasisFunctions2D.GetBasisFunctionValue(_i, node, _xLimits, _yLimits) * LinearBasisFunctions2D.GetBasisFunctionValue(_j, node, _xLimits, _yLimits) * r;
 
 			}
 		}

@@ -26,7 +26,6 @@ namespace FemProducer.MatrixBuilding
 		public Matrix CreateMatrix(GridModel grid)
 		{
 			int nodesCount = grid.NodesCount;
-			int elemCount = grid.ElementsCount;
 			Initialize(nodesCount);
 
 			int memory = nodesCount * 8;
@@ -112,7 +111,5 @@ namespace FemProducer.MatrixBuilding
 
 			return new Matrix(_di, _al.ToArray(), _au.ToArray(), _ja.ToArray(), _ia.ToArray());
 		}
-
-
 	}
 }

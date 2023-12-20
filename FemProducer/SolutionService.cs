@@ -11,10 +11,10 @@ namespace FemProducer
 
 		private readonly GridModel _grid;
 
-		public SolutionService(ProblemService problemParameters, GridModel grid)
+		public SolutionService(ProblemService problemService, GridModel grid)
 		{
 			_grid = grid;
-			CalculateAnalyticsSolves(problemParameters);
+			CalculateAnalyticsSolves(problemService);
 		}
 
 		private void CalculateAnalyticsSolves(ProblemService problemService)

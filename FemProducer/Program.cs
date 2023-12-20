@@ -1,4 +1,16 @@
-﻿using Tools;
+﻿using FemProducer.Collector;
+using FemProducer.ConfigureReader;
+using FemProducer.Logger;
+using FemProducer.MatrixBuilding;
+
+using Grid.Implementations.Factories;
+using Grid.Interfaces;
+using Grid.Models;
+
+using SlaeSolver.Implementations.Factories;
+using SlaeSolver.Interfaces;
+
+using Tools;
 
 namespace FemProducer
 {
@@ -11,11 +23,43 @@ namespace FemProducer
 		{
 			System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
 
+			IConfigureReader taskBuilder = new JsonConfigureReader(ConfigureFile);
+
+			var problemParameters = taskBuilder.GetProblemParameters();
+			var solverParameters = taskBuilder.GetSolverParameters();
+			var gridParameters = taskBuilder.GetGridParameters();
+
+			IGridFactory gridFactory = new GridFactory();
+			ISolverFactory solverFactory = new SolverFactory();
+
+			ISolver solver = solverFactory.CreateSolver(solverParameters);
+			GridModel grid = gridFactory.GetGrid(gridParameters);
+
+			Messages.PrintSuccessMessage("The grid was built!");
+
+			ProblemService problemService = new ProblemService(problemParameters);
+			SolutionService solutionService = new SolutionService(problemService, grid);
+
+			MatrixFactory matrixFactory = new();
+
+			CollectorBase collectorBase = new(grid, matrixFactory, problemService, new Basises.LinearQuadrangularCartesianBasis(problemService));
+			EllipticCollector timeCollector = new EllipticCollector(collectorBase, grid, matrixFactory);
+
+			ResultsService<TxtLogger> resultsService = new(new TxtLogger("results"), grid, solutionService, problemService);
+
+
+
+			IProblemSolver problemSolver = new TimeProblemSolver(solver, solutionService, timeCollector, resultsService, gridParameters);
+
 			//	try
 			//	{
 			sw.Start();
-			IProblemSolver problemSolver = new TimeProblemSolver();
+
 			problemSolver.Solve(ConfigureFile, OutputFile);
+
+
+
+
 			//}
 			//catch (ValidationException ex)
 			//{
@@ -45,8 +89,8 @@ namespace FemProducer
 			//}
 			sw.Stop();
 			Messages.PrintSuccessMessage("program work time: " + sw.ElapsedMilliseconds);
-
-			//Tools.Processes.OpenPythonScript("isolines.py");
+			Tools.Processes.OpenPythonScript(scriptPath: @"PythonScripts\grid2d.py");
+			Tools.Processes.OpenPythonScript(@"PythonScripts\isolines.py");
 		}
 	}
 }

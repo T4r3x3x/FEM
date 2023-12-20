@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
+using Grid.Enum;
+
 using MathModels;
 
 using Tools;
@@ -8,28 +10,34 @@ namespace Grid.Models
 {
 	public class GridParameters : IValidatableObject
 	{
-		public Point[][] linesNodes;
-		public int[][] areas;
-		public double[] qx, qy;
-		public double qt;
-		public List<int> xSplitsCount, ySplitsCount;
-		public int tSplitsCount;
-		public double[] tLimits;
-		public int[][] boundaryConditions;
+		public Point[][] LinesNodes;
+		public int[][] Areas;
+		public double[] Qx, Qy, Qz;
+		public double Qt;
+		public List<int> XSplitsCount, YSplitsCount, ZSplitsCount;
+		public double[] ZW;
+		public int TSplitsCount;
+		public double[] TLimits;
+		public int[][] BoundaryConditions;
+		public GridDimensional GridDimensional;
 
-		public GridParameters(Point[][] linesNodes, int[][] areas, double[] qx, double[] qy, double qt, List<int> xSplitsCount, List<int> ySplitsCount, int tSplitsCount, double[] tLimits, int[][] boundaryConditions)
+		public GridParameters(Point[][] linesNodes, int[][] areas, double[] qx, double[] qy, double[] qz, double qt, List<int> xSplitsCount, List<int> ySplitsCount, List<int> zSplitsCount, int tSplitsCount, double[] tLimits,
+			int[][] boundaryConditions, GridDimensional gridDimensional, double[] zw)
 		{
-			this.linesNodes = linesNodes;
-			this.areas = areas;
-			this.qx = qx;
-			this.qy = qy;
-			this.qt = qt;
-			this.xSplitsCount = xSplitsCount;
-			this.ySplitsCount = ySplitsCount;
-			this.tSplitsCount = tSplitsCount;
-			this.tLimits = tLimits;
-			this.boundaryConditions = boundaryConditions;
-
+			LinesNodes = linesNodes;
+			Areas = areas;
+			Qx = qx;
+			Qy = qy;
+			Qz = qz;
+			Qt = qt;
+			XSplitsCount = xSplitsCount;
+			YSplitsCount = ySplitsCount;
+			ZSplitsCount = zSplitsCount;
+			TSplitsCount = tSplitsCount;
+			TLimits = tLimits;
+			BoundaryConditions = boundaryConditions;
+			GridDimensional = gridDimensional;
+			ZW = zw;
 			var results = new List<ValidationResult>();
 			var context = new ValidationContext(this);
 
@@ -41,10 +49,10 @@ namespace Grid.Models
 		{
 			List<ValidationResult> errors = new List<ValidationResult>();
 
-			if (linesNodes[0].Length != qx.Length + 1)
+			if (LinesNodes[0].Length != Qx.Length + 1)
 				errors.Add(new ValidationResult("Количество коэффициентов разрядки qx и количество интервалов разбиений не совпадает!"));
 
-			if (linesNodes.Length != qy.Length + 1)
+			if (LinesNodes.Length != Qy.Length + 1)
 				errors.Add(new ValidationResult("Количество коэффициентов разрядки qy и количество интервалов разбиений не совпадает!"));
 
 
