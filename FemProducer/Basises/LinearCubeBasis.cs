@@ -12,12 +12,13 @@ namespace FemProducer.Basises
 
 		private double[,] G = LinearBasisFunctions.G;
 		private double[,] M = LinearBasisFunctions.M;
+		private readonly LinearRectangularBasis _linearRectangularBasis = new(null);
 
 		public LinearCubeBasis(ProblemService problemService) : base(problemService) { }
 
-		private static int mu(int i) => (i - 1) % 2 + 1;
-		private static int nu(int i) => ((i - 1) / 2) % 2 + 1;
-		private static int vi(int i) => ((i - 1) / 4) + 1;
+		private static int mu(int i) => (i) % 2;
+		private static int nu(int i) => ((i) / 2) % 2;
+		private static int vi(int i) => ((i) / 4);
 
 		public override IList<IList<double>> GetMassMatrix(IList<Node> nodes)// Grid.M - номер кэ 
 		{
@@ -26,7 +27,7 @@ namespace FemProducer.Basises
 			var hz = nodes[4].Z - nodes[0].Z;
 
 			// инициализация
-			double[][] result = new double[M.LongLength][];
+			double[][] result = new double[nodes.Count][];
 			for (int i = 0; i < result.Length; i++)
 				result[i] = new double[result.Length];
 
@@ -34,7 +35,7 @@ namespace FemProducer.Basises
 			for (int i = 0; i < result.Length; i++)
 				for (int j = 0; j < result.Length; j++)
 				{
-					result[i][j] += M[mu(i), mu(j)] * M[nu(i), nu(j)] * M[vi(i), vi(j)];
+					result[i][j] = M[mu(i), mu(j)] * M[nu(i), nu(j)] * M[vi(i), vi(j)];
 					result[i][j] *= hx / 6 * hy / 6 * hz / 6;
 				}
 
@@ -48,7 +49,7 @@ namespace FemProducer.Basises
 			var hz = nodes[4].Z - nodes[0].Z;
 
 			// инициализация
-			double[][] result = new double[G.LongLength][];
+			double[][] result = new double[nodes.Count][];
 			for (int i = 0; i < result.Length; i++)
 				result[i] = new double[result.Length];
 
@@ -66,11 +67,7 @@ namespace FemProducer.Basises
 		{
 			double[] localVector = new double[NodesCount];
 
-			var hx = nodes[1].X - nodes[0].X;
-			var hy = nodes[2].Y - nodes[0].Y;
-			var hz = nodes[4].Z - nodes[0].Z;
-
-			var stiffnessMatrix = GetStiffnessMatrix(nodes);
+			var massMatrix = GetMassMatrix(nodes);
 
 			var funcValues = new double[NodesCount];
 			for (int i = 0; i < NodesCount; i++)
@@ -78,7 +75,7 @@ namespace FemProducer.Basises
 				funcValues[i] = func(nodes[i], formulaNumber);
 
 				for (int j = 0; j < NodesCount; j++)
-					localVector[i] = funcValues[i] * stiffnessMatrix[i][j];
+					localVector[i] += funcValues[i] * massMatrix[i][j];
 			}
 			return localVector;
 		}
@@ -92,7 +89,12 @@ namespace FemProducer.Basises
 			};
 		}
 
-		public override void ConsiderSecondBoundaryCondition(Slae slae, Node node, int nodeIndex) => throw new NotImplementedException();
-		public override void ConsiderThirdBoundaryCondition(Slae slae, Node node, int nodeIndex) => throw new NotImplementedException();
+		public override IList<double> ConsiderSecondBoundaryCondition(Slae slae, IList<Node> nodes, int nodeIndex)
+		{
+			return _linearRectangularBasis.GetLocalVector(nodes, _problemService.DivFuncZ, nodeIndex);
+		}
+
+		public override (IList<IList<double>>, IList<double>) ConsiderThirdBoundaryCondition(Slae slae, IList<Node> nodes, int nodeIndex) => throw new NotImplementedException();
+
 	}
 }

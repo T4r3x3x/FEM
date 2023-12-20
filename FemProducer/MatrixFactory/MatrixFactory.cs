@@ -28,7 +28,7 @@ namespace FemProducer.MatrixBuilding
 			int nodesCount = grid.NodesCount;
 			Initialize(nodesCount);
 
-			int memory = nodesCount * 8;
+			int memory = nodesCount * 27;
 			List<List<int>> list = new List<List<int>>(2);
 			list.Add(new List<int>(memory));
 			list.Add(new List<int>(memory));
@@ -41,11 +41,11 @@ namespace FemProducer.MatrixBuilding
 
 			foreach (var element in grid.Elements)
 			{
-				for (int i = 0; i < 4; i++)
+				for (int i = 0; i < 8; i++)
 				{
 					int k = element.NodesIndexes[i];
 
-					for (int j = i + 1; j < 4; j++)
+					for (int j = i + 1; j < 8; j++)
 					{
 						int ind1 = k;
 

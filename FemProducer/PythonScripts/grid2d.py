@@ -15,12 +15,10 @@ vertices = []
 polygons = []
 subdomains = []
 temp = []
-#boundaries = f.readline().split(' ')
+boundaries = f.readline().split(' ')
 
-ax.set_xlim(-10, 10)
-ax.set_ylim(-10, 10)
-# ax.set_xlim(float(boundaries[0]), float(boundaries[1]))
-# ax.set_ylim(float(boundaries[2]), float(boundaries[3]))
+ax.set_xlim(float(boundaries[0]), float(boundaries[1]))
+ax.set_ylim(float(boundaries[2]), float(boundaries[3]))
 #subdomainsCount = int(f.readline())
 
 # for i in range(0,subdomainsCount):

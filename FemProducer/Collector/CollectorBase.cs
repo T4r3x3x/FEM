@@ -72,7 +72,7 @@ namespace FemProducer.Collector
 		{
 			lock (_lock)
 			{
-				for (int p = 0; p < 4; p++)
+				for (int p = 0; p < localMatrix.Count; p++)
 				{
 					matrix.Di[element.NodesIndexes[p]] += localMatrix[p][p];
 
@@ -92,14 +92,15 @@ namespace FemProducer.Collector
 
 		public void GetBoundaryConditions(Slae slae)
 		{
-			ConsiderFirstBoundaryConditions(slae);
 			ConsiderSecondBoundaryConditions(slae);
 			ConsiderThirdBoundaryConditions(slae);
+			ConsiderFirstBoundaryConditions(slae);
 		}
 
 		private void ConsiderFirstBoundaryConditions(Slae slae)
 		{
 			Parallel.ForEach(_grid.FirstBoundaryNodes, boundaryNodeIndex =>
+			//foreach (var boundaryNodeIndex in _grid.FirstBoundaryNodes)
 			{
 				_basis.ConsiderFirstBoundaryCondition(slae, _grid.Nodes[boundaryNodeIndex], boundaryNodeIndex);
 			});
@@ -107,10 +108,19 @@ namespace FemProducer.Collector
 
 		private void ConsiderSecondBoundaryConditions(Slae slae)
 		{
-			Parallel.ForEach(_grid.FirstBoundaryNodes, boundaryNodeIndex =>
+			//Parallel.ForEach(_grid.SecondBoundaryNodes, boundaryNodeIndex =>
+			//{
+			foreach (var boundaryNodeIndex in _grid.SecondBoundaryNodes)
 			{
-				_basis.ConsiderFirstBoundaryCondition(slae, _grid.Nodes[boundaryNodeIndex], boundaryNodeIndex);
-			});
+				var element = new FiniteElement([boundaryNodeIndex[0], boundaryNodeIndex[1], boundaryNodeIndex[2], boundaryNodeIndex[3]], 0);
+				var nodes = _grid.ElementToNode(element);
+				var localVector = _basis.ConsiderSecondBoundaryCondition(slae, nodes, boundaryNodeIndex[4]);
+				for (int i = 0; i < localVector.Count; i++)
+				{
+					localVector[i] *= -1;
+				}
+				AddLocalVector(slae.Vector, localVector, element);
+			}
 		}
 
 		private void ConsiderThirdBoundaryConditions(Slae slae)

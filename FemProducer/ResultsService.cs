@@ -76,7 +76,7 @@ namespace FemProducer
 			Console.WriteLine("Относительная погрешность: " + _resultProducer.GetSolveDifference(timeLayer));
 		}
 
-		public void WriteSolveWithGrid(string path, Vector solve)
+		public void WriteSolveWithNodes(string path, Vector solve)
 		{
 			using (var file = File.Open(path, FileMode.OpenOrCreate))
 			using (StreamWriter sw = new StreamWriter(file))
@@ -114,6 +114,18 @@ namespace FemProducer
 			using (var file = File.Open(path, FileMode.OpenOrCreate))
 			using (StreamWriter sw = new StreamWriter(file))
 			{
+				var x = _grid.Nodes.Select(node => node.X).Order();
+				var y = _grid.Nodes.Select(node => node.Y).Order();
+				var xmin = x.First();
+				var xmax = x.Last();
+				var ymin = y.First();
+				var ymax = y.Last();
+
+				sw.Write(xmin + " ");
+				sw.Write(xmax + " ");
+				sw.Write(ymin + " ");
+				sw.Write(ymax + " \n");
+
 				sw.WriteLine(_grid.Elements.Count);
 				foreach (var element in _grid.Elements)
 				{

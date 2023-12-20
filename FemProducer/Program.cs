@@ -42,14 +42,14 @@ namespace FemProducer
 
 			MatrixFactory matrixFactory = new();
 
-			CollectorBase collectorBase = new(grid, matrixFactory, problemService, new Basises.LinearQuadrangularCartesianBasis(problemService));
+			CollectorBase collectorBase = new(grid, matrixFactory, problemService, new Basises.LinearCubeBasis(problemService));
 			EllipticCollector timeCollector = new EllipticCollector(collectorBase, grid, matrixFactory);
 
 			ResultsService<TxtLogger> resultsService = new(new TxtLogger("results"), grid, solutionService, problemService);
 
 
 
-			IProblemSolver problemSolver = new TimeProblemSolver(solver, solutionService, timeCollector, resultsService, gridParameters);
+			IProblemSolver problemSolver = new TimeProblemSolver(solver, solutionService, timeCollector, resultsService, gridParameters, grid);
 
 			//	try
 			//	{

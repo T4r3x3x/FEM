@@ -30,22 +30,33 @@ namespace FemProducer
 		{
 			var x = node.X;
 			var y = node.Y;
+			var z = node.Z;
 
-			return x + y;
+			return x * y * z;
 		}
 
-		public double DivFuncX1(double x, double y, int area)
+		public double DivFuncX(Node node, int area)
 		{
 			switch (area)
 			{
 				default: return 0;
 			}
 		}
-		public double DivFuncY1(double x, double y, int area)
+		public double DivFuncY(Node node, int area)
 		{
 			switch (area)
 			{
 				default: return 0;
+			}
+		}
+		public double DivFuncZ(Node node, int area)
+		{
+			var x = node.X;
+			var y = node.Y;
+			var z = node.Z;
+			switch (area)
+			{
+				default: return x * y;
 			}
 		}
 

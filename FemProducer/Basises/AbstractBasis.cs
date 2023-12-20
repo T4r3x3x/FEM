@@ -6,7 +6,7 @@ namespace FemProducer.Basises
 {
 	public abstract class AbstractBasis
 	{
-		private readonly ProblemService _problemService;
+		protected readonly ProblemService _problemService;
 
 		protected AbstractBasis(ProblemService problemService) => _problemService = problemService;
 
@@ -22,8 +22,8 @@ namespace FemProducer.Basises
 			slae.Vector[nodeIndex] = _problemService.Function(node);
 		}
 
-		public abstract void ConsiderSecondBoundaryCondition(Slae slae, Node node, int nodeIndex);
+		public abstract IList<double> ConsiderSecondBoundaryCondition(Slae slae, IList<Node> nodes, int nodeIndex);
 
-		public abstract void ConsiderThirdBoundaryCondition(Slae slae, Node node, int nodeIndex);
+		public abstract (IList<IList<double>>, IList<double>) ConsiderThirdBoundaryCondition(Slae slae, IList<Node> nodes, int nodeIndex);
 	}
 }

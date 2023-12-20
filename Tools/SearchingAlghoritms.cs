@@ -4,7 +4,7 @@
 	{
 		public static int BinarySearch(IList<int> list, int value, int l, int r)
 		{
-			while (l != r)
+			while (l < r)
 			{
 				int mid = (l + r) / 2 + 1;
 

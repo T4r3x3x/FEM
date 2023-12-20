@@ -43,9 +43,9 @@ namespace Grid.Models
 
 		public IList<Node> ElementToNode(FiniteElement element)
 		{
-			Node[] nodes = new Node[_nodesInElementCount];
+			Node[] nodes = new Node[element.NodesIndexes.Length];
 
-			for (int i = 0; i < _nodesInElementCount; i++)
+			for (int i = 0; i < element.NodesIndexes.Length; i++)
 				nodes[i] = Nodes[element.NodesIndexes[i]];
 
 			return nodes;
