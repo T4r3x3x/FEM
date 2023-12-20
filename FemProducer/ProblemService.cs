@@ -26,12 +26,18 @@ namespace FemProducer
 			return _problemParameters.Gamma[formulaNumber];
 		}
 
-		public double Function(Node node)
+		public double Function(Node node, int area)
 		{
 			var x = node.X;
 			var y = node.Y;
 
-			return x + y;
+			return area switch
+			{
+				0 => 2 * x * y,
+				1 => x * y,
+				_ => throw new ArgumentException(),
+				//_ => throw new ArgumentException(),
+			};
 		}
 
 		public double DivFuncX1(double x, double y, int area)
@@ -56,7 +62,7 @@ namespace FemProducer
 
 			return formulaIndex switch
 			{
-				_ => Gamma(formulaIndex) * Function(node),
+				_ => Gamma(formulaIndex) * Function(node, formulaIndex),
 				//_ => throw new ArgumentException(),
 			};
 		}

@@ -1,4 +1,5 @@
-﻿using MathModels;
+﻿
+using MathModels;
 
 namespace Grid.Models
 {
@@ -12,7 +13,7 @@ namespace Grid.Models
 
 		public GridModel(IList<FiniteElement> elements, IList<Node> nodes,
 			IEnumerable<int> firstBoundaryNodes, IEnumerable<IList<int>> secondBoundaryNodes, IEnumerable<IList<int>> thirdBoundaryNodes, int xCount, int yCount, IList<Point[]> subdomains,
-			int nodesInElementCount, double[] x, double[] y, double[] t = null, List<double> ht = null)
+			int nodesInElementCount, double[] x, double[] y, int[][] areas, double[] t = null, List<double> ht = null)
 		{
 			FirstBoundaryNodes = firstBoundaryNodes;
 			SecondBoundaryNodes = secondBoundaryNodes;
@@ -27,9 +28,10 @@ namespace Grid.Models
 			_nodesInElementCount = nodesInElementCount;
 			X = x;
 			Y = y;
+			_areas = areas;
 		}
 
-		public IList<Point[]> Subdomains { get; }
+		public IList<MathModels.Point[]> Subdomains { get; }
 		public IList<FiniteElement> Elements { get; private set; }
 		public IList<Node> Nodes { get; private set; }
 		public IEnumerable<int> FirstBoundaryNodes { get; private set; }
@@ -41,6 +43,8 @@ namespace Grid.Models
 		public int XCount { get; }
 		public int YCount { get; }
 
+		private int[][] _areas;
+
 		public IList<Node> ElementToNode(FiniteElement element)
 		{
 			Node[] nodes = new Node[_nodesInElementCount];
@@ -49,6 +53,39 @@ namespace Grid.Models
 				nodes[i] = Nodes[element.NodesIndexes[i]];
 
 			return nodes;
+		}
+		private double YLine(double x, double x1, double y1, double x2, double y2)
+		{
+			if (y1 == y2)
+				return y1;
+
+			if (y1 > y2)
+			{
+				var temp = x1;
+				x1 = x2;
+				x2 = temp;
+				temp = y1;
+				y1 = y2;
+				y2 = temp;
+			}
+
+			var y = (x - x1) * (y2 - y1) / (x2 - x1) + y1;
+			return y;
+		}
+
+
+		public int GetSubDomain(Node node)
+		{
+			double y0, y1;
+			for (int i = 0; i < Subdomains.Count; i++)
+			{
+				y0 = YLine(node.X, Subdomains[i][0].X, Subdomains[i][0].Y, Subdomains[i][1].X, Subdomains[i][1].Y);
+				y1 = YLine(node.X, Subdomains[i][2].X, Subdomains[i][2].Y, Subdomains[i][3].X, Subdomains[i][3].Y);
+				if (Subdomains[i][0].X <= node.X && node.X <= Subdomains[i][1].X)
+					if (y0 <= node.Y && node.Y <= y1)
+						return _areas[i][4];
+			}
+			return -1;
 		}
 
 		/// <summary>

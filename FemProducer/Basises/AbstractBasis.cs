@@ -15,11 +15,11 @@ namespace FemProducer.Basises
 		public abstract Dictionary<string, IList<IList<double>>> GetLocalMatrixes(IList<Node> nodes);
 		public abstract IList<double> GetLocalVector(IList<Node> nodes, Func<Node, int, double> func, int formulaNumber);
 
-		public virtual void ConsiderFirstBoundaryCondition(Slae slae, Node node, int nodeIndex)
+		public virtual void ConsiderFirstBoundaryCondition(Slae slae, Node node, int nodeIndex, int area)
 		{
 			slae.Matrix.ZeroingRow(nodeIndex);
 			slae.Matrix.Di[nodeIndex] = 1;
-			slae.Vector[nodeIndex] = _problemService.Function(node);
+			slae.Vector[nodeIndex] = _problemService.Function(node, area);
 		}
 
 		public abstract void ConsiderSecondBoundaryCondition(Slae slae, Node node, int nodeIndex);
