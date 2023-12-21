@@ -21,7 +21,7 @@ namespace FemProducer
 			Slae slae = collector.Collect(0);
 			Vector solve = solver.Solve(slae);
 			solutionService.NumericalSolves.Add(solve);
-			resultsService.PrintResult(0, true);
+			resultsService.PrintResult(0, false);
 			//	}
 
 			resultsService.WriteSolve("solve.txt", solutionService.NumericalSolves[0]);
