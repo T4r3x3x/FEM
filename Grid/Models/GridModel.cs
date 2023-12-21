@@ -11,7 +11,7 @@ namespace Grid.Models
 		private readonly int _nodesInElementCount; //количество узлов в кэ.
 
 		public GridModel(IList<FiniteElement> elements, IList<Node> nodes,
-			IEnumerable<int> firstBoundaryNodes, IEnumerable<IList<int>> secondBoundaryNodes, IEnumerable<IList<int>> thirdBoundaryNodes, int xCount, int yCount, IList<Point[]> subdomains,
+			IEnumerable<int> firstBoundaryNodes, IEnumerable<IList<int>> secondBoundaryNodes, IEnumerable<IList<int>> thirdBoundaryNodes, int xCount, int yCount, IList<IList<double>> subdomains,
 			int nodesInElementCount, double[] x, double[] y, double[] t = null, List<double> ht = null)
 		{
 			FirstBoundaryNodes = firstBoundaryNodes;
@@ -29,7 +29,7 @@ namespace Grid.Models
 			Y = y;
 		}
 
-		public IList<Point[]> Subdomains { get; }
+		public IList<IList<double>> Subdomains { get; }
 		public IList<FiniteElement> Elements { get; private set; }
 		public IList<Node> Nodes { get; private set; }
 		public IEnumerable<int> FirstBoundaryNodes { get; private set; }
@@ -40,6 +40,7 @@ namespace Grid.Models
 		public int NodesCount => Nodes.Count;
 		public int XCount { get; }
 		public int YCount { get; }
+
 
 		public IList<Node> ElementToNode(FiniteElement element)
 		{
@@ -64,7 +65,17 @@ namespace Grid.Models
 
 			return null;
 		}
-
+		public int GetSubDomain(Node node)
+		{
+			for (int i = 0; i < Subdomains.Count; i++)
+			{
+				if (Subdomains[i][0] <= node.X && node.X <= Subdomains[i][1])
+					if (Subdomains[i][2] <= node.Y && node.Y <= Subdomains[i][3])
+						if (Subdomains[i][4] <= node.Z && node.Z <= Subdomains[i][5])
+							return i;
+			}
+			return -1;
+		}
 		private bool IsElementContainPoint(FiniteElement element, Point point)
 		{
 			if (Nodes[element.NodesIndexes[0]].X < point.X && point.X < Nodes[element.NodesIndexes[1]].X)

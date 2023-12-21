@@ -56,7 +56,7 @@ namespace Grid.Implementations.Factories
 
 			//	var realSubDomains = GetRealSubdomians(lines, gridParametrs.Areas);
 
-			return new GridModel(elements, nodes, firstBoundaryNodes, second, third, x.Length, y.Length, null, 8, x, y, t);
+			return new GridModel(elements, nodes, firstBoundaryNodes, second, third, x.Length, y.Length, subDomains, 8, x, y, t);
 		}
 
 		private List<Point[]> GetRealSubdomians(Point[][] lines, int[][] areas)

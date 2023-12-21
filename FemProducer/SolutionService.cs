@@ -23,8 +23,10 @@ namespace FemProducer
 			{
 				var exactSolution = new Vector(_grid.NodesCount);
 				for (int i = 0; i < _grid.Nodes.Count; i++)
-					exactSolution[i] = problemService.Function(_grid.Nodes[i]);
-
+				{
+					var area = _grid.GetSubDomain(_grid.Nodes[i]);
+					exactSolution[i] = problemService.Function(_grid.Nodes[i], area);
+				}
 				AnalyticsSolves.Add(exactSolution);
 			}
 		}

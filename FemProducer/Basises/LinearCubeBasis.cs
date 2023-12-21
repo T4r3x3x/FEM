@@ -35,8 +35,7 @@ namespace FemProducer.Basises
 			for (int i = 0; i < result.Length; i++)
 				for (int j = 0; j < result.Length; j++)
 				{
-					result[i][j] = M[mu(i), mu(j)] * M[nu(i), nu(j)] * M[vi(i), vi(j)];
-					result[i][j] *= hx / 6 * hy / 6 * hz / 6;
+					result[i][j] = M[mu(i), mu(j)] * M[nu(i), nu(j)] * M[vi(i), vi(j)] * hx / 6 * hy / 6 * hz / 6;
 				}
 
 			return result;

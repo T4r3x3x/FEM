@@ -92,8 +92,8 @@ namespace FemProducer.Collector
 
 		public void GetBoundaryConditions(Slae slae)
 		{
-			ConsiderSecondBoundaryConditions(slae);
-			ConsiderThirdBoundaryConditions(slae);
+			//	ConsiderSecondBoundaryConditions(slae);
+			//	ConsiderThirdBoundaryConditions(slae);
 			ConsiderFirstBoundaryConditions(slae);
 		}
 
@@ -102,7 +102,8 @@ namespace FemProducer.Collector
 			Parallel.ForEach(_grid.FirstBoundaryNodes, boundaryNodeIndex =>
 			//foreach (var boundaryNodeIndex in _grid.FirstBoundaryNodes)
 			{
-				_basis.ConsiderFirstBoundaryCondition(slae, _grid.Nodes[boundaryNodeIndex], boundaryNodeIndex);
+				var area = _grid.GetSubDomain(_grid.Nodes[boundaryNodeIndex]);
+				_basis.ConsiderFirstBoundaryCondition(slae, _grid.Nodes[boundaryNodeIndex], boundaryNodeIndex, area);
 			});
 		}
 
@@ -123,12 +124,12 @@ namespace FemProducer.Collector
 			}
 		}
 
-		private void ConsiderThirdBoundaryConditions(Slae slae)
-		{
-			Parallel.ForEach(_grid.FirstBoundaryNodes, boundaryNodeIndex =>
-			{
-				_basis.ConsiderFirstBoundaryCondition(slae, _grid.Nodes[boundaryNodeIndex], boundaryNodeIndex);
-			});
-		}
+		//private void ConsiderThirdBoundaryConditions(Slae slae)
+		//{
+		//	Parallel.ForEach(_grid.FirstBoundaryNodes, boundaryNodeIndex =>
+		//	{
+		//		_basis.ConsiderFirstBoundaryCondition(slae, _grid.Nodes[boundaryNodeIndex], boundaryNodeIndex);
+		//	});
+		//}
 	}
 }
