@@ -92,7 +92,7 @@ namespace FemProducer.Basises
 			};
 		}
 
-		public override void ConsiderSecondBoundaryCondition(Slae slae, Node node, int nodeIndex) => throw new NotImplementedException();
-		public override void ConsiderThirdBoundaryCondition(Slae slae, Node node, int nodeIndex) => throw new NotImplementedException();
+		public override void ConsiderSecondBoundaryCondition(Slae slae, IList<Node> nodes, IList<int> nodeIndexes) => throw new NotImplementedException();
+		public override (IList<IList<double>>, IList<double>) ConsiderThirdBoundaryCondition(Slae slae, IList<Node> nodes, IList<int> nodeIndexes, Func<Node, int, double> func, int formulaNumber) => throw new NotImplementedException();
 	}
 }

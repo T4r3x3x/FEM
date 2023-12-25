@@ -72,7 +72,7 @@ namespace FemProducer.Collector
 		{
 			lock (_lock)
 			{
-				for (int p = 0; p < 4; p++)
+				for (int p = 0; p < element.NodesIndexes.Length; p++)
 				{
 					matrix.Di[element.NodesIndexes[p]] += localMatrix[p][p];
 
@@ -92,9 +92,9 @@ namespace FemProducer.Collector
 
 		public void GetBoundaryConditions(Slae slae)
 		{
+			ConsiderSecondBoundaryConditions(slae);
+			ConsiderThirdBoundaryConditions(slae);
 			ConsiderFirstBoundaryConditions(slae);
-			//	ConsiderSecondBoundaryConditions(slae);
-			//	ConsiderThirdBoundaryConditions(slae);
 		}
 
 		private void ConsiderFirstBoundaryConditions(Slae slae)
@@ -105,21 +105,32 @@ namespace FemProducer.Collector
 				_basis.ConsiderFirstBoundaryCondition(slae, _grid.Nodes[boundaryNodeIndex], boundaryNodeIndex, area);
 			});
 		}
+		private void ConsiderSecondBoundaryConditions(Slae slae)
+		{
+			//Parallel.ForEach(_grid.SecondBoundaryNodes, nodesIndexes =>
+			//{
+			//	List<Node> nodes = new();
+			//	for (int i = 0; i < nodesIndexes.Count; i++)
+			//		nodes.Add(_grid.Nodes[nodesIndexes[i]]);
 
-		//private void ConsiderSecondBoundaryConditions(Slae slae)
-		//{
-		//	Parallel.ForEach(_grid.FirstBoundaryNodes, boundaryNodeIndex =>
-		//	{
-		//		_basis.ConsiderFirstBoundaryCondition(slae, _grid.Nodes[boundaryNodeIndex], boundaryNodeIndex);
-		//	});
-		//}
+			//	_basis.ConsiderSecondBoundaryCondition(slae, nodes, nodesIndexes);
+			//});
+		}
 
-		//private void ConsiderThirdBoundaryConditions(Slae slae)
-		//{
-		//	Parallel.ForEach(_grid.FirstBoundaryNodes, boundaryNodeIndex =>
-		//	{
-		//		_basis.ConsiderFirstBoundaryCondition(slae, _grid.Nodes[boundaryNodeIndex], boundaryNodeIndex);
-		//	});
-		//}
+		private void ConsiderThirdBoundaryConditions(Slae slae)
+		{
+			//Parallel.ForEach(_grid.ThirdBoundaryNodes, nodesIndexes =>
+			foreach (var nodesIndexes in _grid.ThirdBoundaryNodes)
+			{
+				List<Node> nodes = new();
+				for (int i = 0; i < nodesIndexes.Count; i++)
+					nodes.Add(_grid.Nodes[nodesIndexes[i]]);
+
+				int formulaNumber = _grid.GetSubDomain(nodes[0]);
+				var res = _basis.ConsiderThirdBoundaryCondition(slae, nodes, nodesIndexes, _problemService.F, formulaNumber);
+				AddLocalMatrix(slae.Matrix, res.Item1, new FiniteElement([nodesIndexes[0], nodesIndexes[1]], formulaNumber));
+				AddLocalVector(slae.Vector, res.Item2, new FiniteElement([nodesIndexes[0], nodesIndexes[1]], formulaNumber));
+			}
+		}
 	}
 }

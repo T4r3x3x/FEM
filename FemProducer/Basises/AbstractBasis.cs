@@ -22,8 +22,8 @@ namespace FemProducer.Basises
 			slae.Vector[nodeIndex] = _problemService.Function(node, area);
 		}
 
-		public abstract void ConsiderSecondBoundaryCondition(Slae slae, Node node, int nodeIndex);
+		public abstract void ConsiderSecondBoundaryCondition(Slae slae, IList<Node> nodes, IList<int> nodesIndexes);
 
-		public abstract void ConsiderThirdBoundaryCondition(Slae slae, Node node, int nodeIndex);
+		public abstract (IList<IList<double>>, IList<double>) ConsiderThirdBoundaryCondition(Slae slae, IList<Node> nodes, IList<int> nodesIndexes, Func<Node, int, double> func, int formulaNumber);
 	}
 }

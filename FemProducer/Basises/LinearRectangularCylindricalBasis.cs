@@ -71,8 +71,123 @@ namespace FemProducer.Basises
 			return massMatrix;
 		}
 
-		public override void ConsiderSecondBoundaryCondition(Slae slae, Node node, int nodeIndex) => throw new NotImplementedException();
-		public override void ConsiderThirdBoundaryCondition(Slae slae, Node node, int nodeIndex) => throw new NotImplementedException();
+		public override void ConsiderSecondBoundaryCondition(Slae slae, IList<Node> nodes, IList<int> nodesIndexes) => throw new NotImplementedException();
+
+
+		public override (IList<IList<double>>, IList<double>) ConsiderThirdBoundaryCondition(Slae slae, IList<Node> nodes, IList<int> nodesIndexes, Func<Node, int, double> func, int formulaNumber)
+		{
+			double betta = 450;
+			Node limits;
+			double secondVariable;
+			bool isR;
+			if (nodes[0].X - nodes[1].X == 0)
+			{
+				limits = new Node(nodes[0].Y, nodes[1].Y);
+				secondVariable = nodes[0].X;
+				isR = true;
+			}
+			else
+			{
+				limits = new Node(nodes[0].X, nodes[1].X);
+				secondVariable = nodes[0].Y;
+				isR = false;
+			}
+
+			var localVector = new double[2];
+
+
+			for (int i = 0; i < nodes.Count; i++)
+			{
+				SecondBoundaryConditionClass intF = new SecondBoundaryConditionClass(limits, func, i, formulaNumber, isR, secondVariable);
+				localVector[i] += Integration.GaussIntegration(limits, intF.SecondBoundaryConditionFunc, Integration.PointsCount.Two);
+				localVector[i] *= betta;
+			}
+
+			var localMatrix = new double[nodes.Count][];
+			for (int i = 0; i < nodes.Count; i++)
+			{
+				localMatrix[i] = new double[nodes.Count];
+				for (int j = 0; j < nodes.Count; j++)
+				{
+					ThirdBoundaryConditionMatrixClass intF = new ThirdBoundaryConditionMatrixClass(limits, func, i, j, formulaNumber, isR, secondVariable);
+					localMatrix[i][j] = Integration.GaussIntegration(limits, intF.SecondBoundaryConditionFunc, Integration.PointsCount.Two);
+					localMatrix[i][j] *= betta;
+				}
+			}
+
+			return (localMatrix, localVector);
+		}
+
+		class ThirdBoundaryConditionMatrixClass
+		{
+			private Node _Limits;
+			private Func<Node, int, double> _func;
+			private int _i, _j;
+			private int _formulaNumber;
+			private bool _isR;
+			private double _secondVariable;
+
+			public ThirdBoundaryConditionMatrixClass(Node Limits, Func<Node, int, double> func, int i, int j, int formulaNumber, bool isR, double secondVariable)
+			{
+				_Limits = Limits;
+				_func = func;
+				_i = i;
+				_j = j;
+				_formulaNumber = formulaNumber;
+				_isR = isR;
+				_secondVariable = secondVariable;
+			}
+
+			public double SecondBoundaryConditionFunc(double r)
+			{
+				Node node;
+
+				if (_isR)
+					node = new Node(r, _secondVariable);
+				else
+					node = new Node(_secondVariable, r);
+
+				double h = _Limits.Y - _Limits.X;
+				double limit = _i == 0 ? _Limits.Y : _Limits.X;
+				var res = _func(node, _formulaNumber) * LinearBasisFunctions.s_Functions[_i](r, limit, h) * LinearBasisFunctions.s_Functions[_j](r, limit, h) * r;
+				return res;
+			}
+		}
+
+		class SecondBoundaryConditionClass
+		{
+			private Node _Limits;
+			private Func<Node, int, double> _func;
+			private int _i = 0;
+			private int _formulaNumber;
+			private bool _isR;
+			private double _secondVariable;
+			public SecondBoundaryConditionClass(Node Limits, Func<Node, int, double> func, int i, int formulaNumber, bool isR, double secondVariable)
+			{
+				_Limits = Limits;
+				_func = func;
+				_i = i;
+				_formulaNumber = formulaNumber;
+				_isR = isR;
+				_secondVariable = secondVariable;
+			}
+
+			public double SecondBoundaryConditionFunc(double r)
+			{
+				Node node;
+
+				if (_isR)
+					node = new Node(r, _secondVariable);
+				else
+					node = new Node(_secondVariable, r);
+
+				double h = _Limits.Y - _Limits.X;
+				double limit = _i == 0 ? _Limits.Y : _Limits.X;
+				var res = _func(node, _formulaNumber) * LinearBasisFunctions.s_Functions[_i](r, limit, h) * r;
+				return res;
+			}
+		}
+
 
 		class LocalVectorIntegrationFuncClass
 		{

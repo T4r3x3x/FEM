@@ -8,6 +8,48 @@ namespace NumericsMethods
 {
 	public static class Integration
 	{
+		public static double GaussIntegration(Node limits, Func<double, double> func, PointsCount pointsCount)
+		{
+			double result = 0;
+			Point point;
+			var hx = limits.Y - limits.X;
+			double[] q;
+			double[] x;
+
+			switch (pointsCount)
+			{
+				case PointsCount.Two:
+					q = [1, 1];
+					x = [-0.5773502692, 0.5773502692];
+					break;
+
+				case PointsCount.Three:
+					q = [8 / 9.0, 5 / 9.0, 5 / 9.0];
+					x = [0, 0.77459666924148337, -0.77459666924148337];
+					break;
+
+				case PointsCount.Four:
+					q = [(18 - Math.Sqrt(30)) / 36, (18 + Math.Sqrt(30)) / 36, (18 + Math.Sqrt(30)) / 36, (18 - Math.Sqrt(30)) / 36];
+					x = [-Math.Sqrt((15 + 2 * Math.Sqrt(30)) / 35), -Math.Sqrt((15 - 2 * Math.Sqrt(30)) / 35), Math.Sqrt((15 - 2 * Math.Sqrt(30)) / 35), Math.Sqrt((15 + 2 * Math.Sqrt(30)) / 35)];
+					break;
+
+				default:
+					throw new InvalidEnumArgumentException();
+			}
+
+			double temp = 0;
+
+			for (int r = 0; r < q.Length; r++)
+			{
+				double u = (limits.X + limits.Y + hx * x[r]) / 2.0;
+				temp += q[r] * func(u);
+			}
+
+			result *= hx * temp / 2.0;
+
+			return result;
+		}
+
 		public static double GaussIntegration(Node leftLowerPoint, Node rightUpperPoint, Func<double, double, double> func, PointsCount pointsCount)
 		{
 			double result = 0;

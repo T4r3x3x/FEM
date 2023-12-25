@@ -33,9 +33,9 @@ namespace FemProducer
 
 			return area switch
 			{
-				0 => 2 * x * y,
-				1 => x * y,
-				_ => throw new ArgumentException(),
+				0 => 25,
+				1 => 450,
+				_ => 25,
 				//_ => throw new ArgumentException(),
 			};
 		}
@@ -55,6 +55,18 @@ namespace FemProducer
 			}
 		}
 
+		public double FBetta(Node node, int formulaIndex)
+		{
+			var x = node.X;
+			var y = node.Y;
+
+			return formulaIndex switch
+			{
+				_ => 25,
+				//_ => throw new ArgumentException(),
+			};
+		}
+
 		public double F(Node node, int formulaIndex)
 		{
 			var x = node.X;
@@ -62,7 +74,7 @@ namespace FemProducer
 
 			return formulaIndex switch
 			{
-				_ => Gamma(formulaIndex) * Function(node, formulaIndex),
+				_ => 0,
 				//_ => throw new ArgumentException(),
 			};
 		}

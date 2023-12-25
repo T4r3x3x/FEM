@@ -43,10 +43,9 @@ namespace Grid.Implementations.Factories
 
 			var boundaryNodes = GetBoundaryNodes(gridParametrs.BoundaryConditions, x, y, gridParametrs.XSplitsCount, gridParametrs.YSplitsCount, missingNodesIndexes);
 
-
 			var realSubDomains = GetRealSubdomians(lines, gridParametrs.Areas);
 
-			return new GridModel(elements, nodes, boundaryNodes, null, null, x.Length, y.Length, realSubDomains.ToArray(), 4, x, y, areas, t);
+			return new GridModel(elements, nodes, boundaryNodes.Item1, boundaryNodes.Item2, boundaryNodes.Item3, x.Length, y.Length, realSubDomains.ToArray(), 4, x, y, areas, t);
 		}
 
 		private List<Point[]> GetRealSubdomians(Point[][] lines, int[][] areas)
@@ -225,26 +224,22 @@ namespace Grid.Implementations.Factories
 			return boundaryLimitsIndexes;
 		}
 
-		private HashSet<int> GetBoundaryNodes(IList<IList<int>> boundaryIndexes, IList<double> x, IList<double> y, List<int> xSplitsCount, List<int> ySplitsCount, IList<int> missingNodesIndexes)
+		private (HashSet<int>, IList<IList<int>>, IList<IList<int>>) GetBoundaryNodes(IList<IList<int>> boundaryIndexes, IList<double> x, IList<double> y, List<int> xSplitsCount, List<int> ySplitsCount, IList<int> missingNodesIndexes)
 		{
-			HashSet<int> boundaryNodes = new HashSet<int>();
+			HashSet<int> firstBoundaryNodes = new HashSet<int>();
+			List<IList<int>> secondBoundaryNodes = new();
+			List<IList<int>> thirdBoundaryNodes = new();
 			var limits = GetBoundaryLimitsIndexes(boundaryIndexes, xSplitsCount, ySplitsCount);
 
-			for (int k = 0; k < boundaryIndexes.Count; k++)
-			{
+			for (int i = 0; i < x.Count - 1; i++)//нижняя грань
+				thirdBoundaryNodes.Add([i, i + 1]);
 
-				for (int i = limits[k][2]; i <= limits[k][3]; i++)
-				{
-					for (int j = limits[k][0]; j <= limits[k][1]; j++)
-					{
-						var index = i * x.Count + j;
-						var realIndex = index - missingNodesIndexes[index];
-						boundaryNodes.Add(realIndex);
-					}
-				}
-			}
+			for (int i = 0; i < x.Count - 1; i++)//верхняя грань
+				thirdBoundaryNodes.Add([x.Count * (y.Count - 1) + i, x.Count * (y.Count - 1) + i + 1]);
 
-			return boundaryNodes;
+			for (int i = 0; i < y.Count - 1; i++)//правая грань
+				thirdBoundaryNodes.Add([x.Count * (i + 1) - 1, x.Count * (i + 2) - 1]);
+			return (firstBoundaryNodes, secondBoundaryNodes, thirdBoundaryNodes);
 		}
 
 		private List<FiniteElement> GetElements(double[] x, double[] y, double[][] subDomains, List<int> missingNodes, int[][] areas)

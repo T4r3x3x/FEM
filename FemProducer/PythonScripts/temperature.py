@@ -21,7 +21,8 @@ X = []
 y = []
 T = []
 
-f = open(r'output\temperature.txt', 'r', encoding="utf-8")
+
+f = open("C:\\Users\\hardb\\source\\repos\\FEM\\FemProducer\\bin\\Debug\\net8.0\\solve.txt", 'r', encoding="utf-8")
 size = int(f.readline())
 layersCount = int(f.readline())
 
@@ -39,21 +40,25 @@ for layer in range(0,layersCount):
 	T.clear()
 
 
-fig = plt.figure(figsize=(27,18))
-ax = plt.axes(projection='3d')
-fig = plt.gcf()
+fig, ax = plt.subplots()
+# fig = plt.gcf()
 fig.canvas.manager.set_window_title("temperature")
-ax.plot_trisurf(_x[0], _y[0],_t[0], linewidth=0, antialiased=False,
+tricount = ax.tricontourf(_x[0], _y[0],_t[0], linewidth=0, antialiased=False,
                label='temperature', shade=True, cmap=cm.inferno)
+colorbar = fig.colorbar(tricount, ax=ax,location='right')  
 plt.xlabel('X', fontsize=30, labelpad =30)  
 plt.ylabel('y ', fontsize=30, labelpad =30) 
 
 def draw(layer):
 	ax.cla()
-	ax.plot_trisurf(_x[0], _y[0],_t[int(layer)], linewidth=0, antialiased=False,label='temperature', shade=True, cmap=cm.inferno)
+	# ax.plot_trisurf(_x[0], _y[0],_t[int(layer)], linewidth=0, antialiased=False,label='temperature', shade=True, cmap=cm.inferno)
+	tricount = ax.tricontourf(_x[0], _y[0],_t[int(layer)], linewidth=0, antialiased=False,label='temperature', shade=True, cmap=cm.inferno)
 	ax.set_ylabel('y ', fontsize=30, labelpad =30)
 	ax.set_xlabel('X ', fontsize=30, labelpad =30)
 	ax.tick_params(axis = 'both', which = 'major', labelsize = 24)
+	global colorbar
+	colorbar.remove()
+	colorbar = fig.colorbar(tricount, ax=ax,location='right')  
 
 
 	
@@ -69,7 +74,7 @@ def set_slider(s, val):
 axfreq = plt.axes([0.20, 0.00, 0.65, 0.03])
 elem_slider = Slider(
     ax=axfreq,
-    label='Time',
+    label='Z',
     valmin=1,
     valmax=layersCount,
     orientation='horizontal',
@@ -83,6 +88,6 @@ elem_slider.on_changed(partial(set_slider, elem_slider))
 fig.set_tight_layout(True)
 plt.tick_params(axis = 'both', which = 'major', labelsize = 34) 
 draw(layersCount-1)
-plt.savefig('Images\Temperature.png', bbox_inches='tight') 
+# plt.savefig('Images\Temperature.png', bbox_inches='tight') 
 fig.set_size_inches(12,9)
 plt.show()
