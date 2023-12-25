@@ -110,5 +110,37 @@ namespace Grid.Models
 
 			return false;
 		}
+
+		private bool BelongToTriangle(Node center, Node p1, Node p2, Node p3)
+		{
+			var a = (p1.X - center.X) * (p2.Y - p1.Y) - (p2.X - p1.X) * (p1.Y - center.Y);
+			var b = (p2.X - center.X) * (p3.Y - p2.Y) - (p3.X - p2.X) * (p2.Y - center.Y);
+			var c = (p3.X - center.X) * (p1.Y - p3.Y) - (p1.X - p3.X) * (p3.Y - center.Y);
+
+			if ((a >= 0 && b >= 0 && c >= 0) || (a <= 0 && b <= 0 && c <= 0))
+				return true;
+
+			return false;
+		}
+
+		public int GetAreaNumber(Node center)
+		{
+			Node p1 = new Node(X[0], Y[0]);
+			Node p2 = new Node(X[X.Count - 1], Y[0]);
+			Node p3 = new Node(X[0], Y[Y.Count - 1]);
+			Node p4 = new Node(X[X.Count - 1], Y[Y.Count - 1]);
+			Node centerOfDomain = new Node((X[X.Count - 1] + X[0]) / 2, (Y[Y.Count - 1] + Y[0]) / 2);
+
+			if (BelongToTriangle(center, p1, p2, centerOfDomain))
+				return 0;
+			if (BelongToTriangle(center, p2, p4, centerOfDomain))
+				return 1;
+			if (BelongToTriangle(center, p3, p4, centerOfDomain))
+				return 2;
+			if (BelongToTriangle(center, p1, p3, centerOfDomain))
+				return 3;
+
+			throw new Exception();
+		}
 	}
 }

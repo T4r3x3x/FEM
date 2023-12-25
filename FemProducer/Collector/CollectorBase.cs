@@ -30,10 +30,17 @@ namespace FemProducer.Collector
 			return GetMatrixesMG();
 		}
 
+		private int GetAreaNumber(IList<Node> nodes)
+		{
+			Node center = new Node((nodes[0].X + nodes[1].X) / 2, (nodes[0].Y + nodes[2].Y) / 2);
+			return _grid.GetAreaNumber(center);
+		}
+
 		private (Dictionary<string, Matrix>, Vector) GetMatrixesMG()
 		{
 			Matrix M = _matrixFactory.CreateMatrix(_grid);
 			Matrix G = _matrixFactory.CreateMatrix(_grid);
+			Matrix H = _matrixFactory.CreateMatrix(_grid);
 			Vector vector = new Vector(M.Size);
 
 			//	Parallel.ForEach(_grid.Elements, element =>
@@ -52,12 +59,16 @@ namespace FemProducer.Collector
 				localMatrix.MultiplyLocalMatrix(_problemService.Lambda(formulaNumber));
 				AddLocalMatrix(G, localMatrix, element);
 
+				var areaNumber = GetAreaNumber(nodes);
+				localMatrix = ((LinearRectangularCylindricalBasis)_basis).GetGradTMatrix(nodes, areaNumber);
+				localMatrix.MultiplyLocalMatrix(_problemService.Gamma(formulaNumber));
+				AddLocalMatrix(H, localMatrix, element);
 
 				var localVector = _basis.GetLocalVector(nodes, _problemService.F, formulaNumber);
 				AddLocalVector(vector, localVector, element);
 			}//);
 
-			Dictionary<string, Matrix> matrixes = new() { { "M", M }, { "G", G } };
+			Dictionary<string, Matrix> matrixes = new() { { "M", M }, { "G", G }, { "H", H } };
 			return (matrixes, vector);
 		}
 

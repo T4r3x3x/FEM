@@ -73,6 +73,59 @@ namespace FemProducer.Basises
 
 		public override void ConsiderSecondBoundaryCondition(Slae slae, IList<Node> nodes, IList<int> nodesIndexes) => throw new NotImplementedException();
 
+		private Node GetV(int areaNumber)
+		{
+			return areaNumber switch
+			{
+				0 => new Node(1, 0),
+				1 => new Node(0, 1),
+				2 => new Node(-1, 0),
+				3 => new Node(0, -1),
+			};
+		}
+
+		public double[][] GetGradTMatrix(IList<Node> nodes, int areaNumber)
+		{
+			double[][] matrix = new double[4][];
+			var xLimits = new Node(nodes[0].X, nodes[1].X);
+			var yLimits = new Node(nodes[0].Y, nodes[2].Y);
+			var v = new Node(0, 0);//GetV(areaNumber);
+			for (int i = 0; i < 4; i++)
+			{
+				matrix[i] = new double[4];
+				for (int j = 0; j < 4; j++)
+				{
+					HMatrixClass hMatrixClass = new(j, i, xLimits, yLimits, v);
+					matrix[i][j] = NumericsMethods.Integration.GaussIntegration(nodes[0], nodes[3], hMatrixClass.HMatrixFunc, Integration.PointsCount.Two);
+				}
+			}
+
+			return matrix;
+		}
+
+		class HMatrixClass
+		{
+			private readonly int _i, _j;
+			private readonly Node _xLimits, _yLimits;
+			private Node _v;
+			public HMatrixClass(int i, int j, Node xLimits, Node yLimits, Node v)
+			{
+				_i = i;
+				_j = j;
+				_xLimits = xLimits;
+				_yLimits = yLimits;
+				_v = v;
+			}
+
+			public double HMatrixFunc(double r, double z)
+			{
+				Node node = new Node(r, z);
+				double result = _v.X * LinearBasisFunctions2D.XDerivativeBasisFunction(_i, node, _xLimits, _yLimits) + _v.Y * LinearBasisFunctions2D.YDerivativeBasisFunction(_i, node, _xLimits, _yLimits);
+				result *= LinearBasisFunctions2D.GetBasisFunctionValue(_j, node, _xLimits, _yLimits) * r;
+				return result;
+
+			}
+		}
 
 		public override (IList<IList<double>>, IList<double>) ConsiderThirdBoundaryCondition(Slae slae, IList<Node> nodes, IList<int> nodesIndexes, Func<Node, int, double> func, int formulaNumber)
 		{
@@ -100,7 +153,7 @@ namespace FemProducer.Basises
 			for (int i = 0; i < nodes.Count; i++)
 			{
 				SecondBoundaryConditionClass intF = new SecondBoundaryConditionClass(limits, func, i, formulaNumber, isR, secondVariable);
-				localVector[i] += Integration.GaussIntegration(limits, intF.SecondBoundaryConditionFunc, Integration.PointsCount.Two);
+				localVector[i] = Integration.GaussIntegration(limits, intF.SecondBoundaryConditionFunc, Integration.PointsCount.Two);
 				localVector[i] *= betta;
 			}
 
@@ -111,7 +164,7 @@ namespace FemProducer.Basises
 				for (int j = 0; j < nodes.Count; j++)
 				{
 					ThirdBoundaryConditionMatrixClass intF = new ThirdBoundaryConditionMatrixClass(limits, func, i, j, formulaNumber, isR, secondVariable);
-					localMatrix[i][j] += Integration.GaussIntegration(limits, intF.SecondBoundaryConditionFunc, Integration.PointsCount.Two);
+					localMatrix[i][j] = Integration.GaussIntegration(limits, intF.ThirdBoundaryConditionMatrixFunc, Integration.PointsCount.Two);
 					localMatrix[i][j] *= betta;
 				}
 			}
@@ -139,7 +192,7 @@ namespace FemProducer.Basises
 				_secondVariable = secondVariable;
 			}
 
-			public double SecondBoundaryConditionFunc(double r)
+			public double ThirdBoundaryConditionMatrixFunc(double r)
 			{
 				Node node;
 
@@ -149,9 +202,9 @@ namespace FemProducer.Basises
 					node = new Node(_secondVariable, r);
 
 				double h = _Limits.Y - _Limits.X;
-				double limit = _i == 0 ? _Limits.Y : _Limits.X;
-				double res = 0;
-				res += _func(node, _formulaNumber) * LinearBasisFunctions.s_Functions[_i](r, limit, h) * LinearBasisFunctions.s_Functions[_j](r, limit, h) * r;
+				double limit1 = _i == 0 ? _Limits.Y : _Limits.X;
+				double limit2 = _j == 0 ? _Limits.Y : _Limits.X;
+				double res = LinearBasisFunctions.s_Functions[_i](r, limit1, h) * LinearBasisFunctions.s_Functions[_j](r, limit2, h) * r;
 				return res;
 			}
 		}
@@ -178,7 +231,7 @@ namespace FemProducer.Basises
 			{
 				Node node;
 
-				if (_isR)
+				if (!_isR)
 					node = new Node(r, _secondVariable);
 				else
 					node = new Node(_secondVariable, r);
@@ -189,7 +242,6 @@ namespace FemProducer.Basises
 				return res;
 			}
 		}
-
 
 		class LocalVectorIntegrationFuncClass
 		{

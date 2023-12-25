@@ -22,11 +22,11 @@
     "qt": 1,
     "qz": [ 1 ],
     "ySplitsCount": [3],
-    "xSplitsCount": [ 3 ],
+    "xSplitsCount": [ 11 ],
     "zSplitsCount": [ 2],
     "ZW": [0,1], 
-    "tSplitsCount": 10,
-    "tLimits": [ 1, 10 ],
+    "tSplitsCount": 100,
+    "tLimits": [ 0, 10 ],
     "linesNodes": [
       [
         {
