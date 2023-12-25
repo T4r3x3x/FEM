@@ -26,7 +26,7 @@ namespace FemProducer.Basises
 			for (int i = 0; i < NodesCount; i++)
 			{
 				LocalVectorIntegrationFuncClass intF = new LocalVectorIntegrationFuncClass(xLimits, yLimits, func, i, formulaNumber);
-				localVector[i] += Integration.GaussIntegration(nodes[0], nodes[3], intF.LocalVectorIntegrationFunc, Integration.PointsCount.Two);
+				localVector[i] += Integration.GaussIntegration(nodes[0], nodes[3], intF.LocalVectorIntegrationFunc, Integration.PointsCount.Three);
 			}
 
 			return localVector;
@@ -44,7 +44,7 @@ namespace FemProducer.Basises
 				for (int j = 0; j < NodesCount; j++)
 				{
 					StiffnessIntegrationFuncClass intFunc = new StiffnessIntegrationFuncClass(i, j, xLimits, yLimits);
-					stiffnessMatrix[i][j] += Integration.GaussIntegration(nodes[0], nodes[3], intFunc.StiffnessIntegrationFunction, Integration.PointsCount.Two);
+					stiffnessMatrix[i][j] += Integration.GaussIntegration(nodes[0], nodes[3], intFunc.StiffnessIntegrationFunction, Integration.PointsCount.Three);
 				}
 			}
 
@@ -64,7 +64,7 @@ namespace FemProducer.Basises
 				{
 
 					MassIntegrationFuncClass intFunc = new(i, j, xLimits, yLimits);
-					massMatrix[i][j] += Integration.GaussIntegration(nodes[0], nodes[3], intFunc.MassIntegrationalFunction, Integration.PointsCount.Two);
+					massMatrix[i][j] += Integration.GaussIntegration(nodes[0], nodes[3], intFunc.MassIntegrationalFunction, Integration.PointsCount.Three);
 				}
 			}
 
@@ -76,7 +76,7 @@ namespace FemProducer.Basises
 
 		public override (IList<IList<double>>, IList<double>) ConsiderThirdBoundaryCondition(Slae slae, IList<Node> nodes, IList<int> nodesIndexes, Func<Node, int, double> func, int formulaNumber)
 		{
-			double betta = 450;
+			double betta = 1;
 			Node limits;
 			double secondVariable;
 			bool isR;
@@ -84,13 +84,14 @@ namespace FemProducer.Basises
 			{
 				limits = new Node(nodes[0].Y, nodes[1].Y);
 				secondVariable = nodes[0].X;
-				isR = true;
+				isR = false;
 			}
 			else
 			{
 				limits = new Node(nodes[0].X, nodes[1].X);
 				secondVariable = nodes[0].Y;
-				isR = false;
+
+				isR = true;
 			}
 
 			var localVector = new double[2];
@@ -110,7 +111,7 @@ namespace FemProducer.Basises
 				for (int j = 0; j < nodes.Count; j++)
 				{
 					ThirdBoundaryConditionMatrixClass intF = new ThirdBoundaryConditionMatrixClass(limits, func, i, j, formulaNumber, isR, secondVariable);
-					localMatrix[i][j] = Integration.GaussIntegration(limits, intF.SecondBoundaryConditionFunc, Integration.PointsCount.Two);
+					localMatrix[i][j] += Integration.GaussIntegration(limits, intF.SecondBoundaryConditionFunc, Integration.PointsCount.Two);
 					localMatrix[i][j] *= betta;
 				}
 			}
@@ -149,7 +150,8 @@ namespace FemProducer.Basises
 
 				double h = _Limits.Y - _Limits.X;
 				double limit = _i == 0 ? _Limits.Y : _Limits.X;
-				var res = _func(node, _formulaNumber) * LinearBasisFunctions.s_Functions[_i](r, limit, h) * LinearBasisFunctions.s_Functions[_j](r, limit, h) * r;
+				double res = 0;
+				res += _func(node, _formulaNumber) * LinearBasisFunctions.s_Functions[_i](r, limit, h) * LinearBasisFunctions.s_Functions[_j](r, limit, h) * r;
 				return res;
 			}
 		}

@@ -224,21 +224,32 @@ namespace Grid.Implementations.Factories
 			return boundaryLimitsIndexes;
 		}
 
-		private (HashSet<int>, IList<IList<int>>, IList<IList<int>>) GetBoundaryNodes(IList<IList<int>> boundaryIndexes, IList<double> x, IList<double> y, List<int> xSplitsCount, List<int> ySplitsCount, IList<int> missingNodesIndexes)
+		private (HashSet<int>, IList<(IList<int>, int)>, IList<(IList<int>, int)>) GetBoundaryNodes(IList<IList<int>> boundaryIndexes, IList<double> x, IList<double> y, List<int> xSplitsCount, List<int> ySplitsCount, IList<int> missingNodesIndexes)
 		{
 			HashSet<int> firstBoundaryNodes = new HashSet<int>();
-			List<IList<int>> secondBoundaryNodes = new();
-			List<IList<int>> thirdBoundaryNodes = new();
+			List<(IList<int>, int)> secondBoundaryNodes = new();
+			List<(IList<int>, int)> thirdBoundaryNodes = new();
 			var limits = GetBoundaryLimitsIndexes(boundaryIndexes, xSplitsCount, ySplitsCount);
 
-			for (int i = 0; i < x.Count - 1; i++)//нижняя грань
-				thirdBoundaryNodes.Add([i, i + 1]);
+			for (int i = 0; i < x.Count; i++)//нижняя грань
+				firstBoundaryNodes.Add(i);
+			for (int i = 0; i < y.Count - 1; i++)//левая грань
+				firstBoundaryNodes.Add(i * x.Count);
 
-			for (int i = 0; i < x.Count - 1; i++)//верхняя грань
-				thirdBoundaryNodes.Add([x.Count * (y.Count - 1) + i, x.Count * (y.Count - 1) + i + 1]);
+			for (int i = 0; i < x.Count; i++)//верхняя грань
+				firstBoundaryNodes.Add(x.Count * (y.Count - 1) + i);
 
 			for (int i = 0; i < y.Count - 1; i++)//правая грань
-				thirdBoundaryNodes.Add([x.Count * (i + 1) - 1, x.Count * (i + 2) - 1]);
+				firstBoundaryNodes.Add(x.Count * (i + 1) - 1);
+
+			//for (int i = 0; i < x.Count - 1; i++)//нижняя грань
+			//	thirdBoundaryNodes.Add(([i, i + 1], 0));
+
+			//for (int i = 0; i < x.Count - 1; i++)//верхняя грань
+			//	thirdBoundaryNodes.Add(([x.Count * (y.Count - 1) + i, x.Count * (y.Count - 1) + i + 1], 1));
+
+			//for (int i = 0; i < y.Count - 1; i++)//правая грань
+			//	thirdBoundaryNodes.Add(([x.Count * (i + 1) - 1, x.Count * (i + 2) - 1], 1));
 			return (firstBoundaryNodes, secondBoundaryNodes, thirdBoundaryNodes);
 		}
 

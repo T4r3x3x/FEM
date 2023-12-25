@@ -45,7 +45,7 @@ namespace NumericsMethods
 				temp += q[r] * func(u);
 			}
 
-			result *= hx * temp / 2.0;
+			result = hx * temp / 2.0;
 
 			return result;
 		}

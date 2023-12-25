@@ -33,9 +33,7 @@ namespace FemProducer
 
 			return area switch
 			{
-				0 => 25,
-				1 => 450,
-				_ => 25,
+				_ => x + y,
 				//_ => throw new ArgumentException(),
 			};
 		}
@@ -62,7 +60,7 @@ namespace FemProducer
 
 			return formulaIndex switch
 			{
-				_ => 25,
+				_ => x + y,
 				//_ => throw new ArgumentException(),
 			};
 		}
@@ -74,7 +72,7 @@ namespace FemProducer
 
 			return formulaIndex switch
 			{
-				_ => 0,
+				_ => Gamma(formulaIndex) * Function(node, formulaIndex),
 				//_ => throw new ArgumentException(),
 			};
 		}

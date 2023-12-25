@@ -1,7 +1,7 @@
 {
   "ProblemParameters": {
-    "Lambda": [ 0.6, 2, 1 ],
-    "Gamma": [ 4187400, 1, 3 ]
+    "Lambda": [ 1, 2, 1 ],
+    "Gamma": [ 1, 1, 3 ]
   },
 
   "SolverParameters": {
@@ -12,18 +12,17 @@
   "GridParameters": {
     "areas": [
       // [ 0, 3, 0, 3, 0 ],
-      [ 0, 1, 0, 1, 1 ],
-      [ 0, 1, 1, 2, 0 ]
+      [ 0, 1, 0, 1, 0 ]
       //[ 1, 3, 0, 1, 0 ],
       //[ 0, 1, 1, 3, 1 ],
       //[ 2, 3, 1, 3, 1 ]
     ],
-    "qy": [ 1,1 ],
+    "qy": [ 1 ],
     "qx": [ 1 ],
     "qt": 1,
     "qz": [ 1 ],
-    "ySplitsCount": [3,24],
-    "xSplitsCount": [ 24 ],
+    "ySplitsCount": [3],
+    "xSplitsCount": [ 3 ],
     "zSplitsCount": [ 2],
     "ZW": [0,1], 
     "tSplitsCount": 10,
@@ -39,16 +38,6 @@
           "y": 0.0
         }
       ],
-      [
-        {
-          "x": 0.0,
-          "y": 1.0
-        },
-        {
-          "x": 10.0,
-          "y": 1.0
-        }
-      ],   
       [
         {
           "x": 0.0,

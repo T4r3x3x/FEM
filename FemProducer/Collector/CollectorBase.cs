@@ -123,13 +123,13 @@ namespace FemProducer.Collector
 			foreach (var nodesIndexes in _grid.ThirdBoundaryNodes)
 			{
 				List<Node> nodes = new();
-				for (int i = 0; i < nodesIndexes.Count; i++)
-					nodes.Add(_grid.Nodes[nodesIndexes[i]]);
+				for (int i = 0; i < nodesIndexes.Item1.Count; i++)
+					nodes.Add(_grid.Nodes[nodesIndexes.Item1[i]]);
 
-				int formulaNumber = _grid.GetSubDomain(nodes[0]);
-				var res = _basis.ConsiderThirdBoundaryCondition(slae, nodes, nodesIndexes, _problemService.F, formulaNumber);
-				AddLocalMatrix(slae.Matrix, res.Item1, new FiniteElement([nodesIndexes[0], nodesIndexes[1]], formulaNumber));
-				AddLocalVector(slae.Vector, res.Item2, new FiniteElement([nodesIndexes[0], nodesIndexes[1]], formulaNumber));
+				int formulaNumber = nodesIndexes.Item2;
+				var res = _basis.ConsiderThirdBoundaryCondition(slae, nodes, nodesIndexes.Item1, _problemService.FBetta, formulaNumber);
+				AddLocalMatrix(slae.Matrix, res.Item1, new FiniteElement([nodesIndexes.Item1[0], nodesIndexes.Item1[1]], formulaNumber));
+				AddLocalVector(slae.Vector, res.Item2, new FiniteElement([nodesIndexes.Item1[0], nodesIndexes.Item1[1]], formulaNumber));
 			}
 		}
 	}

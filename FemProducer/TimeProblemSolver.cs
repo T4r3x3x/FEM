@@ -13,18 +13,21 @@ namespace FemProducer
 	{
 		void IProblemSolver.Solve(string configureFile, string outputFile)
 		{
-			solutionService.NumericalSolves.Add(solutionService.AnalyticsSolves[0]);
-			solutionService.NumericalSolves.Add(solutionService.AnalyticsSolves[1]);
+			//	solutionService.NumericalSolves.Add(solutionService.AnalyticsSolves[0]);
+			//	solutionService.NumericalSolves.Add(solutionService.AnalyticsSolves[1]);
 
-			for (int timeLayer = 2; timeLayer < grid.T.Count; timeLayer++)
-			{
-				Slae slae = collector.Collect(timeLayer);
-				Vector solve = solver.Solve(slae);
-				solutionService.NumericalSolves.Add(solve);
-				//		resultsService.PrintResult(timeLayer, false);
-			}
+			//		for (int timeLayer = 1; timeLayer < grid.T.Count; timeLayer++)
+			//{
+			Slae slae = collector.Collect(0);
+			Vector solve = solver.Solve(slae);
+			solutionService.NumericalSolves.Add(solve);
+			//	resultsService.PrintSlae(slae);
+			resultsService.PrintResult(0, true);
 
-			resultsService.WriteSolve("solve.txt", solutionService.NumericalSolves[0]);
+			//	}
+			resultsService.WriteSolve("solve.txt", solutionService.NumericalSolves);
+			//	resultsService.PrintResult(0, true);
+
 			resultsService.WriteGrid("grid.txt", gridParameters);
 			resultsService.WriteSolveWithGrid("isolines.txt", solutionService.NumericalSolves[0]);
 			//consoleLogger.Log();

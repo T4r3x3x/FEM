@@ -101,12 +101,18 @@ namespace FemProducer
 			}
 		}
 
-		public void WriteSolve(string path, Vector solve)
+		public void WriteSolve(string path, IList<Vector> solve)
 		{
 			using (var file = File.Open(path, FileMode.OpenOrCreate))
 			using (StreamWriter sw = new StreamWriter(file))
-				foreach (var value in solve)
-					sw.WriteLine(value.ToString().Replace(",", "."));
+			{
+				sw.WriteLine(_grid.XCount * _grid.YCount);
+				sw.WriteLine(_grid.T.Count);
+
+				for (int j = 0; j < _grid.T.Count; j++)
+					for (int i = 0; i < _grid.Nodes.Count; i++)
+						sw.WriteLine(_grid.Nodes[i].ToString() + " " + solve[j][i].ToString().Replace(",", "."));
+			}
 		}
 
 		public void WriteGrid(string path, GridParameters gridParameter)
