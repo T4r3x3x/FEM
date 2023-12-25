@@ -8,11 +8,12 @@ namespace Grid.Models
 		public readonly IReadOnlyList<double> Ht;
 		public readonly IReadOnlyList<double> X;
 		public readonly IReadOnlyList<double> Y;
+		public readonly IReadOnlyList<double> Z;
 		private readonly int _nodesInElementCount; //количество узлов в кэ.
 
 		public GridModel(IList<FiniteElement> elements, IList<Node> nodes,
 			IEnumerable<int> firstBoundaryNodes, IEnumerable<IList<int>> secondBoundaryNodes, IEnumerable<IList<int>> thirdBoundaryNodes, int xCount, int yCount, IList<IList<double>> subdomains,
-			int nodesInElementCount, double[] x, double[] y, double[] t = null, List<double> ht = null)
+			int nodesInElementCount, double[] x, double[] y, double[] z, double[] t = null, List<double> ht = null)
 		{
 			FirstBoundaryNodes = firstBoundaryNodes;
 			SecondBoundaryNodes = secondBoundaryNodes;
@@ -23,6 +24,7 @@ namespace Grid.Models
 			Ht = ht;
 			XCount = xCount;
 			YCount = yCount;
+			ZCount = z.Length;
 			Subdomains = subdomains;
 			_nodesInElementCount = nodesInElementCount;
 			X = x;
@@ -40,7 +42,7 @@ namespace Grid.Models
 		public int NodesCount => Nodes.Count;
 		public int XCount { get; }
 		public int YCount { get; }
-
+		public int ZCount { get; }
 
 		public IList<Node> ElementToNode(FiniteElement element)
 		{

@@ -1,4 +1,7 @@
-﻿using FemProducer.Collector;
+﻿using Autofac;
+
+using FemProducer.Basises;
+using FemProducer.Collector;
 using FemProducer.ConfigureReader;
 using FemProducer.Logger;
 using FemProducer.MatrixBuilding;
@@ -23,14 +26,31 @@ namespace FemProducer
 		{
 			System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
 
-			IConfigureReader taskBuilder = new JsonConfigureReader(ConfigureFile);
+			ContainerBuilder container = new ContainerBuilder();
+			container.RegisterType<JsonConfigureReader>().As<IConfigureReader>();
+			container.RegisterType<GridFactory>().As<IGridFactory>();
+			container.RegisterType<SolverFactory>().As<ISolverFactory>();
+			container.RegisterType<ProblemService>();
+			container.RegisterType<SolutionService>();
+			container.RegisterType<MatrixFactory>().As<IMatrixFactory>();
+			container.RegisterType<CollectorBase>().As<ICollectorBase>();
+			container.RegisterType<EllipticCollector>().As<AbstractCollector>();
+			container.RegisterType<LinearCubeBasis>().As<AbstractBasis>();
+			container.RegisterType<ResultsService<TxtLogger>>();
+			container.RegisterType<TimeProblemSolver>().As<IProblemSolver>();
 
-			var problemParameters = taskBuilder.GetProblemParameters();
-			var solverParameters = taskBuilder.GetSolverParameters();
-			var gridParameters = taskBuilder.GetGridParameters();
+			var build = container.Build();
+			var reader = build.Resolve<IConfigureReader>(new NamedParameter("filePath", ConfigureFile));
 
-			IGridFactory gridFactory = new GridFactory();
-			ISolverFactory solverFactory = new SolverFactory();
+			var problemParameters = reader.GetProblemParameters();
+			var solverParameters = reader.GetSolverParameters();
+			var gridParameters = reader.GetGridParameters();
+
+			var gridFactory = build.Resolve<IGridFactory>();
+			var solverFactory = build.Resolve<ISolverFactory>();
+
+			//	SolverFactory solverFactory = new();
+			//	GridFactory gridFactory = new();
 
 			ISolver solver = solverFactory.CreateSolver(solverParameters);
 			GridModel grid = gridFactory.GetGrid(gridParameters);
@@ -48,12 +68,14 @@ namespace FemProducer
 			ResultsService<TxtLogger> resultsService = new(new TxtLogger("results"), grid, solutionService, problemService);
 
 
-
+			var _problemSolver = build.Resolve<IProblemSolver>();
 			IProblemSolver problemSolver = new TimeProblemSolver(solver, solutionService, timeCollector, resultsService, gridParameters, grid);
 
 			//	try
 			//	{
 			sw.Start();
+
+			Console.WriteLine(grid.ElementsCount);
 
 			problemSolver.Solve(ConfigureFile, OutputFile);
 
@@ -90,7 +112,7 @@ namespace FemProducer
 			sw.Stop();
 			Messages.PrintSuccessMessage("program work time: " + sw.ElapsedMilliseconds);
 			//Tools.Processes.OpenPythonScript(scriptPath: @"PythonScripts\grid2d.py");
-			//Tools.Processes.OpenPythonScript(@"PythonScripts\isolines.py");
+			Tools.Processes.OpenPythonScript(@"PythonScripts\temperature.py");
 		}
 	}
 }

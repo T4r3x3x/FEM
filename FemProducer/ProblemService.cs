@@ -34,8 +34,8 @@ namespace FemProducer
 
 			return formulaIndex switch
 			{
-				0 => x * y * z,
-				_ => throw new ArgumentException($"Гамма для формулы задана!"),
+				_ => x + z + y,
+				//_ => throw new ArgumentException($"Гамма для формулы задана!"),
 			};
 		}
 
@@ -60,7 +60,7 @@ namespace FemProducer
 			var z = node.Z;
 			switch (area)
 			{
-				default: return x * y;
+				default: return -Math.Sin(x + y + z);
 			}
 		}
 
@@ -72,9 +72,9 @@ namespace FemProducer
 
 			return formulaIndex switch
 			{
-				0 => Gamma(formulaIndex) * Function(node, formulaIndex),
+				_ => Gamma(formulaIndex) * Function(node, formulaIndex),
 
-				_ => throw new ArgumentException(),
+				//_ => throw new ArgumentException(),
 			};
 		}
 	}

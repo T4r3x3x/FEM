@@ -13,16 +13,16 @@ namespace Grid.Implementations.Factories
 	{
 		private const int countOfNodesInElement = 4;
 
-		public GridModel GetGrid(GridParameters gridParametrs)
+		public GridModel GetGrid(GridParameters gridParameters)
 		{
-			(var XW, var YW) = GetSegmentsBoundaries(gridParametrs.LinesNodes);
+			(var XW, var YW) = GetSegmentsBoundaries(gridParameters.LinesNodes);
 
-			var ZW = gridParametrs.ZW;
+			var ZW = gridParameters.ZW;
 
-			double[][] subDomains = new double[gridParametrs.Areas.Length][];
+			double[][] subDomains = new double[gridParameters.Areas.Length][];
 
-			var lines = gridParametrs.LinesNodes;
-			var areas = gridParametrs.Areas;
+			var lines = gridParameters.LinesNodes;
+			var areas = gridParameters.Areas;
 
 			for (int i = 0; i < areas.Length; i++)
 			{
@@ -42,21 +42,21 @@ namespace Grid.Implementations.Factories
 			//		lines[areas[i][3]][areas[i][1]]]);
 			//}
 
-			var x = BaseMethods.GetPointsInAxis(gridParametrs.Qx, XW, gridParametrs.XSplitsCount);
-			var y = BaseMethods.GetPointsInAxis(gridParametrs.Qy, YW, gridParametrs.YSplitsCount);
-			var z = BaseMethods.GetPointsInAxis(gridParametrs.Qz, ZW, gridParametrs.ZSplitsCount);
-			var t = BaseMethods.GetPointsInAxis([gridParametrs.Qt], gridParametrs.TLimits, [gridParametrs.TSplitsCount]);
+			var x = BaseMethods.GetPointsInAxis(gridParameters.Qx, XW, gridParameters.XSplitsCount);
+			var y = BaseMethods.GetPointsInAxis(gridParameters.Qy, YW, gridParameters.YSplitsCount);
+			var z = BaseMethods.GetPointsInAxis(gridParameters.Qz, ZW, gridParameters.ZSplitsCount);
+			var t = BaseMethods.GetPointsInAxis([gridParameters.Qt], gridParameters.TLimits, [gridParameters.TSplitsCount]);
 
-			(var nodes, var missingNodesIndexes) = GetNodes(gridParametrs.Areas, subDomains, gridParametrs.LinesNodes, x, y, z);
+			(var nodes, var missingNodesIndexes) = GetNodes(gridParameters.Areas, subDomains, gridParameters.LinesNodes, x, y, z);
 
-			var elements = GetElements(x, y, z, subDomains, missingNodesIndexes, gridParametrs.Areas);
+			var elements = GetElements(x, y, z, subDomains, missingNodesIndexes, gridParameters.Areas);
 
-			(var firstBoundaryNodes, var second, var third) = GetBoundaryNodes(gridParametrs.BoundaryConditions, x, y, gridParametrs.XSplitsCount, gridParametrs.YSplitsCount, gridParametrs.ZSplitsCount, missingNodesIndexes, subDomains, areas);
+			(var firstBoundaryNodes, var second, var third) = GetBoundaryNodes(gridParameters.BoundaryConditions, x, y, gridParameters.XSplitsCount, gridParameters.YSplitsCount, gridParameters.ZSplitsCount, missingNodesIndexes, subDomains, areas);
 
 
-			//	var realSubDomains = GetRealSubdomians(lines, gridParametrs.Areas);
+			//	var realSubDomains = GetRealSubdomians(lines, gridParameters.Areas);
 
-			return new GridModel(elements, nodes, firstBoundaryNodes, second, third, x.Length, y.Length, subDomains, 8, x, y, t);
+			return new GridModel(elements, nodes, firstBoundaryNodes, second, third, x.Length, y.Length, subDomains, 8, x, y, z, t);
 		}
 
 		private List<Point[]> GetRealSubdomians(Point[][] lines, int[][] areas)

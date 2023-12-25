@@ -99,12 +99,12 @@ namespace FemProducer.Collector
 
 		private void ConsiderFirstBoundaryConditions(Slae slae)
 		{
-			Parallel.ForEach(_grid.FirstBoundaryNodes, boundaryNodeIndex =>
-			//foreach (var boundaryNodeIndex in _grid.FirstBoundaryNodes)
+			//Parallel.ForEach(_grid.FirstBoundaryNodes, boundaryNodeIndex =>
+			foreach (var boundaryNodeIndex in _grid.FirstBoundaryNodes)
 			{
 				var area = _grid.GetSubDomain(_grid.Nodes[boundaryNodeIndex]);
 				_basis.ConsiderFirstBoundaryCondition(slae, _grid.Nodes[boundaryNodeIndex], boundaryNodeIndex, area);
-			});
+			}//);
 		}
 
 		private void ConsiderSecondBoundaryConditions(Slae slae)

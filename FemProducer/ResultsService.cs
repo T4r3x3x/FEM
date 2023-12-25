@@ -81,17 +81,18 @@ namespace FemProducer
 			using (var file = File.Open(path, FileMode.OpenOrCreate))
 			using (StreamWriter sw = new StreamWriter(file))
 			{
-				sw.WriteLine(_grid.Subdomains.Count);
-				foreach (var subDomain in _grid.Subdomains)
-				{
-					foreach (var value in subDomain)
-					{
-						sw.Write(value.ToString().Replace(',', '.') + " ");
-					}
-					sw.WriteLine();
-				}
+				//sw.WriteLine(_grid.Subdomains.Count);
+				//foreach (var subDomain in _grid.Subdomains)
+				//{
+				//	foreach (var value in subDomain)
+				//	{
+				//		sw.Write(value.ToString().Replace(',', '.') + " ");
+				//	}
+				//	sw.WriteLine();
+				//}
 
 				sw.WriteLine(_grid.Nodes.Count);
+
 
 				for (int i = 0; i < _grid.Nodes.Count; i++)
 				{
@@ -105,8 +106,16 @@ namespace FemProducer
 		{
 			using (var file = File.Open(path, FileMode.OpenOrCreate))
 			using (StreamWriter sw = new StreamWriter(file))
-				foreach (var value in solve)
-					sw.WriteLine(value.ToString().Replace(",", "."));
+			{
+				sw.WriteLine(_grid.XCount * _grid.YCount);
+				sw.WriteLine(_grid.ZCount);
+
+				for (int i = 0; i < _grid.Nodes.Count; i++)
+				{
+					sw.WriteLine(_grid.Nodes[i].ToString() + " " + solve[i].ToString().Replace(",", "."));
+				}
+
+			}
 		}
 
 		public void WriteGrid(string path, GridParameters gridParameter)

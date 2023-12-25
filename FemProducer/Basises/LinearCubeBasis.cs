@@ -70,12 +70,12 @@ namespace FemProducer.Basises
 
 			var funcValues = new double[NodesCount];
 			for (int i = 0; i < NodesCount; i++)
-			{
 				funcValues[i] = func(nodes[i], formulaNumber);
 
+			for (int i = 0; i < NodesCount; i++)
 				for (int j = 0; j < NodesCount; j++)
-					localVector[i] += funcValues[i] * massMatrix[i][j];
-			}
+					localVector[i] += funcValues[j] * massMatrix[i][j];
+
 			return localVector;
 		}
 

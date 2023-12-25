@@ -18,7 +18,9 @@ namespace FemProducer
 
 			//	for (int timeLayer = 2; timeLayer < grid.T.Count; timeLayer++)
 			//		{
+
 			Slae slae = collector.Collect(0);
+			//	slae.Vector[0] = 1.5;
 			Vector solve = solver.Solve(slae);
 			solutionService.NumericalSolves.Add(solve);
 			resultsService.PrintResult(0, false);
