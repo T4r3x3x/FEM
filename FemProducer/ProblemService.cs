@@ -73,7 +73,7 @@ namespace FemProducer
 
 			return formulaIndex switch
 			{
-				_ => Gamma(formulaIndex) * Function(node, formulaIndex),
+				_ => 0,
 				//_ => throw new ArgumentException(),
 			};
 		}

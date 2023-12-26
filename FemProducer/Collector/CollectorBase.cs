@@ -59,10 +59,10 @@ namespace FemProducer.Collector
 				localMatrix.MultiplyLocalMatrix(_problemService.Lambda(formulaNumber));
 				AddLocalMatrix(G, localMatrix, element);
 
-				//var areaNumber = GetAreaNumber(nodes);
-				//localMatrix = ((LinearRectangularCylindricalBasis)_basis).GetGradTMatrix(nodes, areaNumber);
-				//localMatrix.MultiplyLocalMatrix(_problemService.Gamma(formulaNumber));
-				//AddLocalMatrix(H, localMatrix, element);
+				var areaNumber = GetAreaNumber(nodes);
+				localMatrix = ((LinearRectangularCylindricalBasis)_basis).GetGradTMatrix(nodes, areaNumber);
+				localMatrix.MultiplyLocalMatrix(_problemService.Gamma(formulaNumber));
+				AddLocalMatrix(H, localMatrix, element);
 
 				var localVector = _basis.GetLocalVector(nodes, _problemService.F, formulaNumber);
 				AddLocalVector(vector, localVector, element);

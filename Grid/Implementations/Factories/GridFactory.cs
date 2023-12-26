@@ -232,8 +232,8 @@ namespace Grid.Implementations.Factories
 			var limits = GetBoundaryLimitsIndexes(boundaryIndexes, xSplitsCount, ySplitsCount);
 
 
-			for (int i = 0; i < y.Count - 1; i++)//левая грань
-				firstBoundaryNodes.Add(i * x.Count);
+			//for (int i = 0; i < y.Count - 1; i++)//левая грань
+			//	firstBoundaryNodes.Add(i * x.Count);
 			//for (int i = 0; i < x.Count; i++)//нижняя грань
 			//	firstBoundaryNodes.Add(i);
 			//for (int i = 0; i < x.Count; i++)//верхняя грань

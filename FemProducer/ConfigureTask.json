@@ -27,8 +27,8 @@
     "xSplitsCount": [ 10,2 ],
     "zSplitsCount": [ 2],
     "ZW": [0,1], 
-    "tSplitsCount": 1e+3,
-    "tLimits": [ 0, 1e+6 ],
+    "tSplitsCount": 1e+4,
+    "tLimits": [ 0, 3e+1 ],
     "linesNodes": [
       [
         {
