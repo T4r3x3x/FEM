@@ -35,8 +35,8 @@ namespace FemProducer.Collector
 			Vector b = results.Item2;
 			var timeCoef = (deltaT + deltaT0) / (deltaT * deltaT0);
 
-			vector += -(deltaT0 / (deltaT * deltaT1)) * vector1 + deltaT / (deltaT1 * deltaT0) * vector2;
-			matrix += timeCoef * M + G + H;
+			vector = -(deltaT0 / (deltaT * deltaT1)) * vector1 + deltaT / (deltaT1 * deltaT0) * vector2;
+			matrix = timeCoef * M + G + H;
 
 			return new Slae(matrix, vector);
 		}

@@ -75,7 +75,7 @@ namespace FemProducer.Basises
 
 		private Node GetV(int areaNumber)
 		{
-			double value = 0.0;
+			double value = 0.01;
 			return areaNumber switch
 			{
 				0 => new Node(value, 0),
@@ -90,7 +90,7 @@ namespace FemProducer.Basises
 			double[][] matrix = new double[4][];
 			var xLimits = new Node(nodes[0].X, nodes[1].X);
 			var yLimits = new Node(nodes[0].Y, nodes[2].Y);
-			var v = new Node(0, 0);//GetV(areaNumber);
+			var v = GetV(areaNumber);
 			for (int i = 0; i < 4; i++)
 			{
 				matrix[i] = new double[4];
@@ -130,7 +130,7 @@ namespace FemProducer.Basises
 
 		public override (IList<IList<double>>, IList<double>) ConsiderThirdBoundaryCondition(Slae slae, IList<Node> nodes, IList<int> nodesIndexes, Func<Node, int, double> func, int formulaNumber)
 		{
-			double betta = 1;
+			double betta = 200;
 			Node limits;
 			double secondVariable;
 			bool isR;
