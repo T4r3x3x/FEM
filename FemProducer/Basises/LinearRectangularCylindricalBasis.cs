@@ -75,12 +75,13 @@ namespace FemProducer.Basises
 
 		private Node GetV(int areaNumber)
 		{
+			double value = 0.0;
 			return areaNumber switch
 			{
-				0 => new Node(1, 0),
-				1 => new Node(0, 1),
-				2 => new Node(-1, 0),
-				3 => new Node(0, -1),
+				0 => new Node(value, 0),
+				1 => new Node(0, value),
+				2 => new Node(-value, 0),
+				3 => new Node(0, -value),
 			};
 		}
 

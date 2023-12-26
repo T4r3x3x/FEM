@@ -57,7 +57,7 @@ namespace SlaeSolver.Implementations.Solvers
 				p = LAUr.Add(b * p);//+
 
 			} while (r * r > eps && k <= maxItCount);
-
+			//	Console.WriteLine(r * r);
 			return solve;
 		}
 

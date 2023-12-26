@@ -78,7 +78,7 @@ namespace FemProducer
 
 		public void WriteSolveWithGrid(string path, Vector solve)
 		{
-			using (var file = File.Open(path, FileMode.OpenOrCreate))
+			using (var file = File.Open(path, FileMode.Create))
 			using (StreamWriter sw = new StreamWriter(file))
 			{
 				sw.WriteLine(_grid.Subdomains.Count);
@@ -103,7 +103,7 @@ namespace FemProducer
 
 		public void WriteSolve(string path, IList<Vector> solve)
 		{
-			using (var file = File.Open(path, FileMode.OpenOrCreate))
+			using (var file = File.Open(path, FileMode.Create))
 			using (StreamWriter sw = new StreamWriter(file))
 			{
 				sw.WriteLine(_grid.XCount * _grid.YCount);

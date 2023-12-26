@@ -15,13 +15,13 @@ namespace FemProducer.Collector
 		public override Slae Collect(int timeLayer)
 		{
 			(var matrixes, var vector) = _collectorBase.Collect();
-			var slae = GetSlae(matrixes.GetValueOrDefault("M"), matrixes.GetValueOrDefault("G"), vector);
+			var slae = GetSlae(matrixes.GetValueOrDefault("M"), matrixes.GetValueOrDefault("G"), matrixes.GetValueOrDefault("H"), vector);
 			return slae;
 		}
 
-		private Slae GetSlae(Matrix M, Matrix G, Vector vector)
+		private Slae GetSlae(Matrix M, Matrix G, Matrix H, Vector vector)
 		{
-			var matrix = M + G;
+			var matrix = M + G + H;
 
 			var slae = new Slae(matrix, vector);
 

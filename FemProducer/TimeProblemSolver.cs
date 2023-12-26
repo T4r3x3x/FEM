@@ -16,6 +16,7 @@ namespace FemProducer
 			solutionService.NumericalSolves.Add(solutionService.AnalyticsSolves[0]);
 			solutionService.NumericalSolves.Add(solutionService.AnalyticsSolves[1]);
 			resultsService.PrintResult(0, false);
+			resultsService.PrintResult(1, false);
 
 			for (int timeLayer = 2; timeLayer < grid.T.Count; timeLayer++)
 			{
@@ -24,7 +25,7 @@ namespace FemProducer
 				solutionService.NumericalSolves.Add(solve);
 				//	resultsService.PrintSlae(slae);
 				resultsService.PrintResult(timeLayer, false);
-
+				//			Console.WriteLine(timeLayer + "/" + grid.T.Count);
 			}
 			resultsService.WriteSolve("solve.txt", solutionService.NumericalSolves);
 			//	resultsService.PrintResult(0, true);

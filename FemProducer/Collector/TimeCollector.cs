@@ -32,11 +32,11 @@ namespace FemProducer.Collector
 
 			Vector vector1 = M * _solutionService.NumericalSolves[timeLayer - 2];
 			Vector vector2 = M * _solutionService.NumericalSolves[timeLayer - 1];
-
+			Vector b = results.Item2;
 			var timeCoef = (deltaT + deltaT0) / (deltaT * deltaT0);
 
 			vector += -(deltaT0 / (deltaT * deltaT1)) * vector1 + deltaT / (deltaT1 * deltaT0) * vector2;
-			matrix += timeCoef * M + G;
+			matrix += timeCoef * M + G + H;
 
 			return new Slae(matrix, vector);
 		}

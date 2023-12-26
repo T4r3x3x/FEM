@@ -44,7 +44,7 @@ namespace FemProducer
 
 			CollectorBase collectorBase = new(grid, matrixFactory, problemService, new Basises.LinearRectangularCylindricalBasis(problemService));
 			AbstractCollector timeCollector = new TimeCollector(solutionService, collectorBase, grid, matrixFactory);
-
+			//	AbstractCollector timeCollector = new EllipticCollector(collectorBase, grid, matrixFactory);
 			ResultsService<TxtLogger> resultsService = new(new TxtLogger("results"), grid, solutionService, problemService);
 
 
