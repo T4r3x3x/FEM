@@ -30,7 +30,7 @@ namespace FemProducer
 			resultsService.WriteSolve("solve.txt", solutionService.NumericalSolves);
 			//	resultsService.PrintResult(0, true);
 
-			resultsService.WriteGrid("grid.txt", gridParameters);
+
 			resultsService.WriteSolveWithGrid("isolines.txt", solutionService.NumericalSolves[0]);
 			//consoleLogger.Log();
 			//solvesOutputer.Show(outputFile);

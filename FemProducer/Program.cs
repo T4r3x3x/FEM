@@ -37,6 +37,7 @@ namespace FemProducer
 
 			Messages.PrintSuccessMessage("The grid was built!");
 
+
 			ProblemService problemService = new ProblemService(problemParameters);
 			SolutionService solutionService = new SolutionService(problemService, grid);
 
@@ -47,6 +48,8 @@ namespace FemProducer
 			//	AbstractCollector timeCollector = new EllipticCollector(collectorBase, grid, matrixFactory);
 			ResultsService<TxtLogger> resultsService = new(new TxtLogger("results"), grid, solutionService, problemService);
 
+			resultsService.WriteGrid("grid.txt", gridParameters);
+			Tools.Processes.OpenPythonScript(scriptPath: @"PythonScripts\grid2d.py");
 
 
 			IProblemSolver problemSolver = new TimeProblemSolver(solver, solutionService, timeCollector, resultsService, gridParameters, grid);
@@ -89,7 +92,7 @@ namespace FemProducer
 			//}
 			sw.Stop();
 			Messages.PrintSuccessMessage("program work time: " + sw.ElapsedMilliseconds);
-			Tools.Processes.OpenPythonScript(scriptPath: @"PythonScripts\grid2d.py");
+
 			Tools.Processes.OpenPythonScript(@"PythonScripts\temperature.py");
 		}
 	}

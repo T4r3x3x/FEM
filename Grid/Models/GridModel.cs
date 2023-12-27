@@ -123,6 +123,19 @@ namespace Grid.Models
 			return false;
 		}
 
+		public double GetCoefficient(Node elementCenter, int areaNumber)
+		{
+			Node centerOfDomain = new Node((X[X.Count - 1] + X[0]) / 2, (Y[Y.Count - 1] + Y[0]) / 2);//hx/2 hy/2
+			var distance = new Node(Math.Abs(elementCenter.X - centerOfDomain.X), Math.Abs(elementCenter.Y - centerOfDomain.Y));
+
+			var a = areaNumber % 2;
+			return a switch
+			{
+				0 => (centerOfDomain.X - distance.X) / centerOfDomain.X,
+				1 => (centerOfDomain.Y - distance.Y) / centerOfDomain.Y,
+			};
+		}
+
 		public int GetAreaNumber(Node center)
 		{
 			Node p1 = new Node(X[0], Y[0]);

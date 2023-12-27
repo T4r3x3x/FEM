@@ -62,6 +62,7 @@ namespace FemProducer
 			{
 				0 => 100,
 				1 => 25,
+				2 => 25,
 				//_ => throw new ArgumentException(),
 			};
 		}

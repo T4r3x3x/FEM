@@ -26,8 +26,20 @@ namespace FemProducer.Basises
 			for (int i = 0; i < NodesCount; i++)
 			{
 				LocalVectorIntegrationFuncClass intF = new LocalVectorIntegrationFuncClass(xLimits, yLimits, func, i, formulaNumber);
-				localVector[i] += Integration.GaussIntegration(nodes[0], nodes[3], intF.LocalVectorIntegrationFunc, Integration.PointsCount.Three);
+				localVector[i] += Integration.GaussIntegration(nodes[0], nodes[3], intF.LocalVectorIntegrationFunc, Integration.PointsCount.Four);
 			}
+
+
+			//var massMatrix = GetMassMatrix(nodes);
+
+			//var funcValues = new double[NodesCount];
+
+			//for (int i = 0; i < NodesCount; i++)
+			//	funcValues[i] = func(nodes[i], formulaNumber);
+
+			//for (int i = 0; i < NodesCount; i++)
+			//	for (int j = 0; j < NodesCount; j++)
+			//		localVector[i] += funcValues[j] * massMatrix[i][j];
 
 			return localVector;
 		}
@@ -44,7 +56,7 @@ namespace FemProducer.Basises
 				for (int j = 0; j < NodesCount; j++)
 				{
 					StiffnessIntegrationFuncClass intFunc = new StiffnessIntegrationFuncClass(i, j, xLimits, yLimits);
-					stiffnessMatrix[i][j] += Integration.GaussIntegration(nodes[0], nodes[3], intFunc.StiffnessIntegrationFunction, Integration.PointsCount.Three);
+					stiffnessMatrix[i][j] += Integration.GaussIntegration(nodes[0], nodes[3], intFunc.StiffnessIntegrationFunction, Integration.PointsCount.Four);
 				}
 			}
 
@@ -64,7 +76,7 @@ namespace FemProducer.Basises
 				{
 
 					MassIntegrationFuncClass intFunc = new(i, j, xLimits, yLimits);
-					massMatrix[i][j] += Integration.GaussIntegration(nodes[0], nodes[3], intFunc.MassIntegrationalFunction, Integration.PointsCount.Three);
+					massMatrix[i][j] += Integration.GaussIntegration(nodes[0], nodes[3], intFunc.MassIntegrationalFunction, Integration.PointsCount.Four);
 				}
 			}
 
@@ -73,31 +85,20 @@ namespace FemProducer.Basises
 
 		public override void ConsiderSecondBoundaryCondition(Slae slae, IList<Node> nodes, IList<int> nodesIndexes) => throw new NotImplementedException();
 
-		private Node GetV(int areaNumber)
-		{
-			double value = 0.01;
-			return areaNumber switch
-			{
-				0 => new Node(value, 0),
-				1 => new Node(0, value),
-				2 => new Node(-value, 0),
-				3 => new Node(0, -value),
-			};
-		}
 
-		public double[][] GetGradTMatrix(IList<Node> nodes, int areaNumber)
+
+		public double[][] GetGradTMatrix(IList<Node> nodes, Node v)
 		{
 			double[][] matrix = new double[4][];
 			var xLimits = new Node(nodes[0].X, nodes[1].X);
 			var yLimits = new Node(nodes[0].Y, nodes[2].Y);
-			var v = GetV(areaNumber);
 			for (int i = 0; i < 4; i++)
 			{
 				matrix[i] = new double[4];
 				for (int j = 0; j < 4; j++)
 				{
 					HMatrixClass hMatrixClass = new(j, i, xLimits, yLimits, v);
-					matrix[i][j] = NumericsMethods.Integration.GaussIntegration(nodes[0], nodes[3], hMatrixClass.HMatrixFunc, Integration.PointsCount.Two);
+					matrix[i][j] = NumericsMethods.Integration.GaussIntegration(nodes[0], nodes[3], hMatrixClass.HMatrixFunc, Integration.PointsCount.Four);
 				}
 			}
 
@@ -287,9 +288,9 @@ namespace FemProducer.Basises
 				var xW2 = LinearBasisFunctions2D.XDerivativeBasisFunction(_j, node, _xLimits, _yLimits);
 				var yW1 = LinearBasisFunctions2D.YDerivativeBasisFunction(_i, node, _xLimits, _yLimits);
 				var yW2 = LinearBasisFunctions2D.YDerivativeBasisFunction(_j, node, _xLimits, _yLimits);
-				var result = (xW1 * xW2 + yW1 * yW2) * r;
+				var result = (xW1 * xW2 + yW1 * yW2);
 
-				return result;
+				return result * r;
 			}
 		}
 

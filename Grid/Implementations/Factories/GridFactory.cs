@@ -249,7 +249,7 @@ namespace Grid.Implementations.Factories
 				thirdBoundaryNodes.Add(([x.Count * (y.Count - 1) + i, x.Count * (y.Count - 1) + i + 1], 1));
 
 			for (int i = 0; i < y.Count - 1; i++)//правая грань
-				thirdBoundaryNodes.Add(([x.Count * (i + 1) - 1, x.Count * (i + 2) - 1], 1));
+				thirdBoundaryNodes.Add(([x.Count * (i + 1) - 1, x.Count * (i + 2) - 1], 2));
 			return (firstBoundaryNodes, secondBoundaryNodes, thirdBoundaryNodes);
 		}
 

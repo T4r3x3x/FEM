@@ -30,10 +30,32 @@ namespace FemProducer.Collector
 			return GetMatrixesMG();
 		}
 
-		private int GetAreaNumber(IList<Node> nodes)
+		private int GetAreaNumber(Node center)
 		{
-			Node center = new Node((nodes[0].X + nodes[1].X) / 2, (nodes[0].Y + nodes[2].Y) / 2);
 			return _grid.GetAreaNumber(center);
+		}
+
+		private double GetCoefficient(Node center, int area)
+		{
+			return _grid.GetCoefficient(center, area);
+		}
+
+		private Node GetV(IList<Node> nodes)
+		{
+			double maxV = 0.001;
+			Node center = new Node((nodes[0].X + nodes[1].X) / 2, (nodes[0].Y + nodes[2].Y) / 2);
+
+			var area = GetAreaNumber(center);
+			var coefficient = GetCoefficient(center, area);
+			var v = maxV * coefficient;
+
+			return area switch
+			{
+				0 => new Node(v, 0),
+				1 => new Node(0, v),
+				2 => new Node(-v, 0),
+				3 => new Node(0, -v),
+			};
 		}
 
 		private (Dictionary<string, Matrix>, Vector) GetMatrixesMG()
@@ -59,13 +81,15 @@ namespace FemProducer.Collector
 				localMatrix.MultiplyLocalMatrix(_problemService.Lambda(formulaNumber));
 				AddLocalMatrix(G, localMatrix, element);
 
-				var areaNumber = GetAreaNumber(nodes);
-				localMatrix = ((LinearRectangularCylindricalBasis)_basis).GetGradTMatrix(nodes, areaNumber);
+				var v = GetV(nodes);
+				localMatrix = ((LinearRectangularCylindricalBasis)_basis).GetGradTMatrix(nodes, v);
 				localMatrix.MultiplyLocalMatrix(_problemService.Gamma(formulaNumber));
 				AddLocalMatrix(H, localMatrix, element);
 
 				var localVector = _basis.GetLocalVector(nodes, _problemService.F, formulaNumber);
 				AddLocalVector(vector, localVector, element);
+
+
 			}//);
 
 			Dictionary<string, Matrix> matrixes = new() { { "M", M }, { "G", G }, { "H", H } };
