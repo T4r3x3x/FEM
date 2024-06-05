@@ -35,6 +35,9 @@
     <None Update="PythonScripts\grid.py">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="PythonScripts\grid2d2.py">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="PythonScripts\isolines.py">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

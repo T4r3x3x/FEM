@@ -15,7 +15,7 @@ namespace FemProducer.Collector
 		public override Slae Collect(int timeLayer)
 		{
 			(var matrixes, var vector) = _collectorBase.Collect();
-			var slae = GetSlae(matrixes.GetValueOrDefault("M"), matrixes.GetValueOrDefault("G"), matrixes.GetValueOrDefault("H"), vector);
+			var slae = GetSlae(matrixes.GetValueOrDefault("ColumnSize"), matrixes.GetValueOrDefault("G"), matrixes.GetValueOrDefault("H"), vector);
 			return slae;
 		}
 

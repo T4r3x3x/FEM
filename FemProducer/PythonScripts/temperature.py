@@ -31,7 +31,7 @@ for layer in range(0,layersCount):
 		arr = list(f.readline().split(" "))
 		X.append(float(arr[0]))
 		y.append(float(arr[1]))
-		T.append(float(arr[2]))
+		T.append(float(arr[3]))
 	_x.append(X.copy())
 	_y.append(y.copy())
 	_t.append(T.copy())

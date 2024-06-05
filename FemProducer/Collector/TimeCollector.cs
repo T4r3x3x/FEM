@@ -1,12 +1,12 @@
 ﻿using FemProducer.MatrixBuilding;
-
+using FemProducer.Services;
 using Grid.Models;
 
 using MathModels.Models;
 
 namespace FemProducer.Collector
 {
-	public class TimeCollector : AbstractCollector
+    public class TimeCollector : AbstractCollector
 	{
 		private readonly SolutionService _solutionService;
 
@@ -26,7 +26,7 @@ namespace FemProducer.Collector
 
 			var results = _collectorBase.Collect();
 
-			results.Item1.TryGetValue("M", out M);
+			results.Item1.TryGetValue("ColumnSize", out M);
 			results.Item1.TryGetValue("G", out G);
 			results.Item1.TryGetValue("H", out H);
 

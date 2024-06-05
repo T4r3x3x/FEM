@@ -2,99 +2,107 @@
 
 namespace MathModels.Models
 {
-	public class Vector : IEnumerable<double>
-	{
-		private double[] Elements;
+    public class Vector : IEnumerable<double>
+    {
+        private double[] Elements;
 
-		public Vector(int length, double[] Elements = null)
-		{
-			this.Elements = Elements ?? new double[length];
-		}
-		public double this[int index]
-		{
-			get => Elements[index];
-			set { Elements[index] = value; }
-		}
+        public Vector(int length)
+        {
+            this.Elements = new double[length];
+        }
 
-		public int Length => Elements.Length;
+        public Vector(double[] elements)
+        {
+            Elements = elements;
+        }
 
-		public double GetNorm()
-		{
-			double result = 0;
+        public double this[int index]
+        {
+            get => Elements[index];
+            set { Elements[index] = value; }
+        }
 
-			for (int i = 0; i < Length; i++)
-				result += Elements[i] * Elements[i];
+        public int Length => Elements.Length;
 
-			return Math.Sqrt(result);
-		}
+        public double GetNorm()
+        {
+            double result = 0;
 
-		public static double operator *(Vector a, Vector b)
-		{
-			if (a.Length != b.Length)
-				throw new Exception("Sizes of the vectors aren'T equals");
+            for (int i = 0; i < Length; i++)
+                result += Elements[i] * Elements[i];
 
-			double result = 0;
+            return Math.Sqrt(result);
+        }
 
-			for (int i = 0; i < a.Elements.Length; i++)
-				result += a.Elements[i] * b.Elements[i];
+        public static double operator *(Vector a, Vector b)
+        {
+            if (a.Length != b.Length)
+                throw new Exception("Sizes of the vectors aren'T equals");
 
-			return result;
-		}
+            double result = 0;
 
-		public static Vector operator +(Vector a, Vector b)
-		{
-			if (a.Length != b.Length)
-				throw new Exception("Sizes of the vectors aren'T equals");
+            for (int i = 0; i < a.Elements.Length; i++)
+                result += a.Elements[i] * b.Elements[i];
 
-			Vector result = new Vector(a.Length, null);
+            return result;
+        }
 
-			for (int i = 0; i < a.Elements.Length; i++)
-				result.Elements[i] = a.Elements[i] + b.Elements[i];
+        public static Vector operator +(Vector a, Vector b)
+        {
+            if (a.Length != b.Length)
+                throw new Exception("Sizes of the vectors aren'T equals");
 
-			return result;
-		}
+            Vector result = new Vector(a.Length);
 
-		public static Vector operator -(Vector a, Vector b)
-		{
-			if (a.Length != b.Length)
-				throw new Exception("Sizes of the vectors aren'T equals");
+            for (int i = 0; i < a.Elements.Length; i++)
+                result.Elements[i] = a.Elements[i] + b.Elements[i];
 
-			Vector result = new Vector(a.Length, null);
+            return result;
+        }
 
-			for (int i = 0; i < a.Elements.Length; i++)
-				result.Elements[i] = a.Elements[i] - b.Elements[i];
+        public static Vector operator -(Vector a, Vector b)
+        {
+            if (a.Length != b.Length)
+                throw new Exception("Sizes of the vectors aren'T equals");
 
-			return result;
-		}
+            Vector result = new Vector(a.Length);
 
-		public static Vector operator *(double a, Vector b)
-		{
-			Vector result = new Vector(b.Length, null);
+            for (int i = 0; i < a.Elements.Length; i++)
+                result.Elements[i] = a.Elements[i] - b.Elements[i];
 
-			for (int i = 0; i < b.Length; i++)
-				result.Elements[i] = a * b.Elements[i];
+            return result;
+        }
 
-			return result;
-		}
+        public static Vector operator *(double a, Vector b)
+        {
+            Vector result = new Vector(b.Length);
 
-		public void Print()
-		{
-			foreach (var element in Elements)
-			{
-				Console.Write(element + " ");
-			}
-			Console.WriteLine("\n\n");
-		}
+            for (int i = 0; i < b.Length; i++)
+                result.Elements[i] = a * b.Elements[i];
 
-		public void Reset()
-		{
-			for (int i = 0; i < Length; i++)
-			{
-				Elements[i] = 0;
-			}
-		}
+            return result;
+        }
 
-		public IEnumerator<double> GetEnumerator() => ((IEnumerable<double>)Elements).GetEnumerator();
-		IEnumerator IEnumerable.GetEnumerator() => Elements.GetEnumerator();
-	}
+        public void Print()
+        {
+            foreach (var element in Elements)
+            {
+                Console.Write(element + " ");
+            }
+            Console.WriteLine("\n\n");
+        }
+
+        public void Reset()
+        {
+            for (int i = 0; i < Length; i++)
+            {
+                Elements[i] = 0;
+            }
+        }
+
+        public static implicit operator Vector(double[] nums) => new Vector(nums);
+
+        public IEnumerator<double> GetEnumerator() => ((IEnumerable<double>)Elements).GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => Elements.GetEnumerator();
+    }
 }
