@@ -1,4 +1,5 @@
-﻿using Grid.Factories.ElementFactory.Interfaces;
+﻿using Grid.Enum;
+using Grid.Factories.ElementFactory.Interfaces;
 using Grid.Factories.GridFactory.Interfaces;
 using Grid.Factories.NodeFactory.Interfaces;
 using Grid.Models;
@@ -28,16 +29,24 @@ namespace Grid.Factories.GridFactory.Implementations
         public GridModel GetGrid(GridInputParameters @params)
         {
             (var coordinates, var t) = GetAxisesToPoints(@params);
+
             var subDomainsBoundaries = GetSubDomainsBoudaries(@params.ZW, @params.LinesNodes, @params.Areas);
+
             (var nodes, var missingNodeses) = _nodeFactory.GetNodes(@params.Areas, subDomainsBoundaries, @params.LinesNodes, coordinates);
-            var elements = _elementFactory.GetElements(coordinates, subDomainsBoundaries, missingNodeses);
+
+            var elements = _elementFactory.GetElements(coordinates, subDomainsBoundaries, missingNodeses.ToArray());
+
             var boundaryNodes = _boundaryFactory.GetBoundaryNodes(@params.Areas, @params.BoundaryConditions, coordinates, @params.XParams.SplitsCount,
                 @params.YParams.SplitsCount, @params.ZParams.SplitsCount, missingNodeses.ToArray());
 
             var realSubdomains = GetRealSubdomians(@params.LinesNodes, @params.Areas);
-            //сделать метод, который будет выдавать количество узлов в элементе
-            return new GridModel(elements, nodes, boundaryNodes.Item1, [], [], realSubdomains, 8, coordinates.X, coordinates.Y, coordinates.Z, @params.Areas, t);
+
+            var nodesInElementCount = CalculateNodesCountInElement(@params.GridDimensional);
+            return new GridModel(elements, nodes, boundaryNodes.Item1, boundaryNodes.Item2, boundaryNodes.Item3, realSubdomains,
+                nodesInElementCount, coordinates.X, coordinates.Y, coordinates.Z, @params.Areas, t);
         }
+
+        private int CalculateNodesCountInElement(GridDimensional dimensional) => (int) Math.Pow(2, (int) dimensional);
 
         /// <summary></summary>
         /// <param name="ZW"></param>

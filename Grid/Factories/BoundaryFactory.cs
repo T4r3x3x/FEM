@@ -1,4 +1,5 @@
-﻿using Grid.Models;
+﻿using Grid.Factories.ElementFactory.Implemenations;
+using Grid.Models;
 
 namespace Grid.Factories
 {
@@ -74,20 +75,20 @@ namespace Grid.Factories
             return boundaryLimitsIndexes.ToArray();
         }
 
-        public (int[], IList<IList<int>>, IList<IList<int>>) GetBoundaryNodes(Area<int>[] areas, Area<int>[] boundaryConditions, SpatialCoordinates coordinates, int[] xSplitsCount, int[] ySplitsCount,
+        public (int[], FiniteElementScheme[], FiniteElementScheme[]) GetBoundaryNodes(Area<int>[] areas, Area<int>[] boundaryConditions, SpatialCoordinates coordinates, int[] xSplitsCount, int[] ySplitsCount,
             int[] zSplitsCount, int[] missingNodesCounts)
         {            //трансформируем индексы из W в реальные номера узлов
             var x = coordinates.X;
             var y = coordinates.Y;
             var limits = GetBoundaryLimitsIndexes(boundaryConditions, xSplitsCount, ySplitsCount, zSplitsCount);
-            return CalculateBoundaryNodes(boundaryConditions, limits, x.Length, y.Length, missingNodesCounts);
+            return CalculateBoundaryNodes(boundaryConditions, limits, x.Length, y.Length, missingNodesCounts, coordinates);
         }
 
-        private (int[], IList<IList<int>>, IList<IList<int>>) CalculateBoundaryNodes(Area<int>[] boundaryConditions, int[][] limits, int xCount, int yCount, int[] missingNodesCounts)
+        private (int[], FiniteElementScheme[], FiniteElementScheme[]) CalculateBoundaryNodes(Area<int>[] boundaryConditions, int[][] limits, int xCount, int yCount, int[] missingNodesCounts, SpatialCoordinates coordinates)
         {
             HashSet<int> fisrtBoundaries = new();
-            HashSet<int> secondBoundaryNodes = new HashSet<int>();
-            List<List<int>> secondBoundaryIndexes = new();
+            List<FiniteElementScheme> secondBoundaryElems = new();
+            List<FiniteElementScheme> thirdBoundaryElems = new();
             for (int i = 0; i < limits.Length; i++)
             {
                 switch (boundaryConditions[i].FormulaNumber) //boundaryType
@@ -97,10 +98,18 @@ namespace Grid.Factories
                             var nodes = GetFisrtBoundaryNodes(limits[i], xCount, yCount, missingNodesCounts);
                             for (int j = 0; j < nodes.Count; j++)
                                 fisrtBoundaries.Add(nodes[j]);
+                            break;
                         }
-                        break;
-                    case 1:
+                    case 1://второе ку
                         {
+                            var elems = GetSecondBoundaryNodes(limits[i], missingNodesCounts, coordinates, 0);
+                            secondBoundaryElems.AddRange(elems);
+                            break;
+                        }
+                    case 2: //третье ку
+                        {
+                            var elems = GetSecondBoundaryNodes(limits[i], missingNodesCounts, coordinates, 0);
+                            thirdBoundaryElems.AddRange(elems);
                             break;
                         }
                     default:
@@ -108,7 +117,7 @@ namespace Grid.Factories
 
                 }
             }
-            return (fisrtBoundaries.ToArray(), secondBoundaryIndexes.ToArray(), null);
+            return (fisrtBoundaries.ToArray(), secondBoundaryElems.ToArray(), thirdBoundaryElems.ToArray());
         }
 
 
@@ -129,13 +138,55 @@ namespace Grid.Factories
             return boundaryNodes;
         }
 
-        //private FiniteElement[] GetSecondBoundaryNodes()
-        //{
+        //надо как-то учитывать по какой формуле должен происходить учёт ку 
+        private FiniteElementScheme[] GetSecondBoundaryNodes(int[] limits, int[] missingNodesCounts, SpatialCoordinates coordinates, int formulaNumber)
+        {
+            var sectionData = GetSectionData(limits, coordinates);
+            ReactangularElementFactory elementFactory = new(sectionData.section, sectionData.secitonIndex);
+            var elements = elementFactory.GetElements(coordinates, null!, missingNodesCounts);
+            //  AccountOffset(elements, sectionData.offset);
+            foreach (var element in elements) //решить где и как будет решаться по какой формуле надо вычитывать ку 
+                element.FormulaNumber = formulaNumber;
 
-        //}
-        //private FiniteElement[] GetThirdBoundaryNodes()
-        //{
+            return elements.ToArray();
+        }
 
-        //}
+        private FiniteElementScheme[] GetThirdBoundaryNodes(int[] limits, int[] missingNodesCounts, SpatialCoordinates coordinates)
+        {
+            throw new NotImplementedException();
+            //var sectionData = GetSectionData(limits, coordinates);
+            //ReactangularElementFactory elementFactory = new(sectionData.section);
+            //var elements = elementFactory.GetElements(coordinates, null!, missingNodesCounts);
+            //AccountOffset(elements, sectionData.offset);
+            //return elements.ToArray();
+        }
+
+        /// <summary>
+        /// Учитываем смещение по оси, по которой происходит смещение
+        /// </summary>
+        /// <param name="elements"></param>
+        /// <param name="offset">смещение индексов, которое надо учесть</param>
+        private void AccountOffset(List<FiniteElementScheme> elements, int offset)
+        {
+            foreach (var element in elements)
+                for (int i = 0; i < element.NodesIndexes.Length; i++)
+                    element.NodesIndexes[i] += offset;
+        }
+
+        /// <summary>
+        /// Определяем по какой оси происходит сечение, и где
+        /// </summary>
+        /// <param name="limits"></param>
+        /// <param name="coordinates"></param>
+        /// <returns>сечение, и смещение индексов</returns>
+        private (Section2D section, int secitonIndex) GetSectionData(int[] limits, SpatialCoordinates coordinates)
+        {
+            if (limits[0] == limits[1])
+                return (Section2D.YZ, limits[0]);
+            if (limits[2] == limits[3])
+                return (Section2D.XZ, limits[2]);
+            else
+                return (Section2D.XY, limits[4]);
+        }
     }
 }

@@ -1,12 +1,13 @@
 ﻿using FemProducer.Basises.BasisFunctions;
 using FemProducer.Services;
+
 using Grid.Models;
 
 using MathModels.Models;
 
 namespace FemProducer.Basises
 {
-    public class LinearRectangularBasis : AbstractBasis
+    public class LinearRectangularBasis : Abstract2DBasis
     {
         public const int NodesCount = 4;
 
@@ -61,8 +62,7 @@ namespace FemProducer.Basises
         {
             double[] result = new double[NodesCount];
 
-            var hx = nodes[1].X - nodes[0].X;
-            var hy = nodes[2].Y - nodes[0].Y;
+            (var hx, var hy) = GetSteps2D(nodes);
 
             var funcValues = new double[NodesCount];
             for (int i = 0; i < NodesCount; i++)

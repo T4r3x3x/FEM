@@ -34,7 +34,7 @@ namespace FemProducer.Services
 
             return area switch
             {
-                _ => y,
+                _ => x * y,
 
                 //_ => throw new ArgumentException(),
             };
@@ -47,7 +47,7 @@ namespace FemProducer.Services
             var z = node.Z;
             return formulaNumber switch
             {
-                0 => 1,
+                0 => y,
                 1 => -1,
                 _ => throw new ArgumentException($"Гамма для формулы {formulaNumber} не задана!")
             };

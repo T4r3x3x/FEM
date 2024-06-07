@@ -12,8 +12,8 @@ namespace Grid.Models
         public readonly IReadOnlyList<double> Z;
         private readonly int _nodesInElementCount; //количество узлов в кэ.
 
-        public GridModel(IList<FiniteElement> elements, IList<Node> nodes,
-            IEnumerable<int> firstBoundaryNodes, IEnumerable<(IList<int>, int)> secondBoundaryNodes, IEnumerable<(IList<int>, int)> thirdBoundaryNodes, IList<Point[]> subdomains,
+        public GridModel(IList<FiniteElementScheme> elements, IList<Node> nodes,
+            IEnumerable<int> firstBoundaryNodes, IEnumerable<FiniteElementScheme> secondBoundaryNodes, IEnumerable<FiniteElementScheme> thirdBoundaryNodes, IList<Point[]> subdomains,
             int nodesInElementCount, double[] x, double[] y, double[] z, Area<int>[] areas, double[] t = null, List<double> ht = null)
         {
             FirstBoundaryNodes = firstBoundaryNodes;
@@ -31,12 +31,12 @@ namespace Grid.Models
             _areas = areas;
         }
 
-        public IList<MathModels.Point[]> Subdomains { get; }
-        public IList<FiniteElement> Elements { get; private set; }
+        public IList<Point[]> Subdomains { get; }
+        public IList<FiniteElementScheme> Elements { get; private set; }
         public IList<Node> Nodes { get; private set; }
         public IEnumerable<int> FirstBoundaryNodes { get; private set; }
-        public IEnumerable<(IList<int>, int)> SecondBoundaryNodes { get; private set; }
-        public IEnumerable<(IList<int>, int)> ThirdBoundaryNodes { get; private set; }
+        public IEnumerable<FiniteElementScheme> SecondBoundaryNodes { get; private set; }
+        public IEnumerable<FiniteElementScheme> ThirdBoundaryNodes { get; private set; }
         public int TimeLayersCount => T.Count;
         public int ElementsCount => Elements.Count;
         public int NodesCount => Nodes.Count;
@@ -46,11 +46,11 @@ namespace Grid.Models
 
         private Area<int>[] _areas;
 
-        public IList<Node> ElementToNode(FiniteElement element)
+        public IList<Node> ElementToNodes(FiniteElementScheme element)
         {
-            Node[] nodes = new Node[_nodesInElementCount];
+            Node[] nodes = new Node[element.NodesIndexes.Length];
 
-            for (int i = 0; i < _nodesInElementCount; i++)
+            for (int i = 0; i < nodes.Length; i++)//переделать, пусть спраишвает у элемента
                 nodes[i] = Nodes[element.NodesIndexes[i]];
 
             return nodes;
@@ -94,7 +94,7 @@ namespace Grid.Models
         /// </summary>
         /// <param name="point"></param>
         /// <returns></returns>
-        public FiniteElement GetElement(Point point)
+        public FiniteElementScheme GetElement(Point point)
         {
             for (int i = 0; i < Elements.Count; i++)
                 if (IsElementContainPoint(Elements[i], point))
@@ -103,7 +103,7 @@ namespace Grid.Models
             return null;
         }
 
-        private bool IsElementContainPoint(FiniteElement element, Point point)
+        private bool IsElementContainPoint(FiniteElementScheme element, Point point)
         {
             if (Nodes[element.NodesIndexes[0]].X < point.X && point.X < Nodes[element.NodesIndexes[1]].X)
                 if (Nodes[element.NodesIndexes[0]].Y < point.Y && point.Y < Nodes[element.NodesIndexes[3]].Y)

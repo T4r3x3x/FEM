@@ -1,5 +1,6 @@
 ﻿using FemProducer.Basises.BasisFunctions;
 using FemProducer.Services;
+
 using Grid.Models;
 
 using MathModels.Models;
@@ -85,7 +86,13 @@ namespace FemProducer.Basises
             };
         }
 
-        public override IList<double> GetSecondBoundaryVector(IList<Node> nodes, Func<Node, int, double> func, int formulaNumber) => throw new NotImplementedException();
+        public override IList<double> GetSecondBoundaryVector(IList<Node> nodes, Func<Node, int, double> func, int formulaNumber)
+        {
+            var rectBasis = new LinearRectangularBasis(_problemService);
+            rectBasis.Section = Section2D.YZ;
+            return rectBasis.GetLocalVector(nodes, func, formulaNumber);
+        }
+
         public override (IList<IList<double>>, IList<double>) ConsiderThirdBoundaryCondition(Slae slae, IList<Node> nodes, IList<int> nodeIndexes, Func<Node, int, double> func, int formulaNumber) => throw new NotImplementedException();
     }
 }

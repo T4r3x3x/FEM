@@ -7,9 +7,9 @@ namespace Grid.Factories.ElementFactory.Implemenations
     {
         private const int NodesCount = 8;
 
-        public override List<FiniteElement> GetElements(SpatialCoordinates coordinates, Area<double>[] subDomains, List<int> missingNodesCounts)
+        public override List<FiniteElementScheme> GetElements(SpatialCoordinates coordinates, Area<double>[] subDomains, int[] missingNodesCounts)
         {
-            List<FiniteElement> elements = new List<FiniteElement>();
+            List<FiniteElementScheme> elements = new List<FiniteElementScheme>();
             var x = coordinates.X;
             var y = coordinates.Y;
             var z = coordinates.Z;
@@ -32,7 +32,7 @@ namespace Grid.Factories.ElementFactory.Implemenations
                             continue;
 
                         var nodesIndexes = GetNodesIndexes(missingNodesCounts, Oxy1, Oxy2, lineIndex1, lineIndex2, xIndex);
-                        var finiteElement = new FiniteElement(nodesIndexes, subDomains[areaNumber].FormulaNumber);
+                        var finiteElement = new FiniteElementScheme(nodesIndexes, subDomains[areaNumber].FormulaNumber);
                         elements.Add(finiteElement);
                     }
                 }
@@ -40,14 +40,14 @@ namespace Grid.Factories.ElementFactory.Implemenations
             return elements;
         }
 
-        private int[] GetNodesIndexes(List<int> missingNodesCounts, int Oxy1, int Oxy2, int lineIndex1, int lineIndex2, int xIndex)
+        private int[] GetNodesIndexes(int[] missingNodesCounts, int Oxy1, int Oxy2, int lineIndex1, int lineIndex2, int xIndex)
         {
             var nodesIndexes = GetNodesIndexesWithoutMissingNodes(Oxy1, Oxy2, lineIndex1, lineIndex2, xIndex);
             AccountMissingNodes(missingNodesCounts, nodesIndexes);
             return nodesIndexes;
         }
 
-        private static void AccountMissingNodes(List<int> missingNodesCounts, int[] nodesIndexes)
+        private static void AccountMissingNodes(int[] missingNodesCounts, int[] nodesIndexes)
         {
             for (int h = 0; h < nodesIndexes.Length; h++)
                 nodesIndexes[h] -= missingNodesCounts[nodesIndexes[h]];

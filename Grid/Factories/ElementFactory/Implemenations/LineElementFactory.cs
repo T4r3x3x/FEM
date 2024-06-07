@@ -5,9 +5,9 @@ namespace Grid.Factories.ElementFactory.Implemenations
 {
     public class LineElementFactory : AbstractElementFactory
     {
-        public override List<FiniteElement> GetElements(SpatialCoordinates coordinates, Area<double>[] subDomains, List<int> missingNodesCounts)
+        public override List<FiniteElementScheme> GetElements(SpatialCoordinates coordinates, Area<double>[] subDomains, int[] missingNodesCounts)
         {
-            List<FiniteElement> elements = new List<FiniteElement>();
+            List<FiniteElementScheme> elements = new List<FiniteElementScheme>();
             var x = coordinates.X;
 
             for (int xIndex = 0; xIndex < x.Length - 1; xIndex++)
@@ -17,20 +17,20 @@ namespace Grid.Factories.ElementFactory.Implemenations
                     continue;
 
                 var nodesIndexes = GetNodesIndexes(missingNodesCounts, xIndex);
-                var finiteElemnent = new FiniteElement(nodesIndexes, subDomains[areaNumber].FormulaNumber);
+                var finiteElemnent = new FiniteElementScheme(nodesIndexes, subDomains[areaNumber].FormulaNumber);
                 elements.Add(finiteElemnent);
             }
             return elements;
         }
 
-        private int[] GetNodesIndexes(List<int> missingNodesCounts, int xIndex)
+        private int[] GetNodesIndexes(int[] missingNodesCounts, int xIndex)
         {
             var nodesIndexes = GetNodesIndexesWithoutMissingNodes(xIndex);
             AccountMissingNodes(missingNodesCounts, nodesIndexes);
             return nodesIndexes;
         }
 
-        private static void AccountMissingNodes(List<int> missingNodesCounts, int[] nodesIndexes)
+        private static void AccountMissingNodes(int[] missingNodesCounts, int[] nodesIndexes)
         {
             for (int h = 0; h < nodesIndexes.Length; h++)
                 nodesIndexes[h] -= missingNodesCounts[nodesIndexes[h]];

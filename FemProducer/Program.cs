@@ -54,9 +54,9 @@ namespace FemProducer
             ResultsService<TxtLogger> resultsService = new(new TxtLogger("results"), grid, solutionService, problemService);
 
             resultsService.WriteGrid("grid.txt", gridParameters);
-            //    resultsService.WriteGrid2("grid2.txt", gridParameters);
             Tools.Processes.OpenPythonScript(scriptPath: @"PythonScripts\grid2d.py");
-
+            resultsService.WriteGrid2("grid2.txt", gridParameters);
+            Tools.Processes.OpenPythonScript(@"PythonScripts\grid2d2.py");
 
             IProblemSolver problemSolver = new TimeProblemSolver(solver, solutionService, timeCollector, resultsService, gridParameters, grid);
 
@@ -99,7 +99,7 @@ namespace FemProducer
             //}
             sw.Stop();
             Messages.PrintSuccessMessage("program work time: " + sw.ElapsedMilliseconds);
-            Tools.Processes.OpenPythonScript(@"PythonScripts\grid2d2.py");
+
             Tools.Processes.OpenPythonScript(@"PythonScripts\temperature.py");
         }
     }
