@@ -18,7 +18,7 @@ namespace Grid.Models.InputModels
         public AxisInputParameters TParams;
         public double[] ZW;
         public double[] TW;
-        public Area<int>[] BoundaryConditions;
+        public (Area<int> Area, BoundaryType BoundaryType)[] BoundaryConditions;
         public GridDimensional GridDimensional;
 
         public GridInputParameters(Point[][] linesNodes, int[][] areas, AxisInputParameters xParams, AxisInputParameters yParams,
@@ -37,10 +37,11 @@ namespace Grid.Models.InputModels
             TParams = tParams;
             ZW = zW;
             TW = tW;
-            BoundaryConditions = new Area<int>[boundaryConditions.Length];
+            BoundaryConditions = new (Area<int> Area, BoundaryType)[boundaryConditions.Length];
             for (int i = 0; i < boundaryConditions.Length; i++)
             {
-                BoundaryConditions[i] = new Area<int>(boundaryConditions[i], boundaryConditions[i][6]);
+                BoundaryConditions[i].Area = new Area<int>(boundaryConditions[i], boundaryConditions[i][7]);
+                BoundaryConditions[i].BoundaryType = (BoundaryType) boundaryConditions[i][6];
             }
             GridDimensional = gridDimensional;
 

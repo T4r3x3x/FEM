@@ -1,4 +1,6 @@
-﻿namespace Grid.Models
+﻿using Grid.Enum;
+
+namespace Grid.Models
 {
     public class FiniteElement
     {

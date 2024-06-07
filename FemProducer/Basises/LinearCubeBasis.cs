@@ -1,6 +1,7 @@
 ﻿using FemProducer.Basises.BasisFunctions;
 using FemProducer.Services;
 
+using Grid.Enum;
 using Grid.Models;
 
 using MathModels.Models;

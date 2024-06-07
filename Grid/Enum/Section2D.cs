@@ -1,4 +1,4 @@
-﻿namespace Grid.Models
+﻿namespace Grid.Enum
 {
     public enum Section2D
     {

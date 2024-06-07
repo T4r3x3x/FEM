@@ -1,4 +1,5 @@
-﻿using Grid.Factories.ElementFactory.Implemenations;
+﻿using Grid.Enum;
+using Grid.Factories.ElementFactory.Implemenations;
 using Grid.Models;
 
 namespace Grid.Factories
@@ -52,30 +53,30 @@ namespace Grid.Factories
         }
         #endregion
 
-        private IList<IList<int>> GetBoundaryLimitsIndexes(Area<int>[] boundaryConditionsLimits, int[] xSplitsCount, int[] ySplitsCount)
+        private IList<IList<int>> GetBoundaryLimitsIndexes((Area<int> Area, BoundaryType BoundaryType)[] boundaryConditionsLimits, int[] xSplitsCount, int[] ySplitsCount)
         {
             IList<IList<int>> boundaryLimitsIndexes = new List<IList<int>>();
 
             for (int i = 0; i < boundaryConditionsLimits.Length; i++)
             {
-                boundaryLimitsIndexes.Add(GetAreaLimitIndexes(boundaryConditionsLimits[i], xSplitsCount, ySplitsCount));
+                boundaryLimitsIndexes.Add(GetAreaLimitIndexes(boundaryConditionsLimits[i].Area, xSplitsCount, ySplitsCount));
             }
 
             return boundaryLimitsIndexes;
         }
 
 
-        private int[][] GetBoundaryLimitsIndexes(Area<int>[] boundaryConditionsLimits, int[] xSplitsCount, int[] ySplitsCount, int[] zSplitsCount)
+        private int[][] GetBoundaryLimitsIndexes((Area<int> Area, BoundaryType BoundaryType)[] boundaryConditionsLimits, int[] xSplitsCount, int[] ySplitsCount, int[] zSplitsCount)
         {
             List<int[]> boundaryLimitsIndexes = new();
 
             for (int i = 0; i < boundaryConditionsLimits.Length; i++)
-                boundaryLimitsIndexes.Add(GetAreaLimitIndexes(boundaryConditionsLimits[i], xSplitsCount, ySplitsCount, zSplitsCount));
+                boundaryLimitsIndexes.Add(GetAreaLimitIndexes(boundaryConditionsLimits[i].Area, xSplitsCount, ySplitsCount, zSplitsCount));
 
             return boundaryLimitsIndexes.ToArray();
         }
 
-        public (int[], FiniteElementScheme[], FiniteElementScheme[]) GetBoundaryNodes(Area<int>[] areas, Area<int>[] boundaryConditions, SpatialCoordinates coordinates, int[] xSplitsCount, int[] ySplitsCount,
+        public (int[], FiniteElementScheme[], FiniteElementScheme[]) GetBoundaryNodes(Area<int>[] areas, (Area<int> Area, BoundaryType BoundaryType)[] boundaryConditions, SpatialCoordinates coordinates, int[] xSplitsCount, int[] ySplitsCount,
             int[] zSplitsCount, int[] missingNodesCounts)
         {            //трансформируем индексы из W в реальные номера узлов
             var x = coordinates.X;
@@ -84,31 +85,31 @@ namespace Grid.Factories
             return CalculateBoundaryNodes(boundaryConditions, limits, x.Length, y.Length, missingNodesCounts, coordinates);
         }
 
-        private (int[], FiniteElementScheme[], FiniteElementScheme[]) CalculateBoundaryNodes(Area<int>[] boundaryConditions, int[][] limits, int xCount, int yCount, int[] missingNodesCounts, SpatialCoordinates coordinates)
+        private (int[], FiniteElementScheme[], FiniteElementScheme[]) CalculateBoundaryNodes((Area<int> Area, BoundaryType BoundaryType)[] boundaryConditions, int[][] limits, int xCount, int yCount, int[] missingNodesCounts, SpatialCoordinates coordinates)
         {
             HashSet<int> fisrtBoundaries = new();
             List<FiniteElementScheme> secondBoundaryElems = new();
             List<FiniteElementScheme> thirdBoundaryElems = new();
             for (int i = 0; i < limits.Length; i++)
             {
-                switch (boundaryConditions[i].FormulaNumber) //boundaryType
+                switch (boundaryConditions[i].BoundaryType) //boundaryType
                 {
-                    case 0://первое к.у.
+                    case BoundaryType.First:
                         {
                             var nodes = GetFisrtBoundaryNodes(limits[i], xCount, yCount, missingNodesCounts);
                             for (int j = 0; j < nodes.Count; j++)
                                 fisrtBoundaries.Add(nodes[j]);
                             break;
                         }
-                    case 1://второе ку
+                    case BoundaryType.Second:
                         {
-                            var elems = GetSecondBoundaryNodes(limits[i], missingNodesCounts, coordinates, 0);
+                            var elems = GetSecondBoundaryNodes(limits[i], missingNodesCounts, coordinates, boundaryConditions[i].Area.FormulaNumber);
                             secondBoundaryElems.AddRange(elems);
                             break;
                         }
-                    case 2: //третье ку
+                    case BoundaryType.Third:
                         {
-                            var elems = GetSecondBoundaryNodes(limits[i], missingNodesCounts, coordinates, 0);
+                            var elems = GetSecondBoundaryNodes(limits[i], missingNodesCounts, coordinates, boundaryConditions[i].Area.FormulaNumber);
                             thirdBoundaryElems.AddRange(elems);
                             break;
                         }

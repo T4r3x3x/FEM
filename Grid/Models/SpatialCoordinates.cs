@@ -1,5 +1,7 @@
 ﻿using System.Collections;
 
+using Grid.Enum;
+
 namespace Grid.Models
 {
     public class SpatialCoordinates : IEnumerable<Node>
