@@ -47,8 +47,12 @@ namespace FemProducer.Services
             var z = node.Z;
             return formulaNumber switch
             {
-                0 => y * z,
-                1 => -y * z,
+                0 => -y * z,
+                1 => x * z,
+                2 => y * z,
+                3 => -x * z,
+                4 => -y * x,
+                5 => y * x,
                 _ => throw new ArgumentException($"Гамма для формулы {formulaNumber} не задана!")
             };
         }

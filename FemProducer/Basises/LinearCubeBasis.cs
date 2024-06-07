@@ -90,7 +90,7 @@ namespace FemProducer.Basises
         public override IList<double> GetSecondBoundaryVector(IList<Node> nodes, Func<Node, int, double> func, int formulaNumber)
         {
             var rectBasis = new LinearRectangularBasis(_problemService);
-            rectBasis.Section = Section2D.YZ;
+            rectBasis.Section = Section2D.XZ;
             return rectBasis.GetLocalVector(nodes, func, formulaNumber);
         }
 
