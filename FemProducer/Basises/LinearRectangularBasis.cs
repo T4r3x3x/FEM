@@ -19,10 +19,9 @@ namespace FemProducer.Basises
         private static int mu(int i) => i % 2;
         private static int nu(int i) => i / 2;
 
-        public override IList<IList<double>> GetMassMatrix(IList<Node> nodes)// Grid.M - номер кэ 
+        public override IList<IList<double>> GetMassMatrix(FiniteElement finiteElement)// Grid.M - номер кэ 
         {
-            var hx = nodes[1].X - nodes[0].X;
-            var hy = nodes[2].Y - nodes[0].Y;
+            (var hx, var hy) = finiteElement.GetSteps2D();
 
             // инициализация
             double[][] result = new double[M.LongLength][];
@@ -40,10 +39,9 @@ namespace FemProducer.Basises
             return result;
         }
 
-        public override IList<IList<double>> GetStiffnessMatrix(IList<Node> nodes)// Grid.M - номер кэ 
+        public override IList<IList<double>> GetStiffnessMatrix(FiniteElement finiteElement)// Grid.M - номер кэ 
         {
-            var hx = nodes[1].X - nodes[0].X;
-            var hy = nodes[2].Y - nodes[0].Y;
+            (var hx, var hy) = finiteElement.GetSteps2D();
 
             // инициализация
             double[][] result = new double[G.LongLength][];
@@ -58,15 +56,14 @@ namespace FemProducer.Basises
             return result;
         }
 
-        public override IList<double> GetLocalVector(IList<Node> nodes, Func<Node, int, double> func, int formulaNumber)
+        public override IList<double> GetLocalVector(FiniteElement finiteElement, Func<Node, int, double> func, int formulaNumber)
         {
+            (var hx, var hy) = finiteElement.GetSteps2D();
+
             double[] result = new double[NodesCount];
-
-            (var hx, var hy) = GetSteps2D(nodes);
-
             var funcValues = new double[NodesCount];
             for (int i = 0; i < NodesCount; i++)
-                funcValues[i] = func(nodes[i], formulaNumber);
+                funcValues[i] = func(finiteElement.Nodes[i], formulaNumber);
 
             result[0] = hx * hy / 36 * (4 * funcValues[0] + 2 * funcValues[1] + 2 * funcValues[2] + funcValues[3]);
             result[1] = hx * hy / 36 * (2 * funcValues[0] + 4 * funcValues[1] + funcValues[2] + 2 * funcValues[3]);
@@ -76,16 +73,16 @@ namespace FemProducer.Basises
             return result;
         }
 
-        public override Dictionary<string, IList<IList<double>>> GetLocalMatrixes(IList<Node> nodes)
+        public override Dictionary<string, IList<IList<double>>> GetLocalMatrixes(FiniteElement finiteElement)
         {
             return new()
             {
-                { "G", GetStiffnessMatrix(nodes) },
-                { "ColumnSize", GetMassMatrix(nodes) }
+                { "G", GetStiffnessMatrix(finiteElement) },
+                { "ColumnSize", GetMassMatrix(finiteElement) }
             };
         }
 
-        public override IList<double> GetSecondBoundaryVector(IList<Node> nodes, Func<Node, int, double> func, int formulaNumber) => throw new NotImplementedException();
-        public override (IList<IList<double>>, IList<double>) ConsiderThirdBoundaryCondition(Slae slae, IList<Node> nodes, IList<int> nodeIndexes, Func<Node, int, double> func, int formulaNumber) => throw new NotImplementedException();
+        public override IList<double> GetSecondBoundaryVector(FiniteElement finiteElement, Func<Node, int, double> func, int formulaNumber) => throw new NotImplementedException();
+        public override (IList<IList<double>>, IList<double>) ConsiderThirdBoundaryCondition(Slae slae, FiniteElement finiteElement, Func<Node, int, double> func, int formulaNumber) => throw new NotImplementedException();
     }
 }

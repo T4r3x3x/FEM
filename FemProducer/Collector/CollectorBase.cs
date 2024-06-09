@@ -39,15 +39,14 @@ namespace FemProducer.Collector
             Vector vector = new Vector(M.Size);
 
             //	Parallel.ForEach(_grid.Elements, element =>
-            foreach (var element in _grid.Elements)
+            foreach (var elementSheme in _grid.Elements)
             {
-                int formulaNumber = element.FormulaNumber;
-                var nodes = _grid.ElementToNodes(element);
+                int formulaNumber = elementSheme.FormulaNumber;
+                var element = _grid.GetFiniteElement(elementSheme);
 
-
-                var localMatrix = _basis.GetMassMatrix(nodes);
+                var localMatrix = _basis.GetMassMatrix(element);
                 localMatrix.MultiplyLocalMatrix(_problemService.Gamma(formulaNumber));
-                AddLocalMatrix(M, localMatrix, element);
+                AddLocalMatrix(M, localMatrix, elementSheme);
 
                 //lock (vector)
                 //{
@@ -61,19 +60,17 @@ namespace FemProducer.Collector
                 //    }
                 //}
 
-
-
-                localMatrix = _basis.GetStiffnessMatrix(nodes);
+                localMatrix = _basis.GetStiffnessMatrix(element);
                 localMatrix.MultiplyLocalMatrix(_problemService.Lambda(formulaNumber));
-                AddLocalMatrix(G, localMatrix, element);
+                AddLocalMatrix(G, localMatrix, elementSheme);
 
                 //var v = GetV(nodes);
                 //localMatrix = ((LinearRectangularCylindricalBasis)_basis).GetGradTMatrix(nodes, v);
                 //localMatrix.MultiplyLocalMatrix(_problemService.Gamma(formulaNumber));
                 //AddLocalMatrix(H, localMatrix, element);
 
-                var localVector = _basis.GetLocalVector(nodes, _problemService.F, formulaNumber);
-                AddLocalVector(vector, localVector, element);
+                var localVector = _basis.GetLocalVector(element, _problemService.F, formulaNumber);
+                AddLocalVector(vector, localVector, elementSheme);
 
 
             }//);
@@ -142,7 +139,7 @@ namespace FemProducer.Collector
             //Parallel.ForEach(_grid.SecondBoundaryNodes, nodesIndexes =>
             foreach (var element in _grid.SecondBoundaryNodes)
             {
-                var nodes = _grid.ElementToNodes(element);
+                var nodes = _grid.GetFiniteElement(element);
                 var res = _basis.GetSecondBoundaryVector(nodes, _problemService.SecondBoundaryFunction, element.FormulaNumber);
                 AddLocalVector(slae.Vector, res, element);
             };

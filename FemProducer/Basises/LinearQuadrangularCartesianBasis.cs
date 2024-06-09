@@ -29,14 +29,14 @@ namespace FemProducer.Basises
 
         private double Jacobian(double ksi, double nu, Coefficients coefficients) => coefficients.a0 + ksi * coefficients.a1 + nu * coefficients.a2;
 
-        public override IList<IList<double>> GetMassMatrix(IList<Node> nodes)
+        public override IList<IList<double>> GetMassMatrix(FiniteElement finiteElement)
         {
             // инициализация
             double[][] result = new double[NodesCount][];
             for (int i = 0; i < result.Length; i++)
                 result[i] = new double[result.Length];
 
-            var coefficents = GetCoefficients(nodes);
+            var coefficents = GetCoefficients(finiteElement.Nodes);
 
             var a = M[0][0][0];
 
@@ -48,14 +48,14 @@ namespace FemProducer.Basises
             return result;
         }
 
-        public override IList<IList<double>> GetStiffnessMatrix(IList<Node> nodes)
+        public override IList<IList<double>> GetStiffnessMatrix(FiniteElement finiteElement)
         {
-            double[][] result = new double[nodes.Count][];
-            var coefficents = GetCoefficients(nodes);
-            for (int i = 0; i < nodes.Count; i++)
+            double[][] result = new double[finiteElement.Nodes.Length][];
+            var coefficents = GetCoefficients(finiteElement.Nodes);
+            for (int i = 0; i < finiteElement.Nodes.Length; i++)
             {
-                result[i] = new double[nodes.Count];
-                for (int j = 0; j < nodes.Count; j++)
+                result[i] = new double[finiteElement.Nodes.Length];
+                for (int j = 0; j < finiteElement.Nodes.Length; j++)
                 {
                     var intFunc = new StiffnessIntegrationFuncClass(coefficents, i, j, Jacobian);
                     result[i][j] = Integration.GaussIntegration(singleSquareFirstPoint, singleSquareFourthPoint, intFunc.StiffnessIntegrationFunc, Integration.PointsCount.Three);
@@ -63,26 +63,26 @@ namespace FemProducer.Basises
             }
             return result;
         }
-        public override IList<double> GetLocalVector(IList<Node> nodes, Func<Node, int, double> func, int formulaNumber)
+        public override IList<double> GetLocalVector(FiniteElement finiteElement, Func<Node, int, double> func, int formulaNumber)
         {
             double[] localVector = new double[NodesCount];
-            var coefficents = GetCoefficients(nodes);
+            var coefficents = GetCoefficients(finiteElement.Nodes);
 
             for (int i = 0; i < NodesCount; i++)
             {
-                LocalVectorIntegrationFuncClass intF = new LocalVectorIntegrationFuncClass(func, Jacobian, i, nodes, coefficents, formulaNumber);
+                LocalVectorIntegrationFuncClass intF = new LocalVectorIntegrationFuncClass(func, Jacobian, i, finiteElement.Nodes, coefficents, formulaNumber);
                 localVector[i] += Integration.GaussIntegration(singleSquareFirstPoint, singleSquareFourthPoint, intF.LocalVectorIntegrationFunc, Integration.PointsCount.Three);
             }
 
             return localVector;
         }
 
-        public override Dictionary<string, IList<IList<double>>> GetLocalMatrixes(IList<Node> nodes)
+        public override Dictionary<string, IList<IList<double>>> GetLocalMatrixes(FiniteElement finiteElement)
         {
             return new()
             {
-                { "ColumnSize", GetMassMatrix(nodes)},
-                { "G", GetStiffnessMatrix(nodes)}
+                { "ColumnSize", GetMassMatrix(finiteElement)},
+                { "G", GetStiffnessMatrix(finiteElement)}
             };
         }
 
@@ -107,8 +107,8 @@ namespace FemProducer.Basises
             return new Coefficients(b1, b2, b3, b4, b5, b6, a0, a1, a2);
         }
 
-        public override IList<double> GetSecondBoundaryVector(IList<Node> nodes, Func<Node, int, double> func, int formulaNumber) => throw new NotImplementedException();
-        public override (IList<IList<double>>, IList<double>) ConsiderThirdBoundaryCondition(Slae slae, IList<Node> nodes, IList<int> nodeIndexes, Func<Node, int, double> func, int formulaNumber) => throw new NotImplementedException();
+        public override IList<double> GetSecondBoundaryVector(FiniteElement finiteElement, Func<Node, int, double> func, int formulaNumber) => throw new NotImplementedException();
+        public override (IList<IList<double>>, IList<double>) ConsiderThirdBoundaryCondition(Slae slae, FiniteElement finiteElement, Func<Node, int, double> func, int formulaNumber) => throw new NotImplementedException();
 
         class Coefficients
         {

@@ -6,6 +6,8 @@ namespace Grid.Factories.ElementFactory.Implemenations
 {
     public class ReactangularElementFactory : AbstractElementFactory
     {
+        private const GridDimensional Dimensional = GridDimensional.Two;
+
         private readonly Section2D _section;
         private readonly int _sectionIndex; //индекс точки на оси, по которой происходит сечение
 
@@ -15,7 +17,6 @@ namespace Grid.Factories.ElementFactory.Implemenations
             _sectionIndex = sectionIndex;
         }
 
-        //Сделать выбор, по каким координатам строить сетку
         public override List<FiniteElementScheme> GetElements(SpatialCoordinates coordinates, Area<double>[] subDomainsValues, int[] missingNodesCounts)
         {
             List<FiniteElementScheme> elements = new List<FiniteElementScheme>();
@@ -33,7 +34,7 @@ namespace Grid.Factories.ElementFactory.Implemenations
                     }
 
                     var nodesIndexes = GetNodesIndexes(missingNodesCounts, innerIndex, outerIndex, coordinates.X.Length, coordinates.Y.Length);
-                    var finiteElemnent = new FiniteElementScheme(nodesIndexes, areaNumber != -2 ? subDomainsValues[areaNumber].FormulaNumber : 0);
+                    var finiteElemnent = new FiniteElementScheme(nodesIndexes, areaNumber != -2 ? subDomainsValues[areaNumber].FormulaNumber : 0, _section);
                     elements.Add(finiteElemnent);
                 }
             }
@@ -94,7 +95,7 @@ namespace Grid.Factories.ElementFactory.Implemenations
         private static int GetAreaNumber(double[] x, double[] y, int yIndex, int xIndex, Area<double>[] subDomains)
         {
             Node elementCenter = GetCenter(x, y, yIndex, xIndex);
-            return BaseMethods.GetAreaNumber(subDomains, elementCenter);
+            return BaseMethods.GetAreaNumber(subDomains, elementCenter, Dimensional);
         }
 
         private static Node GetCenter(double[] x, double[] y, int yIndex, int xIndex) =>

@@ -1,4 +1,5 @@
-﻿using Grid.Factories.ElementFactory.Interfaces;
+﻿using Grid.Enum;
+using Grid.Factories.ElementFactory.Interfaces;
 using Grid.Models;
 
 namespace Grid.Factories.ElementFactory.Implemenations
@@ -6,6 +7,7 @@ namespace Grid.Factories.ElementFactory.Implemenations
     public class CubeElementFactory : AbstractElementFactory
     {
         private const int NodesCount = 8;
+        private const GridDimensional Dimensional = GridDimensional.Three;
 
         public override List<FiniteElementScheme> GetElements(SpatialCoordinates coordinates, Area<double>[] subDomains, int[] missingNodesCounts)
         {
@@ -32,7 +34,7 @@ namespace Grid.Factories.ElementFactory.Implemenations
                             continue;
 
                         var nodesIndexes = GetNodesIndexes(missingNodesCounts, Oxy1, Oxy2, lineIndex1, lineIndex2, xIndex);
-                        var finiteElement = new FiniteElementScheme(nodesIndexes, subDomains[areaNumber].FormulaNumber);
+                        var finiteElement = new FiniteElementScheme(nodesIndexes, subDomains[areaNumber].FormulaNumber, Section2D.XY);
                         elements.Add(finiteElement);
                     }
                 }
@@ -79,7 +81,7 @@ namespace Grid.Factories.ElementFactory.Implemenations
         private static int GetAreaNumber(double[] x, double[] y, double[] z, int zIndex, int yIndex, int xIndex, Area<double>[] subDomains)
         {
             Node elementCenter = GetCenter(x, y, z, zIndex, yIndex, xIndex);
-            return BaseMethods.GetAreaNumber(subDomains, elementCenter);
+            return BaseMethods.GetAreaNumber(subDomains, elementCenter, Dimensional);
         }
 
         private static Node GetCenter(double[] x, double[] y, double[] z, int zIndex, int yIndex, int xIndex) =>

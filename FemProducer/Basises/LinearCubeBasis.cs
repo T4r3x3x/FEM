@@ -1,7 +1,6 @@
 ﻿using FemProducer.Basises.BasisFunctions;
 using FemProducer.Services;
 
-using Grid.Enum;
 using Grid.Models;
 
 using MathModels.Models;
@@ -19,14 +18,12 @@ namespace FemProducer.Basises
 
         public LinearCubeBasis(ProblemService problemService) : base(problemService) { }
 
-        public override IList<IList<double>> GetMassMatrix(IList<Node> nodes)// Grid.M - номер кэ 
+        public override IList<IList<double>> GetMassMatrix(FiniteElement finiteElement)// Grid.M - номер кэ 
         {
-            var hx = nodes[1].X - nodes[0].X;
-            var hy = nodes[2].Y - nodes[0].Y;
-            var hz = nodes[4].Z - nodes[0].Z;
+            (var hx, var hy, var hz) = finiteElement.GetSteps3D();
 
             // инициализация
-            double[][] result = new double[nodes.Count][];
+            double[][] result = new double[finiteElement.Nodes.Length][];
             for (int i = 0; i < result.Length; i++)
                 result[i] = new double[result.Length];
 
@@ -40,14 +37,12 @@ namespace FemProducer.Basises
             return result;
         }
 
-        public override IList<IList<double>> GetStiffnessMatrix(IList<Node> nodes)// Grid.M - номер кэ 
+        public override IList<IList<double>> GetStiffnessMatrix(FiniteElement finiteElement)// Grid.M - номер кэ 
         {
-            var hx = nodes[1].X - nodes[0].X;
-            var hy = nodes[2].Y - nodes[0].Y;
-            var hz = nodes[4].Z - nodes[0].Z;
+            (var hx, var hy, var hz) = finiteElement.GetSteps3D();
 
             // инициализация
-            double[][] result = new double[nodes.Count][];
+            double[][] result = new double[finiteElement.Nodes.Length][];
             for (int i = 0; i < result.Length; i++)
                 result[i] = new double[result.Length];
 
@@ -61,15 +56,15 @@ namespace FemProducer.Basises
             return result;
         }
 
-        public override IList<double> GetLocalVector(IList<Node> nodes, Func<Node, int, double> func, int formulaNumber)
+        public override IList<double> GetLocalVector(FiniteElement finiteElement, Func<Node, int, double> func, int formulaNumber)
         {
             double[] localVector = new double[NodesCount];
 
-            var massMatrix = GetMassMatrix(nodes);
+            var massMatrix = GetMassMatrix(finiteElement);
 
             var funcValues = new double[NodesCount];
             for (int i = 0; i < NodesCount; i++)
-                funcValues[i] = func(nodes[i], formulaNumber);
+                funcValues[i] = func(finiteElement.Nodes[i], formulaNumber);
 
             for (int i = 0; i < NodesCount; i++)
                 for (int j = 0; j < NodesCount; j++)
@@ -78,22 +73,21 @@ namespace FemProducer.Basises
             return localVector;
         }
 
-        public override Dictionary<string, IList<IList<double>>> GetLocalMatrixes(IList<Node> nodes)
+        public override Dictionary<string, IList<IList<double>>> GetLocalMatrixes(FiniteElement finiteElement)
         {
             return new()
             {
-                { "G", GetStiffnessMatrix(nodes) },
-                { "ColumnSize", GetMassMatrix(nodes) }
+                { "G", GetStiffnessMatrix(finiteElement) },
+                { "ColumnSize", GetMassMatrix(finiteElement) }
             };
         }
 
-        public override IList<double> GetSecondBoundaryVector(IList<Node> nodes, Func<Node, int, double> func, int formulaNumber)
+        public override IList<double> GetSecondBoundaryVector(FiniteElement finiteElement, Func<Node, int, double> func, int formulaNumber)
         {
             var rectBasis = new LinearRectangularBasis(_problemService);
-            rectBasis.Section = Section2D.XZ;
-            return rectBasis.GetLocalVector(nodes, func, formulaNumber);
+            return rectBasis.GetLocalVector(finiteElement, func, formulaNumber);
         }
 
-        public override (IList<IList<double>>, IList<double>) ConsiderThirdBoundaryCondition(Slae slae, IList<Node> nodes, IList<int> nodeIndexes, Func<Node, int, double> func, int formulaNumber) => throw new NotImplementedException();
+        public override (IList<IList<double>>, IList<double>) ConsiderThirdBoundaryCondition(Slae slae, FiniteElement finiteElement, Func<Node, int, double> func, int formulaNumber) => throw new NotImplementedException();
     }
 }

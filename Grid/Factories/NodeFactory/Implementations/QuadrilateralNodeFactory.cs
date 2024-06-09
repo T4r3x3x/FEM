@@ -1,5 +1,6 @@
 ﻿using FemProducer;
 
+using Grid.Enum;
 using Grid.Factories.NodeFactory.Interfaces;
 using Grid.Models;
 
@@ -9,6 +10,7 @@ namespace Grid.Factories.NodeFactory.Implementations
 {
     public class QuadrilateralNodeFactory : INodeFactory
     {
+        private const GridDimensional Dimensional = GridDimensional.Two;
         private const int CountOfNodesInElement = 4;
 
         public (List<Node>, List<int>) GetNodes(Area<int>[] areas, Area<double>[] subDomains, Point[][] lines, SpatialCoordinates coordinates)
@@ -19,7 +21,7 @@ namespace Grid.Factories.NodeFactory.Implementations
 
             foreach (var node in (IEnumerable<Node>) coordinates)
             {
-                var area = BaseMethods.GetAreaNumber(subDomains, node);
+                var area = BaseMethods.GetAreaNumber(subDomains, node, Dimensional);
                 if (area != -1)
                 {
                     var points = GetQuadrilateralPoints(lines, area, areas);

@@ -1,5 +1,6 @@
 ﻿using FemProducer.Basises.BasisFunctions;
 using FemProducer.Services;
+
 using Grid.Models;
 
 using MathModels.Models;
@@ -16,26 +17,26 @@ namespace FemProducer.Basises
         {
         }
 
-        public override Dictionary<string, IList<IList<double>>> GetLocalMatrixes(IList<Node> nodes) => throw new NotImplementedException();
-        public override IList<double> GetLocalVector(IList<Node> nodes, Func<Node, int, double> func, int formulaNumber)
+        public override Dictionary<string, IList<IList<double>>> GetLocalMatrixes(FiniteElement finiteElement) => throw new NotImplementedException();
+        public override IList<double> GetLocalVector(FiniteElement finiteElement, Func<Node, int, double> func, int formulaNumber)
         {
             double[] localVector = new double[NodesCount];
-            Node xLimits = new Node(nodes[0].X, nodes[1].X);
-            Node yLimits = new Node(nodes[0].Y, nodes[2].Y);
+            Node xLimits = new Node(finiteElement.Nodes[0].X, finiteElement.Nodes[1].X);
+            Node yLimits = new Node(finiteElement.Nodes[0].Y, finiteElement.Nodes[2].Y);
 
             for (int i = 0; i < NodesCount; i++)
             {
                 LocalVectorIntegrationFuncClass intF = new LocalVectorIntegrationFuncClass(xLimits, yLimits, func, i, formulaNumber);
-                localVector[i] += Integration.GaussIntegration(nodes[0], nodes[3], intF.LocalVectorIntegrationFunc, Integration.PointsCount.Four);
+                localVector[i] += Integration.GaussIntegration(finiteElement.Nodes[0], finiteElement.Nodes[3], intF.LocalVectorIntegrationFunc, Integration.PointsCount.Four);
             }
 
 
-            //var massMatrix = GetMassMatrix(nodes);
+            //var massMatrix = GetMassMatrix(finiteElement.Nodes);
 
             //var funcValues = new double[NodesCount];
 
             //for (int i = 0; i < NodesCount; i++)
-            //	funcValues[i] = func(nodes[i], formulaNumber);
+            //	funcValues[i] = func(finiteElement.Nodes[i], formulaNumber);
 
             //for (int i = 0; i < NodesCount; i++)
             //	for (int j = 0; j < NodesCount; j++)
@@ -44,11 +45,11 @@ namespace FemProducer.Basises
             return localVector;
         }
 
-        public override IList<IList<double>> GetStiffnessMatrix(IList<Node> nodes)
+        public override IList<IList<double>> GetStiffnessMatrix(FiniteElement finiteElement)
         {
             double[][] stiffnessMatrix = new double[NodesCount][];
-            var xLimits = new Node(nodes[0].X, nodes[1].X);
-            var yLimits = new Node(nodes[0].Y, nodes[2].Y);
+            var xLimits = new Node(finiteElement.Nodes[0].X, finiteElement.Nodes[1].X);
+            var yLimits = new Node(finiteElement.Nodes[0].Y, finiteElement.Nodes[2].Y);
 
             for (int i = 0; i < NodesCount; i++)
             {
@@ -56,18 +57,18 @@ namespace FemProducer.Basises
                 for (int j = 0; j < NodesCount; j++)
                 {
                     StiffnessIntegrationFuncClass intFunc = new StiffnessIntegrationFuncClass(i, j, xLimits, yLimits);
-                    stiffnessMatrix[i][j] += Integration.GaussIntegration(nodes[0], nodes[3], intFunc.StiffnessIntegrationFunction, Integration.PointsCount.Four);
+                    stiffnessMatrix[i][j] += Integration.GaussIntegration(finiteElement.Nodes[0], finiteElement.Nodes[3], intFunc.StiffnessIntegrationFunction, Integration.PointsCount.Four);
                 }
             }
 
             return stiffnessMatrix;
         }
 
-        public override IList<IList<double>> GetMassMatrix(IList<Node> nodes)
+        public override IList<IList<double>> GetMassMatrix(FiniteElement finiteElement)
         {
             double[][] massMatrix = new double[NodesCount][];
-            var xLimits = new Node(nodes[0].X, nodes[1].X);
-            var yLimits = new Node(nodes[0].Y, nodes[2].Y);
+            var xLimits = new Node(finiteElement.Nodes[0].X, finiteElement.Nodes[1].X);
+            var yLimits = new Node(finiteElement.Nodes[0].Y, finiteElement.Nodes[2].Y);
 
             for (int i = 0; i < NodesCount; i++)
             {
@@ -76,14 +77,14 @@ namespace FemProducer.Basises
                 {
 
                     MassIntegrationFuncClass intFunc = new(i, j, xLimits, yLimits);
-                    massMatrix[i][j] += Integration.GaussIntegration(nodes[0], nodes[3], intFunc.MassIntegrationalFunction, Integration.PointsCount.Four);
+                    massMatrix[i][j] += Integration.GaussIntegration(finiteElement.Nodes[0], finiteElement.Nodes[3], intFunc.MassIntegrationalFunction, Integration.PointsCount.Four);
                 }
             }
 
             return massMatrix;
         }
 
-        public override IList<double> GetSecondBoundaryVector(IList<Node> nodes, Func<Node, int, double> func, int formulaNumber) => throw new NotImplementedException();
+        public override IList<double> GetSecondBoundaryVector(FiniteElement finiteElement, Func<Node, int, double> func, int formulaNumber) => throw new NotImplementedException();
 
 
 
@@ -129,41 +130,40 @@ namespace FemProducer.Basises
             }
         }
 
-        public override (IList<IList<double>>, IList<double>) ConsiderThirdBoundaryCondition(Slae slae, IList<Node> nodes, IList<int> nodesIndexes, Func<Node, int, double> func, int formulaNumber)
+        public override (IList<IList<double>>, IList<double>) ConsiderThirdBoundaryCondition(Slae slae, FiniteElement finiteElement, Func<Node, int, double> func, int formulaNumber)
         {
             double betta = 200;
             Node limits;
             double secondVariable;
             bool isR;
-            if (nodes[0].X - nodes[1].X == 0)
+            if (finiteElement.Nodes[0].X - finiteElement.Nodes[1].X == 0)
             {
-                limits = new Node(nodes[0].Y, nodes[1].Y);
-                secondVariable = nodes[0].X;
+                limits = new Node(finiteElement.Nodes[0].Y, finiteElement.Nodes[1].Y);
+                secondVariable = finiteElement.Nodes[0].X;
                 isR = false;
             }
             else
             {
-                limits = new Node(nodes[0].X, nodes[1].X);
-                secondVariable = nodes[0].Y;
+                limits = new Node(finiteElement.Nodes[0].X, finiteElement.Nodes[1].X);
+                secondVariable = finiteElement.Nodes[0].Y;
 
                 isR = true;
             }
 
             var localVector = new double[2];
 
-
-            for (int i = 0; i < nodes.Count; i++)
+            for (int i = 0; i < finiteElement.Nodes.Length; i++)
             {
                 SecondBoundaryConditionClass intF = new SecondBoundaryConditionClass(limits, func, i, formulaNumber, isR, secondVariable);
                 localVector[i] = Integration.GaussIntegration(limits, intF.SecondBoundaryConditionFunc, Integration.PointsCount.Two);
                 localVector[i] *= betta;
             }
 
-            var localMatrix = new double[nodes.Count][];
-            for (int i = 0; i < nodes.Count; i++)
+            var localMatrix = new double[finiteElement.Nodes.Length][];
+            for (int i = 0; i < finiteElement.Nodes.Length; i++)
             {
-                localMatrix[i] = new double[nodes.Count];
-                for (int j = 0; j < nodes.Count; j++)
+                localMatrix[i] = new double[finiteElement.Nodes.Length];
+                for (int j = 0; j < finiteElement.Nodes.Length; j++)
                 {
                     ThirdBoundaryConditionMatrixClass intF = new ThirdBoundaryConditionMatrixClass(limits, func, i, j, formulaNumber, isR, secondVariable);
                     localMatrix[i][j] = Integration.GaussIntegration(limits, intF.ThirdBoundaryConditionMatrixFunc, Integration.PointsCount.Two);

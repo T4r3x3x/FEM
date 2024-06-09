@@ -6,6 +6,48 @@ namespace Grid.Factories
 {
     public class BoundaryFactory
     {
+        public (int[], FiniteElementScheme[], FiniteElementScheme[]) GetBoundaryNodes(Area<int>[] areas, (Area<int> Area, BoundaryType BoundaryType)[] boundaryConditions, SpatialCoordinates coordinates,
+            int[] xSplitsCount, int[] ySplitsCount, int[] zSplitsCount, int[] missingNodesCounts)
+        {
+            var x = coordinates.X;
+            var y = coordinates.Y;
+            var boundaryLimitsNodesIndexes = GetBoundaryLimitsNodesIndexes(boundaryConditions, xSplitsCount, ySplitsCount, zSplitsCount);
+            return CalculateBoundaryNodes(boundaryConditions, boundaryLimitsNodesIndexes, x.Length, y.Length, missingNodesCounts, coordinates);
+        }
+        private (int[], FiniteElementScheme[], FiniteElementScheme[]) CalculateBoundaryNodes((Area<int> Area, BoundaryType BoundaryType)[] boundaryConditions, int[][] limits, int xCount, int yCount, int[] missingNodesCounts, SpatialCoordinates coordinates)
+        {
+            HashSet<int> fisrtBoundaries = new();
+            List<FiniteElementScheme> secondBoundaryElems = new();
+            List<FiniteElementScheme> thirdBoundaryElems = new();
+            for (int i = 0; i < limits.Length; i++)
+            {
+                switch (boundaryConditions[i].BoundaryType)
+                {
+                    case BoundaryType.First:
+                        {
+                            var nodes = GetFisrtBoundaryNodes(limits[i], xCount, yCount, missingNodesCounts);
+                            for (int j = 0; j < nodes.Count; j++)
+                                fisrtBoundaries.Add(nodes[j]);
+                            break;
+                        }
+                    case BoundaryType.Second:
+                        {
+                            var elems = GetNaturalBoundaryElems(limits[i], missingNodesCounts, coordinates, boundaryConditions[i].Area.FormulaNumber);
+                            secondBoundaryElems.AddRange(elems);
+                            break;
+                        }
+                    case BoundaryType.Third:
+                        {
+                            var elems = GetNaturalBoundaryElems(limits[i], missingNodesCounts, coordinates, boundaryConditions[i].Area.FormulaNumber);
+                            thirdBoundaryElems.AddRange(elems);
+                            break;
+                        }
+                    default:
+                        throw new ArgumentException($"Boundary type was wrong - {limits[i][6]}");
+                }
+            }
+            return (fisrtBoundaries.ToArray(), secondBoundaryElems.ToArray(), thirdBoundaryElems.ToArray());
+        }
         private (int, int) GetAxisLimitIndexes(int leftLimit, int rightLimit, int[] SplitsCount)
         {
             int firstLimit = 0, secondLimit, i;
@@ -66,7 +108,15 @@ namespace Grid.Factories
         }
 
 
-        private int[][] GetBoundaryLimitsIndexes((Area<int> Area, BoundaryType BoundaryType)[] boundaryConditionsLimits, int[] xSplitsCount, int[] ySplitsCount, int[] zSplitsCount)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="boundaryConditionsLimits"></param>
+        /// <param name="xSplitsCount"></param>
+        /// <param name="ySplitsCount"></param>
+        /// <param name="zSplitsCount"></param>
+        /// <returns>номера узлов, по которым проходят границы подобластей</returns>
+        private int[][] GetBoundaryLimitsNodesIndexes((Area<int> Area, BoundaryType BoundaryType)[] boundaryConditionsLimits, int[] xSplitsCount, int[] ySplitsCount, int[] zSplitsCount)
         {
             List<int[]> boundaryLimitsIndexes = new();
 
@@ -75,52 +125,6 @@ namespace Grid.Factories
 
             return boundaryLimitsIndexes.ToArray();
         }
-
-        public (int[], FiniteElementScheme[], FiniteElementScheme[]) GetBoundaryNodes(Area<int>[] areas, (Area<int> Area, BoundaryType BoundaryType)[] boundaryConditions, SpatialCoordinates coordinates, int[] xSplitsCount, int[] ySplitsCount,
-            int[] zSplitsCount, int[] missingNodesCounts)
-        {            //трансформируем индексы из W в реальные номера узлов
-            var x = coordinates.X;
-            var y = coordinates.Y;
-            var limits = GetBoundaryLimitsIndexes(boundaryConditions, xSplitsCount, ySplitsCount, zSplitsCount);
-            return CalculateBoundaryNodes(boundaryConditions, limits, x.Length, y.Length, missingNodesCounts, coordinates);
-        }
-
-        private (int[], FiniteElementScheme[], FiniteElementScheme[]) CalculateBoundaryNodes((Area<int> Area, BoundaryType BoundaryType)[] boundaryConditions, int[][] limits, int xCount, int yCount, int[] missingNodesCounts, SpatialCoordinates coordinates)
-        {
-            HashSet<int> fisrtBoundaries = new();
-            List<FiniteElementScheme> secondBoundaryElems = new();
-            List<FiniteElementScheme> thirdBoundaryElems = new();
-            for (int i = 0; i < limits.Length; i++)
-            {
-                switch (boundaryConditions[i].BoundaryType) //boundaryType
-                {
-                    case BoundaryType.First:
-                        {
-                            var nodes = GetFisrtBoundaryNodes(limits[i], xCount, yCount, missingNodesCounts);
-                            for (int j = 0; j < nodes.Count; j++)
-                                fisrtBoundaries.Add(nodes[j]);
-                            break;
-                        }
-                    case BoundaryType.Second:
-                        {
-                            var elems = GetSecondBoundaryNodes(limits[i], missingNodesCounts, coordinates, boundaryConditions[i].Area.FormulaNumber);
-                            secondBoundaryElems.AddRange(elems);
-                            break;
-                        }
-                    case BoundaryType.Third:
-                        {
-                            var elems = GetSecondBoundaryNodes(limits[i], missingNodesCounts, coordinates, boundaryConditions[i].Area.FormulaNumber);
-                            thirdBoundaryElems.AddRange(elems);
-                            break;
-                        }
-                    default:
-                        throw new ArgumentException($"Boundary type was wrong - {limits[i][6]}");
-
-                }
-            }
-            return (fisrtBoundaries.ToArray(), secondBoundaryElems.ToArray(), thirdBoundaryElems.ToArray());
-        }
-
 
         private List<int> GetFisrtBoundaryNodes(int[] limits, int xCount, int yCount, int[] missingNodesCounts)
         {
@@ -139,8 +143,7 @@ namespace Grid.Factories
             return boundaryNodes;
         }
 
-        //надо как-то учитывать по какой формуле должен происходить учёт ку 
-        private FiniteElementScheme[] GetSecondBoundaryNodes(int[] limits, int[] missingNodesCounts, SpatialCoordinates coordinates, int formulaNumber)
+        private FiniteElementScheme[] GetNaturalBoundaryElems(int[] limits, int[] missingNodesCounts, SpatialCoordinates coordinates, int formulaNumber)
         {
             var sectionData = GetSectionData(limits, coordinates);
             ReactangularElementFactory elementFactory = new(sectionData.section, sectionData.secitonIndex);
@@ -150,28 +153,6 @@ namespace Grid.Factories
                 element.FormulaNumber = formulaNumber;
 
             return elements.ToArray();
-        }
-
-        private FiniteElementScheme[] GetThirdBoundaryNodes(int[] limits, int[] missingNodesCounts, SpatialCoordinates coordinates)
-        {
-            throw new NotImplementedException();
-            //var sectionData = GetSectionData(limits, coordinates);
-            //ReactangularElementFactory elementFactory = new(sectionData.section);
-            //var elements = elementFactory.GetElements(coordinates, null!, missingNodesCounts);
-            //AccountOffset(elements, sectionData.offset);
-            //return elements.ToArray();
-        }
-
-        /// <summary>
-        /// Учитываем смещение по оси, по которой происходит смещение
-        /// </summary>
-        /// <param name="elements"></param>
-        /// <param name="offset">смещение индексов, которое надо учесть</param>
-        private void AccountOffset(List<FiniteElementScheme> elements, int offset)
-        {
-            foreach (var element in elements)
-                for (int i = 0; i < element.NodesIndexes.Length; i++)
-                    element.NodesIndexes[i] += offset;
         }
 
         /// <summary>

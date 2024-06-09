@@ -1,10 +1,13 @@
-﻿using Grid.Factories.ElementFactory.Interfaces;
+﻿using Grid.Enum;
+using Grid.Factories.ElementFactory.Interfaces;
 using Grid.Models;
 
 namespace Grid.Factories.ElementFactory.Implemenations
 {
     public class LineElementFactory : AbstractElementFactory
     {
+        private const GridDimensional Dimensional = GridDimensional.One;
+
         public override List<FiniteElementScheme> GetElements(SpatialCoordinates coordinates, Area<double>[] subDomains, int[] missingNodesCounts)
         {
             List<FiniteElementScheme> elements = new List<FiniteElementScheme>();
@@ -17,7 +20,7 @@ namespace Grid.Factories.ElementFactory.Implemenations
                     continue;
 
                 var nodesIndexes = GetNodesIndexes(missingNodesCounts, xIndex);
-                var finiteElemnent = new FiniteElementScheme(nodesIndexes, subDomains[areaNumber].FormulaNumber);
+                var finiteElemnent = new FiniteElementScheme(nodesIndexes, subDomains[areaNumber].FormulaNumber, Section2D.XY);
                 elements.Add(finiteElemnent);
             }
             return elements;
@@ -55,7 +58,7 @@ namespace Grid.Factories.ElementFactory.Implemenations
         private static int GetAreaNumber(double[] x, int xIndex, Area<double>[] subDomains)
         {
             Node elementCenter = GetCenter(x, xIndex);
-            return BaseMethods.GetAreaNumber(subDomains, elementCenter);
+            return BaseMethods.GetAreaNumber(subDomains, elementCenter, Dimensional);
         }
 
         private static Node GetCenter(double[] x, int xIndex) =>

@@ -1,5 +1,6 @@
 ﻿using FemProducer.Basises.BasisFunctions;
 using FemProducer.Services;
+
 using Grid.Models;
 
 using MathModels.Models;
@@ -23,9 +24,9 @@ namespace FemProducer.Basises
             _linearQuadrangularBasis = new LinearQuadrangularCartesianBasis(problemService);
         }
 
-        public override IList<IList<double>> GetMassMatrix(IList<Node> nodes)
+        public override IList<IList<double>> GetMassMatrix(FiniteElement finiteElement)
         {
-            double[][] result = new double[nodes.Count][];
+            double[][] result = new double[finiteElement.Nodes.Length][];
             for (int i = 0; i < result.Length; i++)
                 result[i] = new double[result.Length];
 
@@ -34,7 +35,7 @@ namespace FemProducer.Basises
                 {
                     var integrFunc = (double ksi, double mu, double theta) =>
                     {
-                        var jacobian = Jacobian(nodes, ksi, mu, theta);
+                        var jacobian = Jacobian(finiteElement.Nodes, ksi, mu, theta);
                         return Fita(i, ksi, mu, theta) * Fita(j, ksi, mu, theta) * jacobian;
                     };
                     result[i][j] = Integration.GaussIntegration(
@@ -47,9 +48,9 @@ namespace FemProducer.Basises
             return result;
         }
 
-        public override IList<IList<double>> GetStiffnessMatrix(IList<Node> nodes)
+        public override IList<IList<double>> GetStiffnessMatrix(FiniteElement finiteElement)
         {
-            double[][] result = new double[nodes.Count][];
+            double[][] result = new double[finiteElement.Nodes.Length][];
             for (int i = 0; i < result.Length; i++)
                 result[i] = new double[result.Length];
 
@@ -58,7 +59,7 @@ namespace FemProducer.Basises
                 {
                     var integrFunc = (double ksi, double mu, double theta) =>
                     {
-                        var jacobi = GetJacobiMatrix(nodes, ksi, mu, theta);
+                        var jacobi = GetJacobiMatrix(finiteElement.Nodes, ksi, mu, theta);
                         var detJ = jacobi.Determinant();
                         var inverseJacobi = jacobi.GetInverseMatrix();
                         var gradFitaI = GradFita(i, ksi, mu, theta);
@@ -76,15 +77,15 @@ namespace FemProducer.Basises
             return result;
         }
 
-        public override IList<double> GetLocalVector(IList<Node> nodes, Func<Node, int, double> func, int formulaNumber)
+        public override IList<double> GetLocalVector(FiniteElement finiteElement, Func<Node, int, double> func, int formulaNumber)
         {
             double[] localVector = new double[NodesCount];
             var fs = new double[NodesCount];
 
             for (int i = 0; i < NodesCount; i++)
-                fs[i] = func(nodes[i], formulaNumber);
+                fs[i] = func(finiteElement.Nodes[i], formulaNumber);
 
-            var g = GetMassMatrix(nodes);
+            var g = GetMassMatrix(finiteElement);
 
             for (int i = 0; i < NodesCount; i++)
             {
@@ -96,24 +97,18 @@ namespace FemProducer.Basises
             return localVector;
         }
 
-        public override Dictionary<string, IList<IList<double>>> GetLocalMatrixes(IList<Node> nodes)
+        public override Dictionary<string, IList<IList<double>>> GetLocalMatrixes(FiniteElement finiteElement)
         {
             throw new NotImplementedException();
         }
 
-        public override IList<double> GetSecondBoundaryVector(IList<Node> nodes, Func<Node, int, double> func, int formulaNumber)
+        public override IList<double> GetSecondBoundaryVector(FiniteElement finiteElement, Func<Node, int, double> func, int formulaNumber) =>
+            _linearQuadrangularBasis.GetLocalVector(finiteElement, func, formulaNumber);
+
+        public override (IList<IList<double>>, IList<double>) ConsiderThirdBoundaryCondition(Slae slae, FiniteElement finiteElement, Func<Node, int, double> func, int formulaNumber)
         {
-            //   return _linearQuadrangularBasis.GetLocalVector(nodes, func, formulaNumber);
-
-
-            IList<double>? result = _linearQuadrangularBasis.GetLocalVector(nodes, func, formulaNumber);
-            return result;
-        }
-
-        public override (IList<IList<double>>, IList<double>) ConsiderThirdBoundaryCondition(Slae slae, IList<Node> nodes, IList<int> nodesIndexes, Func<Node, int, double> func, int formulaNumber)
-        {
-            var matrix = _linearQuadrangularBasis.GetMassMatrix(nodes);
-            var vector = _linearQuadrangularBasis.GetLocalVector(nodes, func, formulaNumber);
+            var matrix = _linearQuadrangularBasis.GetMassMatrix(finiteElement);
+            var vector = _linearQuadrangularBasis.GetLocalVector(finiteElement, func, formulaNumber);
             return (matrix, vector);
         }
 

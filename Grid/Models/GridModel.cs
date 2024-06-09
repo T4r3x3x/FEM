@@ -46,14 +46,18 @@ namespace Grid.Models
 
         private Area<int>[] _areas;
 
-        public IList<Node> ElementToNodes(FiniteElementScheme element)
+        /// <summary>
+        /// Может вообще избавится от схемы, так как все равно для каждого кэ создавать элемент. Выгода неочевидна.
+        /// </summary>
+        /// <param name="sheme"></param>
+        /// <returns></returns>
+        public FiniteElement GetFiniteElement(FiniteElementScheme sheme)
         {
-            Node[] nodes = new Node[element.NodesIndexes.Length];
+            Node[] nodes = new Node[sheme.NodesIndexes.Length];
+            for (int i = 0; i < sheme.NodesIndexes.Length; i++)
+                nodes[i] = Nodes[sheme.NodesIndexes[i]];
 
-            for (int i = 0; i < nodes.Length; i++)//переделать, пусть спраишвает у элемента
-                nodes[i] = Nodes[element.NodesIndexes[i]];
-
-            return nodes;
+            return new FiniteElement(nodes, sheme.Section, sheme.FormulaNumber);
         }
         private double YLine(double x, double x1, double y1, double x2, double y2)
         {
@@ -73,7 +77,6 @@ namespace Grid.Models
             var y = (x - x1) * (y2 - y1) / (x2 - x1) + y1;
             return y;
         }
-
 
         public int GetSubDomain(Node node)
         {
@@ -110,52 +113,6 @@ namespace Grid.Models
                     return true;
 
             return false;
-        }
-
-        private bool BelongToTriangle(Node center, Node p1, Node p2, Node p3)
-        {
-            var a = (p1.X - center.X) * (p2.Y - p1.Y) - (p2.X - p1.X) * (p1.Y - center.Y);
-            var b = (p2.X - center.X) * (p3.Y - p2.Y) - (p3.X - p2.X) * (p2.Y - center.Y);
-            var c = (p3.X - center.X) * (p1.Y - p3.Y) - (p1.X - p3.X) * (p3.Y - center.Y);
-
-            if ((a >= 0 && b >= 0 && c >= 0) || (a <= 0 && b <= 0 && c <= 0))
-                return true;
-
-            return false;
-        }
-
-        [Obsolete]
-        public double GetCoefficient(Node elementCenter, int areaNumber)
-        {
-            Node centerOfDomain = new Node((X[X.Count - 1] + X[0]) / 2, (Y[Y.Count - 1] + Y[0]) / 2);//hx/2 hy/2
-            var distance = new Node(Math.Abs(elementCenter.X - centerOfDomain.X), Math.Abs(elementCenter.Y - centerOfDomain.Y));
-
-            var a = areaNumber % 2;
-            return a switch
-            {
-                0 => (centerOfDomain.X - distance.X) / centerOfDomain.X,
-                1 => (centerOfDomain.Y - distance.Y) / centerOfDomain.Y,
-            };
-        }
-
-        public int GetAreaNumber(Node center)
-        {
-            Node p1 = new Node(X[0], Y[0]);
-            Node p2 = new Node(X[X.Count - 1], Y[0]);
-            Node p3 = new Node(X[0], Y[Y.Count - 1]);
-            Node p4 = new Node(X[X.Count - 1], Y[Y.Count - 1]);
-            Node centerOfDomain = new Node((X[X.Count - 1] + X[0]) / 2, (Y[Y.Count - 1] + Y[0]) / 2);
-
-            if (BelongToTriangle(center, p1, p2, centerOfDomain))
-                return 0;
-            if (BelongToTriangle(center, p2, p4, centerOfDomain))
-                return 1;
-            if (BelongToTriangle(center, p3, p4, centerOfDomain))
-                return 2;
-            if (BelongToTriangle(center, p1, p3, centerOfDomain))
-                return 3;
-
-            throw new Exception();
         }
     }
 }

@@ -14,5 +14,25 @@ namespace Grid.Models
             Section = section;
             FormulaNumber = formulaNumber;
         }
+
+        public (double, double, double) GetSteps3D() => (GetXStep(Nodes), GetYStep(Nodes), GetZStep(Nodes));
+
+        /// <summary </summary>
+        /// <param name="nodes"></param>
+        /// <returns>возвращает шаги по конечному элементу, согласно сечению</returns>
+        public (double, double) GetSteps2D()
+        {
+            return Section switch
+            {
+                Section2D.XY => (GetXStep(Nodes), GetYStep(Nodes)),
+                Section2D.XZ => (GetXStep(Nodes), Nodes[2].Z - Nodes[0].Z),
+                Section2D.YZ => (Nodes[1].Y - Nodes[0].Y, Nodes[2].Z - Nodes[0].Z),
+                _ => throw new ArgumentException("Invalid argument!")
+            };
+        }
+
+        private double GetXStep(IList<Node> Nodes) => Nodes[1].X - Nodes[0].X;
+        private double GetYStep(IList<Node> Nodes) => Nodes[2].Y - Nodes[0].Y;
+        private double GetZStep(IList<Node> Nodes) => Nodes[4].Z - Nodes[0].Z;
     }
 }
