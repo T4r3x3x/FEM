@@ -1,4 +1,5 @@
-﻿using FemProducer.Basises.BasisFunctions;
+﻿using FemProducer.Basises.Abstractions;
+using FemProducer.Basises.Helpers.BasisFunctions;
 using FemProducer.Services;
 
 using Grid.Models;
@@ -7,86 +8,52 @@ using MathModels.Models;
 
 using NumericsMethods;
 
-namespace FemProducer.Basises
+namespace FemProducer.Basises.Implementations.TwoDimensional
 {
     internal class LinearRectangularCylindricalBasis : AbstractBasis
     {
-        private const int NodesCount = 4;
+        protected override int _nodesCountInElement => 4;
 
-        public LinearRectangularCylindricalBasis(ProblemService problemService) : base(problemService)
-        {
-        }
+        public LinearRectangularCylindricalBasis(ProblemService problemService) : base(problemService) { }
 
         public override Dictionary<string, IList<IList<double>>> GetLocalMatrixes(FiniteElement finiteElement) => throw new NotImplementedException();
-        public override IList<double> GetLocalVector(FiniteElement finiteElement, Func<Node, int, double> func, int formulaNumber)
-        {
-            double[] localVector = new double[NodesCount];
-            Node xLimits = new Node(finiteElement.Nodes[0].X, finiteElement.Nodes[1].X);
-            Node yLimits = new Node(finiteElement.Nodes[0].Y, finiteElement.Nodes[2].Y);
-
-            for (int i = 0; i < NodesCount; i++)
-            {
-                LocalVectorIntegrationFuncClass intF = new LocalVectorIntegrationFuncClass(xLimits, yLimits, func, i, formulaNumber);
-                localVector[i] += Integration.GaussIntegration(finiteElement.Nodes[0], finiteElement.Nodes[3], intF.LocalVectorIntegrationFunc, Integration.PointsCount.Four);
-            }
-
-
-            //var massMatrix = GetMassMatrix(finiteElement.Nodes);
-
-            //var funcValues = new double[NodesCount];
-
-            //for (int i = 0; i < NodesCount; i++)
-            //	funcValues[i] = func(finiteElement.Nodes[i], formulaNumber);
-
-            //for (int i = 0; i < NodesCount; i++)
-            //	for (int j = 0; j < NodesCount; j++)
-            //		localVector[i] += funcValues[j] * massMatrix[i][j];
-
-            return localVector;
-        }
 
         public override IList<IList<double>> GetStiffnessMatrix(FiniteElement finiteElement)
         {
-            double[][] stiffnessMatrix = new double[NodesCount][];
+            var stiffnessMatrix = InitializeMatrix(_nodesCountInElement);
+
             var xLimits = new Node(finiteElement.Nodes[0].X, finiteElement.Nodes[1].X);
             var yLimits = new Node(finiteElement.Nodes[0].Y, finiteElement.Nodes[2].Y);
 
-            for (int i = 0; i < NodesCount; i++)
-            {
-                stiffnessMatrix[i] = new double[NodesCount];
-                for (int j = 0; j < NodesCount; j++)
+            for (int i = 0; i < _nodesCountInElement; i++)
+                for (int j = 0; j < _nodesCountInElement; j++)
                 {
                     StiffnessIntegrationFuncClass intFunc = new StiffnessIntegrationFuncClass(i, j, xLimits, yLimits);
                     stiffnessMatrix[i][j] += Integration.GaussIntegration(finiteElement.Nodes[0], finiteElement.Nodes[3], intFunc.StiffnessIntegrationFunction, Integration.PointsCount.Four);
                 }
-            }
+
 
             return stiffnessMatrix;
         }
 
         public override IList<IList<double>> GetMassMatrix(FiniteElement finiteElement)
         {
-            double[][] massMatrix = new double[NodesCount][];
+            var massMatrix = InitializeMatrix(_nodesCountInElement);
+
             var xLimits = new Node(finiteElement.Nodes[0].X, finiteElement.Nodes[1].X);
             var yLimits = new Node(finiteElement.Nodes[0].Y, finiteElement.Nodes[2].Y);
 
-            for (int i = 0; i < NodesCount; i++)
-            {
-                massMatrix[i] = new double[NodesCount];
-                for (int j = 0; j < NodesCount; j++)
+            for (int i = 0; i < _nodesCountInElement; i++)
+                for (int j = 0; j < _nodesCountInElement; j++)
                 {
-
                     MassIntegrationFuncClass intFunc = new(i, j, xLimits, yLimits);
                     massMatrix[i][j] += Integration.GaussIntegration(finiteElement.Nodes[0], finiteElement.Nodes[3], intFunc.MassIntegrationalFunction, Integration.PointsCount.Four);
                 }
-            }
 
             return massMatrix;
         }
 
-        public override IList<double> GetSecondBoundaryVector(FiniteElement finiteElement, Func<Node, int, double> func, int formulaNumber) => throw new NotImplementedException();
-
-
+        public override IList<double> GetSecondBoundaryData(FiniteElement finiteElement, Func<Node, int, double> func, int formulaNumber) => throw new NotImplementedException();
 
         public double[][] GetGradTMatrix(IList<Node> nodes, Node v)
         {
@@ -110,7 +77,8 @@ namespace FemProducer.Basises
         {
             private readonly int _i, _j;
             private readonly Node _xLimits, _yLimits;
-            private Node _v;
+            private readonly Node _v;
+
             public HMatrixClass(int i, int j, Node xLimits, Node yLimits, Node v)
             {
                 _i = i;
@@ -130,7 +98,7 @@ namespace FemProducer.Basises
             }
         }
 
-        public override (IList<IList<double>>, IList<double>) ConsiderThirdBoundaryCondition(Slae slae, FiniteElement finiteElement, Func<Node, int, double> func, int formulaNumber)
+        public override (IList<IList<double>>, IList<double>) GetThirdBoundaryData(Slae slae, FiniteElement finiteElement, Func<Node, int, double> func, int formulaNumber)
         {
             double betta = 200;
             Node limits;

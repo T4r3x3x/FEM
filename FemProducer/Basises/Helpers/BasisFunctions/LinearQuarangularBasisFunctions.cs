@@ -1,17 +1,17 @@
-﻿namespace FemProducer.Basises.BasisFunctions
+﻿namespace FemProducer.Basises.Helpers.BasisFunctions
 {
     using static BasisUnitFunctions;
 
     public static class LinearQuarangularBasisFunctions
     {
-        public static List<Func<double, double, double>> fitasKsi = [
+        public static List<Func<double, double, double>> FitasKsi = [
             (ksi, nu) => nu - 1,
             (ksi, nu) => 1 - nu,
             (ksi, nu) => -nu,
             (ksi, nu) => nu,
         ];
 
-        public static List<Func<double, double, double>> fitasNu = [
+        public static List<Func<double, double, double>> FitasNu = [
             (ksi, nu) => ksi - 1,
             (ksi, nu) => -ksi,
             (ksi, nu) => 1 - ksi,

@@ -20,7 +20,7 @@ namespace Grid.Factories.ElementFactory.Implemenations
                     continue;
 
                 var nodesIndexes = GetNodesIndexes(missingNodesCounts, xIndex);
-                var finiteElemnent = new FiniteElementScheme(nodesIndexes, subDomains[areaNumber].FormulaNumber, Section2D.XY);
+                var finiteElemnent = new FiniteElementScheme(nodesIndexes, subDomains[areaNumber].FormulaNumber, AxisOrientation.XY);
                 elements.Add(finiteElemnent);
             }
             return elements;

@@ -1,4 +1,7 @@
-﻿using FemProducer.Collector;
+﻿using FemProducer.Basises.Implementations.ThreeDimensional;
+using FemProducer.Collector.CollectorBases.Implementations;
+using FemProducer.Collectors.Abstractions;
+using FemProducer.Collectors.Implementations;
 using FemProducer.ConfigureReader;
 using FemProducer.Logger;
 using FemProducer.MatrixBuilding;
@@ -21,8 +24,8 @@ namespace FemProducer
 {
     class Program
     {
-        const string ConfigureFile = "ConfigureTask.json";
-        const string OutputFile = "output.txt";
+        private const string ConfigureFile = "ConfigureTask.json";
+        private const string OutputFile = "output.txt";
 
         static void Main(string[] args)
         {
@@ -42,21 +45,20 @@ namespace FemProducer
 
             Messages.PrintSuccessMessage("The grid was built!");
 
-
             ProblemService problemService = new ProblemService(problemParameters);
             SolutionService solutionService = new SolutionService(problemService, grid);
 
             MatrixFactory matrixFactory = new();
 
-            CollectorBase collectorBase = new(grid, matrixFactory, problemService, new Basises.LinearCubeBasis(problemService));
+            CollectorBase collectorBase = new(grid, matrixFactory, problemService, new LinearCubeBasis(problemService));
             // AbstractCollector timeCollector = new TimeCollector(solutionService, collectorBase, grid, matrixFactory);
             AbstractCollector timeCollector = new EllipticCollector(collectorBase, grid, matrixFactory);
             ResultsService<TxtLogger> resultsService = new(new TxtLogger("results"), grid, solutionService, problemService);
 
             resultsService.WriteGrid("grid.txt", gridParameters);
-            Tools.Processes.OpenPythonScript(scriptPath: @"PythonScripts\grid2d.py");
+            Processes.OpenPythonScript(scriptPath: @"PythonScripts\grid2d.py");
             resultsService.WriteGrid2("grid2.txt", gridParameters);
-            Tools.Processes.OpenPythonScript(@"PythonScripts\grid2d2.py");
+            Processes.OpenPythonScript(@"PythonScripts\grid2d2.py");
 
             IProblemSolver problemSolver = new TimeProblemSolver(solver, solutionService, timeCollector, resultsService, gridParameters, grid);
 

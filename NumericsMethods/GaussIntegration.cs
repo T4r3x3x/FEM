@@ -1,6 +1,6 @@
-﻿using Grid.Models;
+﻿using System.ComponentModel;
 
-using System.ComponentModel;
+using Grid.Models;
 
 namespace NumericsMethods
 {
@@ -10,6 +10,7 @@ namespace NumericsMethods
         {
             double result, temp = 0;
             var hx = limits.Y - limits.X;
+
             GetCoeffs(pointsCount, out var q, out var x);
 
             for (int r = 0; r < q.Length; r++)
@@ -18,16 +19,14 @@ namespace NumericsMethods
                 temp += q[r] * func(u);
             }
             result = hx * temp / 2.0;
-
             return result;
         }
 
-        //можно просто лимиты по х и у передавать
-        public static double GaussIntegration(Node leftLowerPoint, Node rightUpperPoint, Func<double, double, double> func, PointsCount pointsCount)
+        public static double GaussIntegration(Node firstAxisLimits, Node secondAxisLimits, Func<double, double, double> func, PointsCount pointsCount)
         {
             double result = 0, temp;
-            var hx = rightUpperPoint.X - leftLowerPoint.X;
-            var hy = rightUpperPoint.Y - leftLowerPoint.Y;
+            var hx = firstAxisLimits.Y - firstAxisLimits.X;
+            var hy = secondAxisLimits.Y - secondAxisLimits.X;
 
             GetCoeffs(pointsCount, out var q, out var x);
 
@@ -36,23 +35,23 @@ namespace NumericsMethods
                 temp = 0;
                 for (int r = 0; r < q.Length; r++)
                 {
-                    double u = (leftLowerPoint.X + rightUpperPoint.X + hx * x[r]) / 2.0;
-                    double v = (leftLowerPoint.Y + rightUpperPoint.Y + hy * x[l]) / 2.0;
+                    double u = (firstAxisLimits.Y + firstAxisLimits.X + hx * x[r]) / 2.0;
+                    double v = (secondAxisLimits.Y + secondAxisLimits.X + hy * x[l]) / 2.0;
                     temp += q[r] * func(u, v);
                 }
                 result += q[l] * temp;
             }
             result *= hx * hy / 4.0;
-
             return result;
         }
 
-        public static double GaussIntegration(Node x1y1z1, Node x2y2z1, Node x2y2z2, Func<double, double, double, double> func, PointsCount pointsCount)
+        public static double GaussIntegration(Node firstAxisLimits, Node secondAxisLimits, Node thirdAxisLimits, Func<double, double, double, double> func, PointsCount pointsCount)
         {
             double result = 0, temp1, temp2;
-            var hx = x2y2z1.X - x1y1z1.X;
-            var hy = x2y2z1.Y - x1y1z1.Y;
-            var hz = x2y2z2.Z - x2y2z1.Z;
+            var hx = firstAxisLimits.Y - firstAxisLimits.X;
+            var hy = secondAxisLimits.Y - secondAxisLimits.X;
+            var hz = thirdAxisLimits.Y - thirdAxisLimits.X;
+
             GetCoeffs(pointsCount, out var q, out var x);
 
             for (int l = 0; l < q.Length; l++)
@@ -63,9 +62,9 @@ namespace NumericsMethods
                     temp2 = 0;
                     for (int k = 0; k < q.Length; k++)
                     {
-                        double u = (x1y1z1.X + x2y2z1.X + hx * x[r]) / 2.0;
-                        double v = (x1y1z1.Y + x2y2z1.Y + hy * x[l]) / 2.0;
-                        double m = (x2y2z1.Z + x2y2z2.Z + hz * x[k]) / 2.0;
+                        double u = (firstAxisLimits.Y + firstAxisLimits.X + hx * x[r]) / 2.0;
+                        double v = (secondAxisLimits.Y + secondAxisLimits.X + hy * x[l]) / 2.0;
+                        double m = (thirdAxisLimits.Y + thirdAxisLimits.X + hz * x[k]) / 2.0;
                         temp2 += q[k] * func(u, v, m);
                     }
                     temp1 += q[r] * temp2;
@@ -73,9 +72,17 @@ namespace NumericsMethods
                 result += q[l] * temp1;
             }
             result *= hx * hy * hz / 8.0;
-
             return result;
         }
+
+        //private double GetFuncValue2D(double u, double v, Func<double, double, double> func, AxisOrientation orientation)
+        //{
+        //    return orientation switch
+        //    {
+        //        AxisOrientation.XY => func(u, v),
+
+        //    };
+        //}
 
         private static void GetCoeffs(PointsCount pointsCount, out double[] q, out double[] x)
         {

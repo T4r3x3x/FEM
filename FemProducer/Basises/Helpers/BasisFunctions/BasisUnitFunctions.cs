@@ -1,4 +1,4 @@
-﻿namespace FemProducer.Basises.BasisFunctions
+﻿namespace FemProducer.Basises.Helpers.BasisFunctions
 {
     public static class BasisUnitFunctions
     {

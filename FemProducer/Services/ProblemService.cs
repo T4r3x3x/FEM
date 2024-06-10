@@ -62,14 +62,14 @@ namespace FemProducer.Services
             var x = node.X;
             var y = node.Y;
             var z = node.Z;
+            return Function(node, formulaNumber) + SecondBoundaryFunction(node, formulaNumber);
+            //return formulaNumber switch
+            //{
+            //    2 => Function(node, formulaNumber) + SecondBoundaryFunction(node, formulaNumber),
+            //    1 => Function(node, formulaNumber) + SecondBoundaryFunction(node, formulaNumber),
 
-            return formulaNumber switch
-            {
-                0 => Function(node, formulaNumber) + SecondBoundaryFunction(node, formulaNumber),
-                1 => Function(node, formulaNumber) + SecondBoundaryFunction(node, formulaNumber),
-
-                _ => throw new ArgumentException(),
-            };
+            //    _ => throw new ArgumentException(),
+            //};
         }
 
         public double F(Node node, int formulaNumber)

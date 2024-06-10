@@ -1,4 +1,4 @@
-﻿using FemProducer.Collector;
+﻿using FemProducer.Collectors.Abstractions;
 using FemProducer.Logger;
 using FemProducer.Services;
 

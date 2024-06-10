@@ -29,13 +29,13 @@ namespace Grid.Models
         /// <param name="section">сечение, на его основе выбираем какаие 2 оси вернуть</param>
         /// <returns></returns>
         /// <exception cref="ArgumentException">2 возвращаемые оси</exception>
-        internal (double[], double[]) GetAxises(Section2D section)
+        internal (double[], double[]) GetAxises(AxisOrientation section)
         {
             return section switch
             {
-                Section2D.XY => (X, Y),
-                Section2D.XZ => (X, Z),
-                Section2D.YZ => (Y, Z),
+                AxisOrientation.XY => (X, Y),
+                AxisOrientation.XZ => (X, Z),
+                AxisOrientation.YZ => (Y, Z),
                 _ => throw new ArgumentException($"Wrong sections - {section.ToString()}!")
             };
         }

@@ -107,7 +107,6 @@ namespace Grid.Factories
             return boundaryLimitsIndexes;
         }
 
-
         /// <summary>
         /// 
         /// </summary>
@@ -145,7 +144,7 @@ namespace Grid.Factories
 
         private FiniteElementScheme[] GetNaturalBoundaryElems(int[] limits, int[] missingNodesCounts, SpatialCoordinates coordinates, int formulaNumber)
         {
-            var sectionData = GetSectionData(limits, coordinates);
+            var sectionData = GetSectionData(limits);
             ReactangularElementFactory elementFactory = new(sectionData.section, sectionData.secitonIndex);
             var elements = elementFactory.GetElements(coordinates, null!, missingNodesCounts);
             //  AccountOffset(elements, sectionData.offset);
@@ -161,14 +160,14 @@ namespace Grid.Factories
         /// <param name="limits"></param>
         /// <param name="coordinates"></param>
         /// <returns>сечение, и смещение индексов</returns>
-        private (Section2D section, int secitonIndex) GetSectionData(int[] limits, SpatialCoordinates coordinates)
+        private static (AxisOrientation section, int secitonIndex) GetSectionData(int[] limits)
         {
             if (limits[0] == limits[1])
-                return (Section2D.YZ, limits[0]);
+                return (AxisOrientation.YZ, limits[0]);
             if (limits[2] == limits[3])
-                return (Section2D.XZ, limits[2]);
+                return (AxisOrientation.XZ, limits[2]);
             else
-                return (Section2D.XY, limits[4]);
+                return (AxisOrientation.XY, limits[4]);
         }
     }
 }

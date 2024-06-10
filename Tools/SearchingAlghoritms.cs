@@ -19,16 +19,17 @@
 
         public static double GetMinValueInCollection(IEnumerable<double> collection)
         {
-            var min = Double.MaxValue;
+            var min = double.MaxValue;
             foreach (var item in collection)
                 if (item < min)
                     min = item;
 
             return min;
         }
+
         public static double GetMaxValueInCollection(IEnumerable<double> collection)
         {
-            var max = Double.MinValue;
+            var max = double.MinValue;
             foreach (var item in collection)
                 if (item > max)
                     max = item;

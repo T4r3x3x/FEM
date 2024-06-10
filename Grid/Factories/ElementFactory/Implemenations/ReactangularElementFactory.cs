@@ -8,10 +8,10 @@ namespace Grid.Factories.ElementFactory.Implemenations
     {
         private const GridDimensional Dimensional = GridDimensional.Two;
 
-        private readonly Section2D _section;
+        private readonly AxisOrientation _section;
         private readonly int _sectionIndex; //индекс точки на оси, по которой происходит сечение
 
-        public ReactangularElementFactory(Section2D section, int sectionIndex)
+        public ReactangularElementFactory(AxisOrientation section, int sectionIndex)
         {
             _section = section;
             _sectionIndex = sectionIndex;
@@ -34,7 +34,7 @@ namespace Grid.Factories.ElementFactory.Implemenations
                     }
 
                     var nodesIndexes = GetNodesIndexes(missingNodesCounts, innerIndex, outerIndex, coordinates.X.Length, coordinates.Y.Length);
-                    var finiteElemnent = new FiniteElementScheme(nodesIndexes, areaNumber != -2 ? subDomainsValues[areaNumber].FormulaNumber : 0, _section);
+                    var finiteElemnent = new FiniteElementScheme(nodesIndexes, areaNumber != -2 ? subDomainsValues![areaNumber].FormulaNumber : 0, _section);
                     elements.Add(finiteElemnent);
                 }
             }
@@ -68,21 +68,21 @@ namespace Grid.Factories.ElementFactory.Implemenations
             return _section switch
             {
                 //outer - y, inner - x
-                Section2D.XY =>
+                AxisOrientation.XY =>
                     [GetNodeIndex3D(_sectionIndex, outerIndex, innerIndex, xCount, yCount),
                         GetNodeIndex3D(_sectionIndex, outerIndex, innerIndex + 1, xCount, yCount),
                         GetNodeIndex3D(_sectionIndex, outerIndex + 1, innerIndex, xCount, yCount),
                         GetNodeIndex3D(_sectionIndex, outerIndex + 1, innerIndex + 1, xCount, yCount),
                     ],
                 //outer - z, inner - x
-                Section2D.XZ =>
+                AxisOrientation.XZ =>
                     [GetNodeIndex3D(outerIndex, _sectionIndex, innerIndex, xCount, yCount),
                         GetNodeIndex3D(outerIndex, _sectionIndex, innerIndex + 1, xCount, yCount),
                         GetNodeIndex3D(outerIndex + 1, _sectionIndex, innerIndex, xCount, yCount),
                         GetNodeIndex3D(outerIndex + 1, _sectionIndex, innerIndex + 1, xCount, yCount),
                     ],
                 //outer - z, inner - y
-                Section2D.YZ =>
+                AxisOrientation.YZ =>
                     [GetNodeIndex3D(outerIndex, innerIndex, _sectionIndex, xCount, yCount),
                         GetNodeIndex3D(outerIndex, innerIndex + 1, _sectionIndex, xCount, yCount),
                         GetNodeIndex3D(outerIndex + 1, innerIndex, _sectionIndex, xCount, yCount),

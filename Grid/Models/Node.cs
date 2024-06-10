@@ -1,4 +1,6 @@
-﻿namespace Grid.Models
+﻿using Grid.Enum;
+
+namespace Grid.Models
 {
     public class Node
     {
@@ -22,6 +24,16 @@
             Z = z;
         }
 
+        public double Component(AxisOrientation axisOrientation)
+        {
+            return axisOrientation switch
+            {
+                AxisOrientation.X => X,
+                AxisOrientation.Y => Y,
+                AxisOrientation.Z => Z,
+                _ => throw new NotImplementedException(),
+            };
+        }
         public override string ToString() =>
             $"{X.ToString().Replace(",", ".")} {Y.ToString().Replace(",", ".")} {Z.ToString().Replace(",", ".")}";
     }

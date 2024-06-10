@@ -68,7 +68,5 @@ namespace Grid.Factories.NodeFactory.Implementations
             var y = points.Select(x => x.Y);
             return (new Point(x.Min(), x.Max()), new Point(y.Min(), y.Max()));
         }
-
-
     }
 }

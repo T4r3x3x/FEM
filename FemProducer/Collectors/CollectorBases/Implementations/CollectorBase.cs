@@ -1,4 +1,5 @@
-﻿using FemProducer.Basises;
+﻿using FemProducer.Basises.Abstractions;
+using FemProducer.Collector.CollectorBase.Interfaces;
 using FemProducer.MatrixBuilding;
 using FemProducer.Services;
 
@@ -8,14 +9,14 @@ using MathModels.Models;
 
 using Tools;
 
-namespace FemProducer.Collector
+namespace FemProducer.Collector.CollectorBases.Implementations
 {
     public class CollectorBase : ICollectorBase
     {
         private readonly GridModel _grid;
         private readonly MatrixFactory _matrixFactory;
         private readonly ProblemService _problemService;
-        private object _lock = new object();
+        private readonly object _lock = new object();
         private readonly AbstractBasis _basis;
 
         public CollectorBase(GridModel grid, MatrixFactory matrixFactory, ProblemService problemService, AbstractBasis basis)
@@ -44,38 +45,20 @@ namespace FemProducer.Collector
                 int formulaNumber = elementSheme.FormulaNumber;
                 var element = _grid.GetFiniteElement(elementSheme);
 
-                var localMatrix = _basis.GetMassMatrix(element);
-                localMatrix.MultiplyLocalMatrix(_problemService.Gamma(formulaNumber));
-                AddLocalMatrix(M, localMatrix, elementSheme);
+                var massMatrix = _basis.GetMassMatrix(element);
+                var localVector = _basis.GetLocalVector(element, _problemService.F, formulaNumber, massMatrix);
+                var stiffnessMatrix = _basis.GetStiffnessMatrix(element);
 
-                //lock (vector)
-                //{
-                //    for (int i = 0; i < 8; i++)
-                //    {
-                //        for (int j = 0; j < 8; j++)
-                //        {
-                //            Console.Write(localMatrix[i][j] + " ");
-                //        }
-                //        Console.WriteLine();
-                //    }
-                //}
+                massMatrix.MultiplyLocalMatrix(_problemService.Gamma(formulaNumber));
+                AddLocalMatrix(M, massMatrix, elementSheme);
 
-                localMatrix = _basis.GetStiffnessMatrix(element);
-                localMatrix.MultiplyLocalMatrix(_problemService.Lambda(formulaNumber));
-                AddLocalMatrix(G, localMatrix, elementSheme);
+                stiffnessMatrix.MultiplyLocalMatrix(_problemService.Lambda(formulaNumber));
+                AddLocalMatrix(G, stiffnessMatrix, elementSheme);
 
-                //var v = GetV(nodes);
-                //localMatrix = ((LinearRectangularCylindricalBasis)_basis).GetGradTMatrix(nodes, v);
-                //localMatrix.MultiplyLocalMatrix(_problemService.Gamma(formulaNumber));
-                //AddLocalMatrix(H, localMatrix, element);
-
-                var localVector = _basis.GetLocalVector(element, _problemService.F, formulaNumber);
                 AddLocalVector(vector, localVector, elementSheme);
-
-
             }//);
 
-            Dictionary<string, Matrix> matrixes = new() { { "ColumnSize", M }, { "G", G }, { "H", H } };
+            Dictionary<string, Matrix> matrixes = new() { { "_M", M }, { "_G", G }, { "H", H } };
             return (matrixes, vector);
         }
 
@@ -137,29 +120,24 @@ namespace FemProducer.Collector
         private void ConsiderSecondBoundaryConditions(Slae slae)
         {
             //Parallel.ForEach(_grid.SecondBoundaryNodes, nodesIndexes =>
-            foreach (var element in _grid.SecondBoundaryNodes)
+            foreach (var sheme in _grid.SecondBoundaryNodes)
             {
-                var nodes = _grid.GetFiniteElement(element);
-                var res = _basis.GetSecondBoundaryVector(nodes, _problemService.SecondBoundaryFunction, element.FormulaNumber);
-                AddLocalVector(slae.Vector, res, element);
+                var finiteElement = _grid.GetFiniteElement(sheme);
+                var res = _basis.GetSecondBoundaryData(finiteElement, _problemService.SecondBoundaryFunction, sheme.FormulaNumber);
+                AddLocalVector(slae.Vector, res, sheme);
             };
         }
 
         private void ConsiderThirdBoundaryConditions(Slae slae)
         {
             //Parallel.ForEach(_grid.ThirdBoundaryNodes, nodesIndexes =>
-            //foreach (var nodesIndexes in _grid.ThirdBoundaryNodes)
-            //{
-            //    List<Node> nodes = new();
-            //    for (int i = 0; i < nodesIndexes.Item1.Count; i++)
-            //        nodes.Add(_grid.Nodes[nodesIndexes.Item1[i]]);
-
-            //    int formulaNumber = nodesIndexes.Item2;
-            //    var res = _basis.ConsiderThirdBoundaryCondition(slae, nodes, nodesIndexes.Item1, _problemService.ThridBoundaryFunction, formulaNumber);
-            //    var elem = new FiniteElement(nodesIndexes.Item1.ToArray(), formulaNumber);
-            //    AddLocalVector(slae.Vector, res.Item2, elem);
-            //    AddLocalMatrix(slae.Matrix, res.Item1, elem);
-            //}
+            foreach (var sheme in _grid.ThirdBoundaryNodes)
+            {
+                var finiteElement = _grid.GetFiniteElement(sheme);
+                var res = _basis.GetThirdBoundaryData(slae, finiteElement, _problemService.ThridBoundaryFunction, sheme.FormulaNumber);
+                AddLocalMatrix(slae.Matrix, res.matrix, sheme);
+                AddLocalVector(slae.Vector, res.vector, sheme);
+            };
         }
     }
 }

@@ -10,6 +10,7 @@ namespace FemProducer.MatrixBuilding
         private List<double> _al, _au;
         private List<int> _ja, _ia;
 
+
         private void Initialize(int nodesCount)
         {
             _di = new double[nodesCount];
@@ -23,27 +24,32 @@ namespace FemProducer.MatrixBuilding
 
         public Matrix CreateMatrix(GridModel grid)
         {
+            int countOfNodesInElement = grid.NodesInElementCount;
+            int neighboursCount = GetNeighboursCount(countOfNodesInElement);
             int nodesCount = grid.NodesCount;
+            int memory = nodesCount * neighboursCount;
+            int listSize = 0;
+
             Initialize(nodesCount);
 
-            int memory = nodesCount * 27;//завист от размерности задачи
-            List<List<int>> list = new List<List<int>>(2);
-            list.Add(new List<int>(memory));
-            list.Add(new List<int>(memory));
-            list[0].AddRange(Enumerable.Repeat(0, list[0].Capacity));
-            list[1].AddRange(Enumerable.Repeat(0, list[1].Capacity));
             _ja = new List<int>(memory);
             List<int> listbeg = new List<int>(nodesCount);
+            List<List<int>> list = new List<List<int>>(2)
+            {
+                new List<int>(memory),
+                new List<int>(memory)
+            };
+            list[0].AddRange(Enumerable.Repeat(0, list[0].Capacity));
+            list[1].AddRange(Enumerable.Repeat(0, list[1].Capacity));
             listbeg.AddRange(Enumerable.Repeat(0, listbeg.Capacity));
-            int listSize = 0;
 
             foreach (var element in grid.Elements)
             {
-                for (int i = 0; i < 8; i++)//завист от размерности задачи
+                for (int i = 0; i < countOfNodesInElement; i++)
                 {
                     int k = element.NodesIndexes[i];
 
-                    for (int j = i + 1; j < 8; j++)//завист от размерности задачи
+                    for (int j = i + 1; j < countOfNodesInElement; j++)
                     {
                         int ind1 = k;
 
@@ -108,6 +114,17 @@ namespace FemProducer.MatrixBuilding
             _au.AddRange(Enumerable.Repeat(0.0, _au.Capacity));
 
             return new Matrix(_di, _al.ToArray(), _au.ToArray(), _ja.ToArray(), _ia.ToArray());
+        }
+
+        private int GetNeighboursCount(int nodesInElementCount)
+        {
+            return nodesInElementCount switch
+            {
+                2 => 2,
+                4 => 5,
+                8 => 26,
+                _ => throw new ArgumentException($"Invalid value -- {nodesInElementCount}!")
+            };
         }
     }
 }

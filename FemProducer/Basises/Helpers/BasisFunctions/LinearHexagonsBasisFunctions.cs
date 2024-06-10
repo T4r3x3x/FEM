@@ -1,11 +1,13 @@
-﻿namespace FemProducer.Basises.BasisFunctions
-{
-    using MathModels.Models;
+﻿using FemProducer.Basises.Helpers.IndexFunctions;
 
+namespace FemProducer.Basises.Helpers.BasisFunctions
+{
     using System.ComponentModel;
 
+    using MathModels.Models;
+
     using static BasisUnitFunctions;
-    using static IntegerFuncitons3D;
+    using static IndexFunctions3D;
 
     public class LinearHexagonsBasisFunctions
     {

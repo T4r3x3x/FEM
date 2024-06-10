@@ -6,10 +6,10 @@ namespace FemProducer.Services
 {
     public class SolutionService
     {
+        private readonly GridModel _grid;
+
         public IList<Vector> NumericalSolves { get; private set; } = new List<Vector>();
         public IList<Vector> AnalyticsSolves { get; private set; } = new List<Vector>();
-
-        private readonly GridModel _grid;
 
         public SolutionService(ProblemService problemService, GridModel grid)
         {

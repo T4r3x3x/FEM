@@ -5,16 +5,16 @@ namespace Grid.Models
 {
     public class GridModel
     {
+        public readonly int NodesInElementCount;
         public readonly IReadOnlyList<double> T;
         public readonly IReadOnlyList<double> Ht;
         public readonly IReadOnlyList<double> X;
         public readonly IReadOnlyList<double> Y;
         public readonly IReadOnlyList<double> Z;
-        private readonly int _nodesInElementCount; //количество узлов в кэ.
 
         public GridModel(IList<FiniteElementScheme> elements, IList<Node> nodes,
             IEnumerable<int> firstBoundaryNodes, IEnumerable<FiniteElementScheme> secondBoundaryNodes, IEnumerable<FiniteElementScheme> thirdBoundaryNodes, IList<Point[]> subdomains,
-            int nodesInElementCount, double[] x, double[] y, double[] z, Area<int>[] areas, double[] t = null, List<double> ht = null)
+            int nodesInElementCount, double[] x, double[] y, double[] z, Area<int>[] areas, double[] t = null!, List<double> ht = null!)
         {
             FirstBoundaryNodes = firstBoundaryNodes;
             SecondBoundaryNodes = secondBoundaryNodes;
@@ -24,7 +24,7 @@ namespace Grid.Models
             T = t ?? [0];
             Ht = ht;
             Subdomains = subdomains;
-            _nodesInElementCount = nodesInElementCount;
+            NodesInElementCount = nodesInElementCount;
             X = x;
             Y = y;
             Z = z;
@@ -66,12 +66,8 @@ namespace Grid.Models
 
             if (y1 > y2)
             {
-                var temp = x1;
-                x1 = x2;
-                x2 = temp;
-                temp = y1;
-                y1 = y2;
-                y2 = temp;
+                (x2, x1) = (x1, x2);
+                (y2, y1) = (y1, y2);
             }
 
             var y = (x - x1) * (y2 - y1) / (x2 - x1) + y1;
@@ -103,7 +99,7 @@ namespace Grid.Models
                 if (IsElementContainPoint(Elements[i], point))
                     return Elements[i];
 
-            return null;
+            throw new Exception("Can't find an element!");
         }
 
         private bool IsElementContainPoint(FiniteElementScheme element, Point point)

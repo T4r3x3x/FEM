@@ -6,9 +6,9 @@ namespace Grid.Models
     {
         public int[] NodesIndexes { get; }
         public int FormulaNumber;
-        public Section2D Section { get; }
+        public AxisOrientation Section { get; }
 
-        public FiniteElementScheme(int[] nodesIndexes, int formulaNumber, Section2D section)
+        public FiniteElementScheme(int[] nodesIndexes, int formulaNumber, AxisOrientation section)
         {
             NodesIndexes = nodesIndexes;
             FormulaNumber = formulaNumber;

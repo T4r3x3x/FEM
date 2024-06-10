@@ -34,7 +34,7 @@ namespace Grid.Factories.ElementFactory.Implemenations
                             continue;
 
                         var nodesIndexes = GetNodesIndexes(missingNodesCounts, Oxy1, Oxy2, lineIndex1, lineIndex2, xIndex);
-                        var finiteElement = new FiniteElementScheme(nodesIndexes, subDomains[areaNumber].FormulaNumber, Section2D.XY);
+                        var finiteElement = new FiniteElementScheme(nodesIndexes, subDomains[areaNumber].FormulaNumber, AxisOrientation.XY);
                         elements.Add(finiteElement);
                     }
                 }
