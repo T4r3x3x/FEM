@@ -2,7 +2,7 @@
 {
     public static class StringExtenisions
     {
-        public static string? ToString(this object obj)
+        public static string? ToString(this double obj)
         {
             return obj.ToString()!.Replace(",", ".");
         }

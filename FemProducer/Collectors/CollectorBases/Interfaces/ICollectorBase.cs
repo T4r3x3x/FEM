@@ -1,6 +1,6 @@
 ﻿using MathModels.Models;
 
-namespace FemProducer.Collector.CollectorBase.Interfaces
+namespace FemProducer.Collectors.CollectorBases.Interfaces
 {
     public interface ICollectorBase
     {

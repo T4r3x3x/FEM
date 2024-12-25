@@ -8,11 +8,14 @@ using MathModels.Models;
 
 using NumericsMethods;
 
+using static FemProducer.Basises.Helpers.BasisFunctions.LinearBasisFunctions2D;
+
+
 namespace FemProducer.Basises.Implementations.TwoDimensional
 {
     internal class LinearRectangularCylindricalBasis : AbstractBasis
     {
-        protected override int _nodesCountInElement => 4;
+        protected override int NodesCountInElement => 4;
 
         public LinearRectangularCylindricalBasis(ProblemService problemService) : base(problemService) { }
 
@@ -20,34 +23,37 @@ namespace FemProducer.Basises.Implementations.TwoDimensional
 
         public override IList<IList<double>> GetStiffnessMatrix(FiniteElement finiteElement)
         {
-            var stiffnessMatrix = InitializeMatrix(_nodesCountInElement);
+            var stiffnessMatrix = InitializeMatrix(NodesCountInElement);
 
             var xLimits = new Node(finiteElement.Nodes[0].X, finiteElement.Nodes[1].X);
             var yLimits = new Node(finiteElement.Nodes[0].Y, finiteElement.Nodes[2].Y);
 
-            for (int i = 0; i < _nodesCountInElement; i++)
-                for (int j = 0; j < _nodesCountInElement; j++)
+            for (int i = 0; i < NodesCountInElement; i++)
+                for (int j = 0; j < NodesCountInElement; j++)
                 {
                     StiffnessIntegrationFuncClass intFunc = new StiffnessIntegrationFuncClass(i, j, xLimits, yLimits);
                     stiffnessMatrix[i][j] += Integration.GaussIntegration(finiteElement.Nodes[0], finiteElement.Nodes[3], intFunc.StiffnessIntegrationFunction, Integration.PointsCount.Four);
                 }
-
 
             return stiffnessMatrix;
         }
 
         public override IList<IList<double>> GetMassMatrix(FiniteElement finiteElement)
         {
-            var massMatrix = InitializeMatrix(_nodesCountInElement);
+            var massMatrix = InitializeMatrix(NodesCountInElement);
 
             var xLimits = new Node(finiteElement.Nodes[0].X, finiteElement.Nodes[1].X);
             var yLimits = new Node(finiteElement.Nodes[0].Y, finiteElement.Nodes[2].Y);
 
-            for (int i = 0; i < _nodesCountInElement; i++)
-                for (int j = 0; j < _nodesCountInElement; j++)
+            for (int i = 0; i < NodesCountInElement; i++)
+                for (int j = 0; j < NodesCountInElement; j++)
                 {
-                    MassIntegrationFuncClass intFunc = new(i, j, xLimits, yLimits);
-                    massMatrix[i][j] += Integration.GaussIntegration(finiteElement.Nodes[0], finiteElement.Nodes[3], intFunc.MassIntegrationalFunction, Integration.PointsCount.Four);
+                    var intFunc = (double r, double z) =>
+                    {
+                        Node node = new(r, z);
+                        return GetBasisFunctionValue(i, node, xLimits, yLimits) * GetBasisFunctionValue(j, node, xLimits, yLimits) * r;
+                    };
+                    massMatrix[i][j] += Integration.GaussIntegration(finiteElement.Nodes[0], finiteElement.Nodes[3], intFunc, Integration.PointsCount.Four);
                 }
 
             return massMatrix;
@@ -66,7 +72,7 @@ namespace FemProducer.Basises.Implementations.TwoDimensional
                 for (int j = 0; j < 4; j++)
                 {
                     HMatrixClass hMatrixClass = new(j, i, xLimits, yLimits, v);
-                    matrix[i][j] = NumericsMethods.Integration.GaussIntegration(nodes[0], nodes[3], hMatrixClass.HMatrixFunc, Integration.PointsCount.Four);
+                    matrix[i][j] = Integration.GaussIntegration(nodes[0], nodes[3], hMatrixClass.HMatrixFunc, Integration.PointsCount.Four);
                 }
             }
 
@@ -144,7 +150,7 @@ namespace FemProducer.Basises.Implementations.TwoDimensional
 
         class ThirdBoundaryConditionMatrixClass
         {
-            private Node _Limits;
+            private readonly Node _Limits;
             private Func<Node, int, double> _func;
             private int _i, _j;
             private int _formulaNumber;
@@ -181,7 +187,7 @@ namespace FemProducer.Basises.Implementations.TwoDimensional
 
         class SecondBoundaryConditionClass
         {
-            private Node _Limits;
+            private readonly Node _Limits;
             private Func<Node, int, double> _func;
             private int _i = 0;
             private int _formulaNumber;
@@ -259,27 +265,6 @@ namespace FemProducer.Basises.Implementations.TwoDimensional
                 var result = (xW1 * xW2 + yW1 * yW2);
 
                 return result * r;
-            }
-        }
-
-        class MassIntegrationFuncClass
-        {
-            private readonly int _i, _j;
-            private readonly Node _xLimits, _yLimits;
-
-            public MassIntegrationFuncClass(int i, int j, Node xLimits, Node yLimits)
-            {
-                _i = i;
-                _j = j;
-                _xLimits = xLimits;
-                _yLimits = yLimits;
-            }
-
-            public double MassIntegrationalFunction(double r, double z)
-            {
-                Node node = new Node(r, z);
-                return LinearBasisFunctions2D.GetBasisFunctionValue(_i, node, _xLimits, _yLimits) * LinearBasisFunctions2D.GetBasisFunctionValue(_j, node, _xLimits, _yLimits) * r;
-
             }
         }
     }

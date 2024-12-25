@@ -1,4 +1,4 @@
-﻿namespace MathModels
+﻿namespace MathModels.Models
 {
 	public class Point
 	{

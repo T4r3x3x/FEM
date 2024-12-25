@@ -19,7 +19,7 @@ namespace MathModels.Models
         public double this[int index]
         {
             get => Elements[index];
-            set { Elements[index] = value; }
+            set => Elements[index] = value;
         }
 
         public int Length => Elements.Length;
@@ -102,7 +102,7 @@ namespace MathModels.Models
 
         public static implicit operator Vector(double[] nums) => new Vector(nums);
 
-        public IEnumerator<double> GetEnumerator() => ((IEnumerable<double>)Elements).GetEnumerator();
+        public IEnumerator<double> GetEnumerator() => ((IEnumerable<double>) Elements).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => Elements.GetEnumerator();
     }
 }

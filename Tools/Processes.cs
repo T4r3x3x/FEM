@@ -8,13 +8,16 @@ namespace Tools
         /// Запускает python скрипт.
         /// </summary>
         /// <param name="scriptPath">Путь, в котором находится скрипт</param>
-        public static void OpenPythonScript(string scriptPath)
+        /// <param name="args">аргументы для скрипта</param>
+        public static void OpenPythonScript(string scriptPath, params string[] args)
         {
-            ProcessStartInfo start = new();
-            start.FileName = "python";
-            start.Arguments = string.Format(scriptPath);
-            start.UseShellExecute = false;
-            start.RedirectStandardOutput = true;
+            ProcessStartInfo start = new()
+            {
+                FileName = "python",
+                Arguments = $"{scriptPath} {string.Join(' ', args)}",
+                UseShellExecute = false,
+                RedirectStandardOutput = true
+            };
             Process.Start(start);
         }
     }

@@ -1,6 +1,5 @@
-﻿using FemProducer.Collector.CollectorBase.Interfaces;
-using FemProducer.Collectors.Abstractions;
-using FemProducer.MatrixBuilding;
+﻿using FemProducer.Collectors.Abstractions;
+using FemProducer.Collectors.CollectorBases.Interfaces;
 
 using Grid.Models;
 
@@ -10,9 +9,7 @@ namespace FemProducer.Collectors.Implementations
 {
     public class EllipticCollector : AbstractCollector
     {
-        public EllipticCollector(ICollectorBase collector, GridModel grid, MatrixFactory matrixFactory) : base(collector, grid, matrixFactory)
-        {
-        }
+        public EllipticCollector(ICollectorBase collector, GridModel grid, MatrixFactory.MatrixFactory matrixFactory) : base(collector, grid, matrixFactory) { }
 
         public override Slae Collect(int timeLayer)
         {

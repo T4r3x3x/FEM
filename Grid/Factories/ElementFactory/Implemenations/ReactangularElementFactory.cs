@@ -1,5 +1,5 @@
 ﻿using Grid.Enum;
-using Grid.Factories.ElementFactory.Interfaces;
+using Grid.Factories.ElementFactory.Abstractions;
 using Grid.Models;
 
 namespace Grid.Factories.ElementFactory.Implemenations

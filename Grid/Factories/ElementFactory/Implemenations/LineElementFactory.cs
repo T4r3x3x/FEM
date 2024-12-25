@@ -1,5 +1,5 @@
 ﻿using Grid.Enum;
-using Grid.Factories.ElementFactory.Interfaces;
+using Grid.Factories.ElementFactory.Abstractions;
 using Grid.Models;
 
 namespace Grid.Factories.ElementFactory.Implemenations
@@ -8,9 +8,18 @@ namespace Grid.Factories.ElementFactory.Implemenations
     {
         private const GridDimensional Dimensional = GridDimensional.One;
 
+        private readonly AxisOrientation _section;
+        private readonly int _sectionIndex; //индекс точки на оси, по которой происходит сечение
+
+        public LineElementFactory(AxisOrientation section, int sectionIndex)
+        {
+            _section = section;
+            _sectionIndex = sectionIndex;
+        }
+
         public override List<FiniteElementScheme> GetElements(SpatialCoordinates coordinates, Area<double>[] subDomains, int[] missingNodesCounts)
         {
-            List<FiniteElementScheme> elements = new List<FiniteElementScheme>();
+            List<FiniteElementScheme> elements = [];
             var x = coordinates.X;
 
             for (int xIndex = 0; xIndex < x.Length - 1; xIndex++)
@@ -57,13 +66,11 @@ namespace Grid.Factories.ElementFactory.Implemenations
 
         private static int GetAreaNumber(double[] x, int xIndex, Area<double>[] subDomains)
         {
-            Node elementCenter = GetCenter(x, xIndex);
+            var elementCenter = GetCenter(x, xIndex);
             return BaseMethods.GetAreaNumber(subDomains, elementCenter, Dimensional);
         }
 
         private static Node GetCenter(double[] x, int xIndex) =>
-            new Node((x[xIndex] + x[xIndex + 1]) / 2.0);
-
-
+            new((x[xIndex] + x[xIndex + 1]) / 2.0);
     }
 }

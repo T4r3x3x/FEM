@@ -10,25 +10,23 @@ using static FemProducer.Basises.Helpers.IndexFunctions.IndexFunctions2D;
 
 namespace FemProducer.Basises.Implementations.TwoDimensional
 {
-    public class LinearRectangularBasis : Abstract2DBasis
+    public class LinearRectangularBasis(ProblemService problemService) : Abstract2DBasis(problemService)
     {
-        protected override int _nodesCountInElement => 4;
+        protected override int NodesCountInElement => 4;
 
-        private double[,] _G = LinearBasisFunctions.G;
-        private double[,] _M = LinearBasisFunctions.M;
-
-        public LinearRectangularBasis(ProblemService problemService) : base(problemService) { }
+        private readonly double[,] _g = LinearBasisFunctions.G;
+        private readonly double[,] _m = LinearBasisFunctions.M;
 
         public override IList<IList<double>> GetMassMatrix(FiniteElement finiteElement)
         {
-            var massMatrix = InitializeMatrix(_nodesCountInElement);
+            var massMatrix = InitializeMatrix(NodesCountInElement);
 
             (var hx, var hy) = finiteElement.GetSteps2D();
 
-            for (int i = 0; i < _nodesCountInElement; i++)
-                for (int j = 0; j < _nodesCountInElement; j++)
+            for (int i = 0; i < NodesCountInElement; i++)
+                for (int j = 0; j < NodesCountInElement; j++)
                 {
-                    massMatrix[i][j] += _M[Mu(i), Mu(j)] * _M[Nu(i), Nu(j)];
+                    massMatrix[i][j] += _m[Mu(i), Mu(j)] * _m[Nu(i), Nu(j)];
                     massMatrix[i][j] *= hx / 6 * hy / 6;
                 }
             return massMatrix;
@@ -36,13 +34,13 @@ namespace FemProducer.Basises.Implementations.TwoDimensional
 
         public override IList<IList<double>> GetStiffnessMatrix(FiniteElement finiteElement)
         {
-            var stiffnessMatrix = InitializeMatrix(_nodesCountInElement);
+            var stiffnessMatrix = InitializeMatrix(NodesCountInElement);
 
             (var hx, var hy) = finiteElement.GetSteps2D();
 
-            for (int i = 0; i < _nodesCountInElement; i++)
-                for (int j = 0; j < _nodesCountInElement; j++)
-                    stiffnessMatrix[i][j] = _G[Mu(i), Mu(j)] / hx * _M[Nu(i), Nu(j)] * hy / 6 + _M[Mu(i), Mu(j)] * hx / 6 * _G[Nu(i), Nu(j)] / hy;
+            for (int i = 0; i < NodesCountInElement; i++)
+                for (int j = 0; j < NodesCountInElement; j++)
+                    stiffnessMatrix[i][j] = _g[Mu(i), Mu(j)] / hx * _m[Nu(i), Nu(j)] * hy / 6 + _m[Mu(i), Mu(j)] * hx / 6 * _g[Nu(i), Nu(j)] / hy;
 
             return stiffnessMatrix;
         }

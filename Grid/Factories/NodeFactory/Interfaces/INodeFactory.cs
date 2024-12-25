@@ -1,6 +1,7 @@
 ﻿using Grid.Models;
 
 using MathModels;
+using MathModels.Models;
 
 namespace Grid.Factories.NodeFactory.Interfaces
 {

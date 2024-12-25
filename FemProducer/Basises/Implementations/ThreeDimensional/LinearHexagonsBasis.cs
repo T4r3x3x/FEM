@@ -15,19 +15,18 @@ namespace FemProducer.Basises.Implementations.ThreeDimensional
 
     public class LinearHexagonsBasis : AbstractBasis
     {
-        private readonly Node _xLimits = new(0, 1), _yLimits = new(0, 1), _zLimits = new Node(0, 1);
-        private readonly LinearQuadrangularCartesianBasis _linearQuadrangularBasis;
+        private readonly Node _axisIntegrLimits = new(0, 1);
 
-        protected override int _nodesCountInElement => 8;
+        protected override int NodesCountInElement => 8;
 
-        public LinearHexagonsBasis(ProblemService problemService) : base(problemService) => _linearQuadrangularBasis = new LinearQuadrangularCartesianBasis(problemService);
+        public LinearHexagonsBasis(ProblemService problemService) : base(problemService) => _boundaryBasis = new LinearQuadrangularCartesianBasis(problemService);
 
         public override IList<IList<double>> GetMassMatrix(FiniteElement finiteElement)
         {
-            var massMatrix = InitializeMatrix(_nodesCountInElement);
+            var massMatrix = InitializeMatrix(NodesCountInElement);
 
-            for (int i = 0; i < _nodesCountInElement; i++)
-                for (int j = 0; j < _nodesCountInElement; j++)
+            for (int i = 0; i < NodesCountInElement; i++)
+                for (int j = 0; j < NodesCountInElement; j++)
                 {
                     double integrFunc(double ksi, double mu, double theta)
                     {
@@ -35,9 +34,9 @@ namespace FemProducer.Basises.Implementations.ThreeDimensional
                         return Fita(i, ksi, mu, theta) * Fita(j, ksi, mu, theta) * jacobian;
                     }
                     massMatrix[i][j] = Integration.GaussIntegration(
-                        _xLimits,
-                        _yLimits,
-                        _zLimits,
+                        _axisIntegrLimits,
+                        _axisIntegrLimits,
+                        _axisIntegrLimits,
                         integrFunc,
                         Integration.PointsCount.Three);
                 }
@@ -46,10 +45,10 @@ namespace FemProducer.Basises.Implementations.ThreeDimensional
 
         public override IList<IList<double>> GetStiffnessMatrix(FiniteElement finiteElement)
         {
-            var stiffnessMatrix = InitializeMatrix(_nodesCountInElement);
+            var stiffnessMatrix = InitializeMatrix(NodesCountInElement);
 
-            for (int i = 0; i < _nodesCountInElement; i++)
-                for (int j = 0; j < _nodesCountInElement; j++)
+            for (int i = 0; i < NodesCountInElement; i++)
+                for (int j = 0; j < NodesCountInElement; j++)
                 {
                     double integrFunc(double ksi, double mu, double theta)
                     {
@@ -62,9 +61,9 @@ namespace FemProducer.Basises.Implementations.ThreeDimensional
                         return (inverseJacobi * gradFitaI) * (inverseJacobi * gradFitaJ) * detJ;
                     }
                     stiffnessMatrix[i][j] = Integration.GaussIntegration(
-                        _xLimits,
-                        _yLimits,
-                        _zLimits,
+                        _axisIntegrLimits,
+                        _axisIntegrLimits,
+                        _axisIntegrLimits,
                         integrFunc,
                         Integration.PointsCount.Three);
                 }
@@ -74,16 +73,6 @@ namespace FemProducer.Basises.Implementations.ThreeDimensional
         public override Dictionary<string, IList<IList<double>>> GetLocalMatrixes(FiniteElement finiteElement)
         {
             throw new NotImplementedException();
-        }
-
-        public override IList<double> GetSecondBoundaryData(FiniteElement finiteElement, Func<Node, int, double> func, int formulaNumber) =>
-            _linearQuadrangularBasis.GetLocalVector(finiteElement, func, formulaNumber);
-
-        public override (IList<IList<double>>, IList<double>) GetThirdBoundaryData(Slae slae, FiniteElement finiteElement, Func<Node, int, double> func, int formulaNumber)
-        {
-            var matrix = _linearQuadrangularBasis.GetMassMatrix(finiteElement);
-            var vector = _linearQuadrangularBasis.GetLocalVector(finiteElement, func, formulaNumber);
-            return (matrix, vector);
         }
 
         #region Support stuff

@@ -8,10 +8,6 @@ namespace FemProducer.Basises.Abstractions
     {
         public AxisOrientation Section { get; set; }
 
-        protected Abstract2DBasis(ProblemService problemService, AxisOrientation section = AxisOrientation.XY) : base(problemService)
-        {
-            Section = section;
-        }
-
+        protected Abstract2DBasis(ProblemService problemService, AxisOrientation section = AxisOrientation.XY) : base(problemService) => Section = section;
     }
 }

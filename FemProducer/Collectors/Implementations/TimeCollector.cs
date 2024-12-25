@@ -1,6 +1,5 @@
-﻿using FemProducer.Collector.CollectorBase.Interfaces;
-using FemProducer.Collectors.Abstractions;
-using FemProducer.MatrixBuilding;
+﻿using FemProducer.Collectors.Abstractions;
+using FemProducer.Collectors.CollectorBases.Interfaces;
 using FemProducer.Services;
 
 using Grid.Models;
@@ -13,15 +12,19 @@ namespace FemProducer.Collectors.Implementations
     {
         private readonly SolutionService _solutionService;
 
-        public TimeCollector(SolutionService solutionService, ICollectorBase collectorBase, GridModel grid, MatrixFactory matrixFactory) : base(collectorBase, grid, matrixFactory)
+        public TimeCollector(SolutionService solutionService, ICollectorBase collectorBase, GridModel grid, MatrixFactory.MatrixFactory matrixFactory) : base(collectorBase, grid, matrixFactory)
         {
             _solutionService = solutionService;
         }
-
-        public Slae CollectSlae(int timeLayer)
+        public override Slae Collect(int timeLayer)
         {
-            Vector vector = new Vector(_grid.NodesCount);
-            Matrix matrix = _matrixFactory.CreateMatrix(_grid);
+            var slae = CollectSlae(timeLayer);
+            _collectorBase.GetBoundaryConditions(slae);
+            return slae;
+        }
+
+        private Slae CollectSlae(int timeLayer)
+        {
             Matrix M, G, H;
             double deltaT = _grid.T[timeLayer] - _grid.T[timeLayer - 2];
             double deltaT1 = _grid.T[timeLayer - 1] - _grid.T[timeLayer - 2];
@@ -38,17 +41,10 @@ namespace FemProducer.Collectors.Implementations
             Vector b = results.Item2;
             var timeCoef = (deltaT + deltaT0) / (deltaT * deltaT0);
 
-            vector = b - deltaT0 / (deltaT * deltaT1) * vector1 + deltaT / (deltaT1 * deltaT0) * vector2;
-            matrix = timeCoef * M + G + H;
+            var vector = b - deltaT0 / (deltaT * deltaT1) * vector1 + deltaT / (deltaT1 * deltaT0) * vector2;
+            var matrix = timeCoef * M + G + H;
 
             return new Slae(matrix, vector);
-        }
-
-        public override Slae Collect(int timeLayer)
-        {
-            var slae = CollectSlae(timeLayer);
-            _collectorBase.GetBoundaryConditions(slae);
-            return slae;
         }
     }
 }

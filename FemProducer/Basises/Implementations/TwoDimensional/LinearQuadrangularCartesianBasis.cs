@@ -13,7 +13,7 @@ namespace FemProducer.Basises.Implementations.TwoDimensional
 {
     public partial class LinearQuadrangularCartesianBasis : AbstractBasis
     {
-        protected override int _nodesCountInElement => 4;
+        protected override int NodesCountInElement => 4;
 
         private readonly Node singleSquareFirstPoint = new Node(0, 0);
         private readonly Node singleSquareFourthPoint = new Node(1, 1);
@@ -32,18 +32,18 @@ namespace FemProducer.Basises.Implementations.TwoDimensional
 
         public override IList<IList<double>> GetMassMatrix(FiniteElement finiteElement)
         {
-            var massMatrix = InitializeMatrix(_nodesCountInElement);
+            var massMatrix = InitializeMatrix(NodesCountInElement);
 
             var coefficents = new LinearQuadrangularCartesianBasisCoefficients(finiteElement);
-            for (int i = 0; i < _nodesCountInElement; i++)
-                for (int j = 0; j < _nodesCountInElement; j++)
+            for (int i = 0; i < NodesCountInElement; i++)
+                for (int j = 0; j < NodesCountInElement; j++)
                     massMatrix[i][j] += (coefficents.a0 / 36 * M[0][i][j] + coefficents.a1 / 72 * M[1][i][j] + coefficents.a2 / 72 * M[2][i][j]) * Math.Sign(coefficents.a0);
             return massMatrix;
         }
 
         public override IList<IList<double>> GetStiffnessMatrix(FiniteElement finiteElement)
         {
-            var stiffnessMatrix = InitializeMatrix(_nodesCountInElement);
+            var stiffnessMatrix = InitializeMatrix(NodesCountInElement);
 
             var coefficients = new LinearQuadrangularCartesianBasisCoefficients(finiteElement);
             for (int i = 0; i < finiteElement.Nodes.Length; i++)

@@ -9,8 +9,9 @@
 		}
 		public static void PrintSuccessMessage(string message)
 		{
-			Console.WriteLine(message, Console.BackgroundColor = ConsoleColor.Green);
-			Console.BackgroundColor = ConsoleColor.Gray;
+			Console.WriteLine(message);
+			// Console.WriteLine(message, Console.BackgroundColor = ConsoleColor.Green);
+			// Console.BackgroundColor = ConsoleColor.Gray;
 		}
 	}
 }

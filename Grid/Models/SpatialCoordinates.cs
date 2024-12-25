@@ -16,7 +16,7 @@ namespace Grid.Models
         /// <param name="x"></param>
         /// <param name="y">не указывать в одномерном случае</param>
         /// <param name="z">не указывать в двумерном случае</param>
-        public SpatialCoordinates(double[] x, double[] y = null!, double[] z = null!)
+        public SpatialCoordinates(double[] x, double[]? y = null!, double[]? z = null!)
         {
             X = x;
             Y = y ?? [0];

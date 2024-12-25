@@ -2,7 +2,7 @@
 
 using MathModels.Models;
 
-namespace FemProducer.MatrixBuilding
+namespace FemProducer.MatrixFactory
 {
 	public interface IMatrixFactory
 	{

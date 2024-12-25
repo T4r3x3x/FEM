@@ -2,34 +2,36 @@
 
 using Tools;
 
-namespace FemProducer.Models
+namespace FemProducer.Models;
+
+public class ProblemParameters : IValidatableObject
 {
-	public class ProblemParameters : IValidatableObject
-	{
-		public IList<double> Lambda, Gamma;
+    public IList<double> SourcePowers { get; }
+    public IList<double> Lambda { get; }
+    public IList<double> Gamma { get; }
 
-		public ProblemParameters(IList<double> lambda, IList<double> gamma)
-		{
-			Lambda = lambda;
-			Gamma = gamma;
+    public ProblemParameters(IList<double> lambda, IList<double> gamma, IList<double> sourcePowers)
+    {
+        Lambda = lambda;
+        Gamma = gamma;
+        SourcePowers = sourcePowers;
 
-			var results = new List<ValidationResult>();
-			var context = new ValidationContext(this);
+        var results = new List<ValidationResult>();
+        var context = new ValidationContext(this);
 
-			if (!Validator.TryValidateObject(this, context, results, true))
-				throw new ValidationException(results.ToCommonLine());
-		}
+        if (!Validator.TryValidateObject(this, context, results, true))
+            throw new ValidationException(results.ToCommonLine());
+    }
 
-		public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-		{
-			List<ValidationResult> errors = new List<ValidationResult>();
-			if (Lambda.Count == 0)
-				errors.Add(new ValidationResult("Не задано ни одной лямбды!"));
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        var errors = new List<ValidationResult>();
+        if (Lambda.Count == 0)
+            errors.Add(new("Не задано ни одной лямбды!"));
 
-			if (Gamma.Count == 0)
-				errors.Add(new ValidationResult("Не задано ни одной гаммы!"));
+        if (Gamma.Count == 0)
+            errors.Add(new("Не задано ни одной гаммы!"));
 
-			return errors;
-		}
-	}
+        return errors;
+    }
 }

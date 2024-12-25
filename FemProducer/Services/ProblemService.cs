@@ -2,86 +2,107 @@
 
 using Grid.Models;
 
-namespace FemProducer.Services
+using MathModels.Models;
+
+namespace FemProducer.Services;
+
+public class ProblemService(ProblemParameters problemParameters)
 {
-    public class ProblemService
+    /// <summary>
+    /// Решение базовой задачи
+    /// </summary>
+    public Vector Q { get; set; }
+
+    public Dictionary<Node, int> NodesIndexes { get; set; }
+
+    /// <summary>
+    /// Мощности источников
+    /// </summary>
+    /// <param name="formulaNumber"></param>
+    /// <returns></returns>
+    public double SourcePowers(int formulaNumber) => problemParameters.SourcePowers[formulaNumber];
+
+    public virtual double Lambda(int formulaNumber)
     {
-        private readonly ProblemParameters _problemParameters;
+        if (formulaNumber > problemParameters.Lambda.Count - 1)
+            throw new ArgumentException($"Лямбда для формулы {formulaNumber} не задана!");
 
-        public ProblemService(ProblemParameters problemParameters) => _problemParameters = problemParameters;
+        return problemParameters.Lambda[formulaNumber];
+    }
 
-        public double Lambda(int formulaNumber)
+    public double Gamma(int formulaNumber)
+    {
+        if (formulaNumber > problemParameters.Gamma.Count - 1)
+            throw new ArgumentException($"Гамма для формулы {formulaNumber} не задана!");
+
+        return problemParameters.Gamma[formulaNumber];
+    }
+
+    public virtual double LambdaRight(int formulaNumber)
+    {
+        if (formulaNumber > problemParameters.Gamma.Count - 1)
+            throw new ArgumentException($"Гамма для формулы {formulaNumber} не задана!");
+
+        return problemParameters.Lambda[formulaNumber];
+    }
+
+    public double Function(Node node, int area)
+    {
+        var x = node.X;
+        var y = node.Y;
+        var z = node.Z;
+
+        return area switch
         {
-            if (formulaNumber > _problemParameters.Lambda.Count - 1)
-                throw new ArgumentException($"Лямбда для формулы {formulaNumber} не задана!");
+            _ => x
 
-            return _problemParameters.Lambda[formulaNumber];
-        }
+            //_ => throw new ArgumentException(),
+        };
+    }
 
-        public double Gamma(int formulaNumber)
+    public double SourceFunction(Node node, int formulaNumber) => SourcePowers(formulaNumber);
+
+    public double SecondBoundaryFunction(Node node, int formulaNumber)
+    {
+        var x = node.X;
+        var y = node.Y;
+        var z = node.Z;
+        return Lambda(formulaNumber) * formulaNumber switch
         {
-            if (formulaNumber > _problemParameters.Gamma.Count - 1)
-                throw new ArgumentException($"Гамма для формулы {formulaNumber} не задана!");
+            0 => -y * z,
+            1 => x * z,
+            2 => y * z,
+            3 => -x * z,
+            4 => -y * x,
+            5 => y * x,
+            _ => throw new ArgumentException($"Гамма для формулы {formulaNumber} не задана!")
+        };
+    }
 
-            return _problemParameters.Gamma[formulaNumber];
-        }
+    public double ThirdBoundaryFunction(Node node, int formulaNumber)
+    {
+        var x = node.X;
+        var y = node.Y;
+        var z = node.Z;
+        return Function(node, formulaNumber) + SecondBoundaryFunction(node, formulaNumber);
+        //return formulaNumber switch
+        //{
+        //    2 => Function(node, formulaNumber) + SecondBoundaryFunction(node, formulaNumber),
+        //    1 => Function(node, formulaNumber) + SecondBoundaryFunction(node, formulaNumber),
 
-        public double Function(Node node, int area)
+        //    _ => throw new ArgumentException(),
+        //};
+    }
+
+    public virtual double F(Node node, int formulaNumber)
+    {
+        var x = node.X;
+        var y = node.Y;
+        var z = node.Z;
+        return formulaNumber switch
         {
-            var x = node.X;
-            var y = node.Y;
-            var z = node.Z;
-
-            return area switch
-            {
-                _ => x * y * z,
-
-                //_ => throw new ArgumentException(),
-            };
-        }
-
-        public double SecondBoundaryFunction(Node node, int formulaNumber)
-        {
-            var x = node.X;
-            var y = node.Y;
-            var z = node.Z;
-            return formulaNumber switch
-            {
-                0 => -y * z,
-                1 => x * z,
-                2 => y * z,
-                3 => -x * z,
-                4 => -y * x,
-                5 => y * x,
-                _ => throw new ArgumentException($"Гамма для формулы {formulaNumber} не задана!")
-            };
-        }
-
-        public double ThridBoundaryFunction(Node node, int formulaNumber)
-        {
-            var x = node.X;
-            var y = node.Y;
-            var z = node.Z;
-            return Function(node, formulaNumber) + SecondBoundaryFunction(node, formulaNumber);
-            //return formulaNumber switch
-            //{
-            //    2 => Function(node, formulaNumber) + SecondBoundaryFunction(node, formulaNumber),
-            //    1 => Function(node, formulaNumber) + SecondBoundaryFunction(node, formulaNumber),
-
-            //    _ => throw new ArgumentException(),
-            //};
-        }
-
-        public double F(Node node, int formulaNumber)
-        {
-            var x = node.X;
-            var y = node.Y;
-            var z = node.Z;
-            return formulaNumber switch
-            {
-                _ => Gamma(formulaNumber) * Function(node, formulaNumber),
-                //_ => throw new ArgumentException(),
-            };
-        }
+            _ => Gamma(formulaNumber) * Function(node, formulaNumber)
+            //_ => throw new ArgumentException(),
+        };
     }
 }

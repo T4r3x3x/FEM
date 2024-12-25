@@ -14,6 +14,7 @@ namespace Grid.Factories
             var boundaryLimitsNodesIndexes = GetBoundaryLimitsNodesIndexes(boundaryConditions, xSplitsCount, ySplitsCount, zSplitsCount);
             return CalculateBoundaryNodes(boundaryConditions, boundaryLimitsNodesIndexes, x.Length, y.Length, missingNodesCounts, coordinates);
         }
+
         private (int[], FiniteElementScheme[], FiniteElementScheme[]) CalculateBoundaryNodes((Area<int> Area, BoundaryType BoundaryType)[] boundaryConditions, int[][] limits, int xCount, int yCount, int[] missingNodesCounts, SpatialCoordinates coordinates)
         {
             HashSet<int> fisrtBoundaries = new();
@@ -43,11 +44,12 @@ namespace Grid.Factories
                             break;
                         }
                     default:
-                        throw new ArgumentException($"Boundary type was wrong - {limits[i][6]}");
+                        throw new ArgumentException($"Boundary type was wrong - {limits[i][6]}");//в одномерном случае индекс будет не 6, надо как-то учесть
                 }
             }
             return (fisrtBoundaries.ToArray(), secondBoundaryElems.ToArray(), thirdBoundaryElems.ToArray());
         }
+
         private (int, int) GetAxisLimitIndexes(int leftLimit, int rightLimit, int[] SplitsCount)
         {
             int firstLimit = 0, secondLimit, i;
@@ -151,7 +153,7 @@ namespace Grid.Factories
             foreach (var element in elements) //решить где и как будет решаться по какой формуле надо вычитывать ку 
                 element.FormulaNumber = formulaNumber;
 
-            return elements.ToArray();
+            return [.. elements];
         }
 
         /// <summary>

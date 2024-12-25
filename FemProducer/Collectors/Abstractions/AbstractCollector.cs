@@ -1,6 +1,4 @@
-﻿
-using FemProducer.Collector.CollectorBase.Interfaces;
-using FemProducer.MatrixBuilding;
+﻿using FemProducer.Collectors.CollectorBases.Interfaces;
 
 using Grid.Models;
 
@@ -12,9 +10,9 @@ namespace FemProducer.Collectors.Abstractions
     {
         protected readonly ICollectorBase _collectorBase;
         protected readonly GridModel _grid;
-        protected readonly MatrixFactory _matrixFactory;
+        protected readonly MatrixFactory.MatrixFactory _matrixFactory;
 
-        protected AbstractCollector(ICollectorBase collectorBase, GridModel grid, MatrixFactory matrixFactory)
+        protected AbstractCollector(ICollectorBase collectorBase, GridModel grid, MatrixFactory.MatrixFactory matrixFactory)
         {
             _collectorBase = collectorBase;
             _grid = grid;

@@ -1,40 +1,39 @@
-﻿namespace Tools
+﻿namespace Tools;
+
+public static class SearchingAlghoritms
 {
-    public static class SearchingAlghoritms
+    public static int BinarySearch(IList<int> list, int value, int l, int r)
     {
-        public static int BinarySearch(IList<int> list, int value, int l, int r)
+        while (l < r)
         {
-            while (l < r)
-            {
-                int mid = (l + r) / 2 + 1;
+            var mid = (l + r) / 2 + 1;
 
-                if (list[mid] > value)
-                    r = mid - 1;
-                else
-                    l = mid;
-            }
-
-            return list[l] == value ? l : -1;
+            if (list[mid] > value)
+                r = mid - 1;
+            else
+                l = mid;
         }
 
-        public static double GetMinValueInCollection(IEnumerable<double> collection)
-        {
-            var min = double.MaxValue;
-            foreach (var item in collection)
-                if (item < min)
-                    min = item;
+        return list[l] == value ? l : -1;
+    }
 
-            return min;
-        }
+    public static double GetMinValueInCollection(IEnumerable<double> collection)
+    {
+        var min = double.MaxValue;
+        foreach (var item in collection)
+            if (item < min)
+                min = item;
 
-        public static double GetMaxValueInCollection(IEnumerable<double> collection)
-        {
-            var max = double.MinValue;
-            foreach (var item in collection)
-                if (item > max)
-                    max = item;
+        return min;
+    }
 
-            return max;
-        }
+    public static double GetMaxValueInCollection(IEnumerable<double> collection)
+    {
+        var max = double.MinValue;
+        foreach (var item in collection)
+            if (item > max)
+                max = item;
+
+        return max;
     }
 }
