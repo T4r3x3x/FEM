@@ -54,7 +54,7 @@ public class ProblemService(ProblemParameters problemParameters)
 
         return area switch
         {
-            _ => x
+            _ => 0
 
             //_ => throw new ArgumentException(),
         };
@@ -69,12 +69,7 @@ public class ProblemService(ProblemParameters problemParameters)
         var z = node.Z;
         return Lambda(formulaNumber) * formulaNumber switch
         {
-            0 => -y * z,
-            1 => x * z,
-            2 => y * z,
-            3 => -x * z,
-            4 => -y * x,
-            5 => y * x,
+
             _ => throw new ArgumentException($"Гамма для формулы {formulaNumber} не задана!")
         };
     }
@@ -101,7 +96,7 @@ public class ProblemService(ProblemParameters problemParameters)
         var z = node.Z;
         return formulaNumber switch
         {
-            _ => Gamma(formulaNumber) * Function(node, formulaNumber)
+            _ => 0
             //_ => throw new ArgumentException(),
         };
     }

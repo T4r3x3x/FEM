@@ -18,6 +18,8 @@ public class GridFactory(AbstractElementFactory elementFactory, INodeFactory nod
 
     public GridModel GetGrid(GridInputParameters @params)
     {
+        var sources = new List<FiniteElementScheme>();
+
         (var coordinates, var t) = GetAxisesToPoints(@params);
 
         var subDomainsBoundaries = (@params.XW is not null && @params.YW is not null) switch
@@ -39,8 +41,25 @@ public class GridFactory(AbstractElementFactory elementFactory, INodeFactory nod
 
         var nodesIndexes = new Dictionary<Node, int>(nodes.Select((n, i) => new KeyValuePair<Node, int>(n, i)));
 
+
+        #region wells
+        var wellDomain = new WellArea(-70, -60, -70, -60, 0, 300, 0, 50, new(0.1, false));
+        var res = WellNodeFactory.BuildWellArea(wellDomain, 4, 1, coordinates.X, coordinates.Y, coordinates.Z, nodes, boundaryNodes.Item1, elements, sources);
+        nodes = (List<Node>)res.nodes;
+        elements.AddRange(res.finiteElements);
+        boundaryNodes.Item1 = boundaryNodes.Item1.Concat(res.firstBoundaryNodes).ToArray();
+        sources.Add(res.source);
+
+        wellDomain = new(60, 70, 60, 70, 0, 300, 1, 50, new(0.1, false));
+        res = WellNodeFactory.BuildWellArea(wellDomain, 4, 1, coordinates.X, coordinates.Y, coordinates.Z, nodes, boundaryNodes.Item1, elements, sources);
+        nodes = (List<Node>)res.nodes;
+        elements.AddRange(res.finiteElements);
+        boundaryNodes.Item1 = boundaryNodes.Item1.Concat(res.firstBoundaryNodes).ToArray();
+        sources.Add(res.source);
+        #endregion
+
         return new(elements, nodes ?? throw new("Nodes is null!"), boundaryNodes.Item1.Order(), boundaryNodes.Item2, boundaryNodes.Item3, realSubdomains,
-            nodesInElementCount, coordinates.X, coordinates.Y, coordinates.Z, @params.Areas, null!, nodesIndexes, t);
+            nodesInElementCount, coordinates.X, coordinates.Y, coordinates.Z, @params.Areas, sources, nodesIndexes, res.receivingLines.ToList(), t);
     }
 
     private static int CalculateNodesCountInElement(GridDimensional dimensional) => (int)Math.Pow(2, (int)dimensional);

@@ -36,8 +36,8 @@ temp = []
 temp2 = []
 #boundaries = f.readline().split(' ')
 
-leftBoundary = -160
-rightBoundary = 160
+leftBoundary = -250
+rightBoundary = 250
 ax[0].set_xlim(leftBoundary, rightBoundary)
 ax[0].set_ylim(leftBoundary, rightBoundary)
 ax[1].set_xlim(leftBoundary, rightBoundary)

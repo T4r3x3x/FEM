@@ -12,6 +12,7 @@ public class GridModel
     public readonly IReadOnlyList<double> Y;
     public readonly IReadOnlyList<double> Z;
     public readonly Dictionary<Node, int> NodesIndexes;
+    public readonly IReadOnlyList<FiniteElementScheme> ReceivingLines;
 
     /// <summary>
     /// Сосредоточенные источники
@@ -20,7 +21,7 @@ public class GridModel
 
     public GridModel(IList<FiniteElementScheme> elements, IList<Node> nodes,
         IEnumerable<int> firstBoundaryNodes, IEnumerable<FiniteElementScheme> secondBoundaryNodes, IEnumerable<FiniteElementScheme> thirdBoundaryNodes, IList<Point[]> subdomains,
-        int nodesInElementCount, double[] x, double[] y, double[] z, Area<int>[] areas, IReadOnlyList<FiniteElementScheme> sources, Dictionary<Node, int> nodesIndexes, double[] t = null!, List<double> ht = null!)
+        int nodesInElementCount, double[] x, double[] y, double[] z, Area<int>[] areas, IReadOnlyList<FiniteElementScheme> sources, Dictionary<Node, int> nodesIndexes, IReadOnlyList<FiniteElementScheme> receivingLines, double[] t = null!, List<double> ht = null!)
     {
         FirstBoundaryNodes = firstBoundaryNodes;
         SecondBoundaryNodes = secondBoundaryNodes;
@@ -37,6 +38,7 @@ public class GridModel
         _areas = areas;
         Sources = sources;
         NodesIndexes = nodesIndexes;
+        ReceivingLines = receivingLines;
     }
 
     public IList<Point[]> Subdomains { get; }

@@ -42,17 +42,14 @@ public class CollectorBase : ICollectorBase
             var element = _grid.GetFiniteElement(elementSheme);
 
             var massMatrix = _basis.GetMassMatrix(element);
-            var stiffnessMatrix = _basis.GetStiffnessMatrix(element); //todo для обычного мкэ должна быть матрица масс
-            var localVector = _basis.GetLocalVector(element, _problemService.F, formulaNumber, stiffnessMatrix);
+            var stiffnessMatrix = _basis.GetStiffnessMatrix(element);
+            var localVector = _basis.GetLocalVector(element, _problemService.F, formulaNumber, massMatrix);
 
             massMatrix.MultiplyLocalMatrix(_problemService.Gamma(formulaNumber));
             AddLocalMatrix(M, massMatrix, elementSheme);
 
             stiffnessMatrix.MultiplyLocalMatrix(_problemService.Lambda(formulaNumber));
             AddLocalMatrix(G, stiffnessMatrix, elementSheme);
-
-            for (var i = 0; i < localVector.Count; i++)
-                localVector[i] *= _problemService.LambdaRight(formulaNumber);
 
             AddLocalVector(vector, localVector, elementSheme);
         });
@@ -114,8 +111,22 @@ public class CollectorBase : ICollectorBase
         ConsiderSecondBoundaryConditions(slae);
         ConsiderThirdBoundaryConditions(slae);
         ConsiderFirstBoundaryConditions(slae);
+        ConsiderSources(slae);
+    }
 
-        slae.Vector[0] = 10;
+    private void ConsiderSources(Slae slae)
+    {
+        foreach (var source in _grid.Sources)
+        {
+            var finiteElement = _grid.GetFiniteElement(source);
+            (var hx, var hy, var hz) = finiteElement.GetSteps3D();
+            var v = hx * hy * hz;
+            var s = 2 * hx * hy + 4 * hy * hz;
+            var vector = new List<double>(source.NodesIndexes.Length);
+            for (var i = 0; i < source.NodesIndexes.Length; i++)
+                vector.Add(_problemService.SourcePowers(source.FormulaNumber) * s / v);
+            AddLocalVector(slae.Vector, vector, source);
+        }
     }
 
 

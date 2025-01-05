@@ -12,8 +12,10 @@ public static class WellNodeFactory
     private const double Tolerance = 1e-15;
     private const double OkopkaStep = 0.02;
 
-    public static (IList<Node> nodes, IList<FiniteElementScheme> finiteElements, int[] firstBoundaryNodes, FiniteElementScheme source) BuildWellArea(WellArea wellDomain, int stepsCount, double q, double[] x, double[] y, double[] z, List<Node> nodes, IList<int> boundaryNodes,
-        FiniteElementScheme[] finiteElementSchemes, IList<FiniteElementScheme>? sources = null!)
+    public static (IList<Node> nodes, IList<FiniteElementScheme> finiteElements, int[] firstBoundaryNodes, FiniteElementScheme source,
+        IList<FiniteElementScheme> receivingLines)
+        BuildWellArea(WellArea wellDomain, int stepsCount, double q, double[] x, double[] y, double[] zW,
+            List<Node> nodes, IList<int> boundaryNodes, IList<FiniteElementScheme> finiteElementSchemes, IList<FiniteElementScheme>? sources = null!)
     {
         for (var i = 0; i < nodes.Count; i++)
         {
@@ -26,7 +28,7 @@ public static class WellNodeFactory
         var supportLines = BuildSupportLines(wellDomain, boundaryX, boundaryY);
 
 
-        (var elems, var newNodes) = BuildElems(wellDomain, stepsCount, q, z, supportLines);
+        (var elems, var newNodes) = BuildElems(wellDomain, stepsCount, q, zW, supportLines);
 
         newNodes = newNodes.Distinct().OrderBy(node => node.Z).ThenBy(node => node.Y).ThenBy(node => node.X).ToArray();
 
@@ -36,14 +38,15 @@ public static class WellNodeFactory
 
         var globalNodesIndexes = new Dictionary<Node, int>();
 
-        foreach (var _z in z)
+        foreach (var _z in zW)
         {
             for (var i = 0; i < boundaryY.Length - 1; i++)
             {
                 var innerNodes = newNodes.Where(node => !IsBoundaryNode(node, boundaryX, boundaryY));
                 var insertNodes = innerNodes.Where(node => boundaryY[i] <= node.Y && node.Y < boundaryY[i + 1] && Math.Abs(node.Z - _z) < Tolerance).ToArray();
 
-                var nodeIndex = nodes.FindIndex(node => Math.Abs(node.X - boundaryX[0]) < Tolerance && Math.Abs(node.Y - boundaryY[i]) < Tolerance && Math.Abs(node.Z - _z) < Tolerance);
+                var nodeIndex = nodes.FindIndex(node =>
+                    Math.Abs(node.X - boundaryX[0]) < Tolerance && Math.Abs(node.Y - boundaryY[i]) < Tolerance && Math.Abs(node.Z - _z) < Tolerance);
                 //плюс еще сколько до след узла
                 var nodesCountAtRight = nodes.Skip(nodeIndex).TakeWhile(node => node.Y <= nodes[nodeIndex].Y).Count();
                 var insertIndex = nodeIndex + nodesCountAtRight;
@@ -78,17 +81,21 @@ public static class WellNodeFactory
 
         TransformLocalNumericInGlobal(schemes, newNodes, globalNodesIndexes);
 
-        var source = GetSourceElementScheme(wellDomain.SourceZ, supportLines, globalNodesIndexes, z, wellDomain.FormulaNumber);
-        var firstBoundaryNodes = GetFirstBoundaryNodes(supportLines, newNodes, globalNodesIndexes, z, boundaryX, boundaryY, globalNodesIndexes);
+        var source = GetSourceElementScheme(wellDomain.SourceZ, supportLines, globalNodesIndexes, zW, wellDomain.FormulaNumber);
+        var firstBoundaryNodes = GetFirstBoundaryNodes(supportLines, newNodes, globalNodesIndexes, zW, boundaryX, boundaryY, globalNodesIndexes);
 
-        return (nodes, schemes, firstBoundaryNodes, source);
+        //будем их учитывать как приёмные линии
+        var wellElems = GetWellElems(supportLines, globalNodesIndexes, zW);
+
+        return (nodes, schemes, firstBoundaryNodes, source, wellElems);
     }
 
     /// <summary>
     /// Находим кэ в котором находится источник
     /// </summary>
     /// <returns></returns>
-    private static FiniteElementScheme GetSourceElementScheme(double sourceZ, SupportLine[] supportLine, Dictionary<Node, int> nodeIndexes, double[] zW, int formulaNumber)
+    private static FiniteElementScheme GetSourceElementScheme(double sourceZ, SupportLine[] supportLine, Dictionary<Node, int> nodeIndexes, double[] zW,
+        int formulaNumber)
     {
         var innerPoints = supportLine.Select(line => line.inner).ToArray();
         (var z1, var z2) = (zW.Last(z => z <= sourceZ), zW.First(z => z > sourceZ));
@@ -98,6 +105,30 @@ public static class WellNodeFactory
         var indexes = elementNodes.Select(node => nodeIndexes[node]).Order().ToArray();
 
         return new(indexes, formulaNumber, AxisOrientation.XYZ);
+    }
+
+    /// <summary>
+    /// Находим кэ в котором находится источник
+    /// </summary>
+    /// <returns></returns>
+    private static List<FiniteElementScheme> GetWellElems(SupportLine[] supportLine, Dictionary<Node, int> nodeIndexes, double[] zW)
+    {
+        var innerPoints = supportLine.Select(line => line.inner).ToArray();
+        var zPairs = new List<(double z1, double z2)>();
+
+        for (var i = 0; i < zW.Length - 2; i++)
+            zPairs.Add((zW[i], zW[i + 1]));
+
+        var elems = new List<FiniteElementScheme>();
+        foreach (var pair in zPairs)
+        {
+            var elementNodes = innerPoints.Select(point => new Node(point.x, point.y, pair.z1))
+                .Concat(innerPoints.Select(point => new Node(point.x, point.y, pair.z2)));
+            var indexes = elementNodes.Select(node => nodeIndexes[node]).Order().ToArray();
+            elems.Add(new(indexes, 0, AxisOrientation.XYZ));
+        }
+
+        return elems;
     }
 
     private static FiniteElementScheme[] ElementsToSchemes(FiniteElement[] elements, Dictionary<Node, int> nodesIndexes)
@@ -114,8 +145,10 @@ public static class WellNodeFactory
         return elementSchemes;
     }
 
-    private static int[] GetFirstBoundaryNodes(SupportLine[] supportLines, Node[] nodes, Dictionary<Node, int> nodesIndexes, double[] zW, double[] xW, double[] yW, Dictionary<Node, int> globalIndexes)
+    private static int[] GetFirstBoundaryNodes(SupportLine[] supportLines, Node[] nodes, Dictionary<Node, int> nodesIndexes, double[] zW, double[] xW,
+        double[] yW, Dictionary<Node, int> globalIndexes)
     {
+        return Array.Empty<int>();
         var boundaryNodesIndexes = new List<int>();
         var innerPoints = supportLines.Select(line => line.inner);
         foreach (var innerPoint in innerPoints)
@@ -124,8 +157,12 @@ public static class WellNodeFactory
             boundaryNodesIndexes.AddRange(boundaryNodes.Select(boundaryNode => nodesIndexes[boundaryNode]));
         }
 
-        var outerNodesX = ArraySegment<int>.Empty; // nodes.Select((node, i) => (node, i)).Where(pair => Math.Abs(pair.node.X - xW.First()) < TOLERANCE || Math.Abs(pair.node.X - xW.Last()) < TOLERANCE).Select(pair => pair.i);
-        var outerNodesY = ArraySegment<int>.Empty; //nodes.Select((node, i) => (node, i)).Where(pair => Math.Abs(pair.node.Y - yW.First()) < TOLERANCE || Math.Abs(pair.node.Y - yW.Last()) < TOLERANCE).Select(pair => pair.i);
+        var
+            outerNodesX = ArraySegment<int>
+                .Empty; // nodes.Select((node, i) => (node, i)).Where(pair => Math.Abs(pair.node.X - xW.First()) < TOLERANCE || Math.Abs(pair.node.X - xW.Last()) < TOLERANCE).Select(pair => pair.i);
+        var
+            outerNodesY = ArraySegment<int>
+                .Empty; //nodes.Select((node, i) => (node, i)).Where(pair => Math.Abs(pair.node.Y - yW.First()) < TOLERANCE || Math.Abs(pair.node.Y - yW.Last()) < TOLERANCE).Select(pair => pair.i);
         var outerNodesZ = nodes.Where(node => Math.Abs(node.Z - zW.First()) < Tolerance || Math.Abs(node.Z - zW.Last()) < Tolerance);
 
         var firstBoundaryNodesGlobalIndexes = outerNodesZ.Select(node => globalIndexes[node]);
@@ -189,7 +226,9 @@ public static class WellNodeFactory
 
     private static (Point fisrt, Point second) GetIntersectionPoints(double y1, double y2, double x1, double x2, WellArea wellArea)
     {
-        if (Math.Abs(x2 - x1) < Tolerance) return ((wellArea.XCenter, wellArea.YCenter - wellArea.WellDomainSettings.WellRadius), (wellArea.XCenter, wellArea.YCenter + wellArea.WellDomainSettings.WellRadius));
+        if (Math.Abs(x2 - x1) < Tolerance)
+            return ((wellArea.XCenter, wellArea.YCenter - wellArea.WellDomainSettings.WellRadius),
+                (wellArea.XCenter, wellArea.YCenter + wellArea.WellDomainSettings.WellRadius));
 
         var k = (y2 - y1) / (x2 - x1);
         var wellRadius = wellArea.WellDomainSettings.WellRadius;
@@ -212,21 +251,24 @@ public static class WellNodeFactory
         var linesCountInQuarter = supportLines.Length / 4;
         for (var i = 0; i < supportLines.Length - 1; i++)
         {
-            var res = BuildElementsBetweenTwoSupportLines(wellDomain, stepsCount, q, z, supportLines[i], supportLines[i + 1], GetQuarter(i, linesCountInQuarter));
+            var res = BuildElementsBetweenTwoSupportLines(wellDomain, stepsCount, q, z, supportLines[i], supportLines[i + 1],
+                GetQuarter(i, linesCountInQuarter));
 
             (var newElems, var newNodes) = res.Item1;
             elems.AddRange(newElems);
             nodes.AddRange(newNodes);
         }
 
-        var elemsBetweenFirstAndLastLines = BuildElementsBetweenTwoSupportLines(wellDomain, stepsCount, q, z, supportLines[^1], supportLines[0], GetQuarter(supportLines.Length - 1, linesCountInQuarter));
+        var elemsBetweenFirstAndLastLines = BuildElementsBetweenTwoSupportLines(wellDomain, stepsCount, q, z, supportLines[^1], supportLines[0],
+            GetQuarter(supportLines.Length - 1, linesCountInQuarter));
         elems.AddRange(elemsBetweenFirstAndLastLines.Item1.Item1);
         return (elems.ToArray(), nodes.ToArray());
     }
 
     private static int GetQuarter(int firstLineNumber, int linesCountInQuarter) => firstLineNumber / linesCountInQuarter;
 
-    private static ((FiniteElement[], Node[] nodes), Node[] boundaryNodes) BuildElementsBetweenTwoSupportLines(WellArea wellDomain, int stepsCount, double q, double[] z, SupportLine firstLine, SupportLine secondLine, int quarterNum)
+    private static ((FiniteElement[], Node[] nodes), Node[] boundaryNodes) BuildElementsBetweenTwoSupportLines(WellArea wellDomain, int stepsCount, double q,
+        double[] z, SupportLine firstLine, SupportLine secondLine, int quarterNum)
     {
         var supportFunc1 = GetLinearFunc(firstLine.outer.y, firstLine.inner.y, firstLine.outer.x, firstLine.inner.x);
         var supportFunc2 = GetLinearFunc(secondLine.outer.y, secondLine.inner.y, secondLine.outer.x, secondLine.inner.x);
@@ -288,7 +330,8 @@ public static class WellNodeFactory
         );
     }
 
-    private static (FiniteElement[], Node[]) GetNodesBetweenTwoSupportLines(int formulaNumber, int zLineLength, int xyLineLength, IList<Node> xyz1, IList<Node> xyz2, int quarterNum)
+    private static (FiniteElement[], Node[]) GetNodesBetweenTwoSupportLines(int formulaNumber, int zLineLength, int xyLineLength, IList<Node> xyz1,
+        IList<Node> xyz2, int quarterNum)
     {
         var elems = new List<FiniteElement>();
         var nodes = new List<Node>();
@@ -379,7 +422,8 @@ public record WellArea : Area<double>
 
     public double SourceZ { get; }
 
-    public WellArea(double XLeft, double XRight, double YBottom, double YTop, double ZBack, double ZFront, int FormulaNumber, double sourceZ, WellDomainSettings wellDomainSettings) : base(XLeft, XRight, YBottom, YTop, ZBack, ZFront, FormulaNumber, EAreaType.Well)
+    public WellArea(double XLeft, double XRight, double YBottom, double YTop, double ZBack, double ZFront, int FormulaNumber, double sourceZ,
+        WellDomainSettings wellDomainSettings) : base(XLeft, XRight, YBottom, YTop, ZBack, ZFront, FormulaNumber, EAreaType.Well)
     {
         WellDomainSettings = wellDomainSettings;
         SourceZ = sourceZ;
