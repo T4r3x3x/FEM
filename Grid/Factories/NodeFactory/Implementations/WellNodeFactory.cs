@@ -12,13 +12,14 @@ public static class WellNodeFactory
     private const double Tolerance = 1e-15;
     private const double OkopkaStep = 0.02;
 
-    public static (IList<Node> nodes, IList<FiniteElementScheme> finiteElements, int[] firstBoundaryNodes, FiniteElementScheme source,
+    public static (IList<Node> nodes, IList<FiniteElementScheme> finiteElements, int[] firstBoundaryNodes, FiniteElementScheme[] sources,
         IList<FiniteElementScheme> receivingLines)
         BuildWellArea(WellArea wellDomain, int stepsCount, double q, double[] x, double[] y, double[] zW,
             List<Node> nodes, IList<int> boundaryNodes, IList<FiniteElementScheme> finiteElementSchemes, IList<FiniteElementScheme>? sources = null!)
     {
         for (var i = 0; i < nodes.Count; i++)
         {
+            nodes[i].X = Math.Round(nodes[i].X, 4);
             nodes[i].Y = Math.Round(nodes[i].Y, 4);
         }
 
@@ -81,13 +82,20 @@ public static class WellNodeFactory
 
         TransformLocalNumericInGlobal(schemes, newNodes, globalNodesIndexes);
 
-        var source = GetSourceElementScheme(wellDomain.SourceZ, supportLines, globalNodesIndexes, zW, wellDomain.FormulaNumber);
+        var newSources = new List<FiniteElementScheme>();
+
+        foreach (var sourceValue in wellDomain.SourceZ)
+        {
+            var source = GetSourceElementScheme(sourceValue, supportLines, globalNodesIndexes, zW, wellDomain.FormulaNumber);
+            newSources.Add(source);
+        }
+
         var firstBoundaryNodes = GetFirstBoundaryNodes(supportLines, newNodes, globalNodesIndexes, zW, boundaryX, boundaryY, globalNodesIndexes);
 
         //будем их учитывать как приёмные линии
         var wellElems = GetWellElems(supportLines, globalNodesIndexes, zW);
 
-        return (nodes, schemes, firstBoundaryNodes, source, wellElems);
+        return (nodes, schemes, firstBoundaryNodes, newSources.ToArray(), wellElems);
     }
 
     /// <summary>
@@ -158,11 +166,11 @@ public static class WellNodeFactory
         }
 
         var
-            outerNodesX = ArraySegment<int>
-                .Empty; // nodes.Select((node, i) => (node, i)).Where(pair => Math.Abs(pair.node.X - xW.First()) < TOLERANCE || Math.Abs(pair.node.X - xW.Last()) < TOLERANCE).Select(pair => pair.i);
+            outerNodesX = nodes.Select((node, i) => (node, i)).Where(pair => Math.Abs(pair.node.X - xW.First()) < Tolerance || Math.Abs(pair.node.X - xW.Last()) < Tolerance)
+                .Select(pair => pair.i);
         var
-            outerNodesY = ArraySegment<int>
-                .Empty; //nodes.Select((node, i) => (node, i)).Where(pair => Math.Abs(pair.node.Y - yW.First()) < TOLERANCE || Math.Abs(pair.node.Y - yW.Last()) < TOLERANCE).Select(pair => pair.i);
+            outerNodesY = nodes.Select((node, i) => (node, i)).Where(pair => Math.Abs(pair.node.Y - yW.First()) < Tolerance || Math.Abs(pair.node.Y - yW.Last()) < Tolerance)
+                .Select(pair => pair.i);
         var outerNodesZ = nodes.Where(node => Math.Abs(node.Z - zW.First()) < Tolerance || Math.Abs(node.Z - zW.Last()) < Tolerance);
 
         var firstBoundaryNodesGlobalIndexes = outerNodesZ.Select(node => globalIndexes[node]);
@@ -420,9 +428,9 @@ public record WellArea : Area<double>
 
     public double YCenter => (YTop + YBottom) / 2;
 
-    public double SourceZ { get; }
+    public double[] SourceZ { get; }
 
-    public WellArea(double XLeft, double XRight, double YBottom, double YTop, double ZBack, double ZFront, int FormulaNumber, double sourceZ,
+    public WellArea(double XLeft, double XRight, double YBottom, double YTop, double ZBack, double ZFront, int FormulaNumber, double[] sourceZ,
         WellDomainSettings wellDomainSettings) : base(XLeft, XRight, YBottom, YTop, ZBack, ZFront, FormulaNumber, EAreaType.Well)
     {
         WellDomainSettings = wellDomainSettings;

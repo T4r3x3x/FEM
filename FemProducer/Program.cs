@@ -11,9 +11,6 @@ using Grid.Factories.ElementFactory.Implemenations;
 using Grid.Factories.GridFactories.Implementations;
 using Grid.Factories.GridFactories.Interfaces;
 using Grid.Factories.NodeFactory.Implementations;
-using Grid.Models;
-
-using MathModels.Models;
 
 using SlaeSolver.Implementations.Factories;
 using SlaeSolver.Interfaces;
@@ -24,7 +21,8 @@ namespace FemProducer;
 
 internal class Program
 {
-    private const string ConfigureFile = "ConfigureTask.json";
+    private const string ConfigureFile = "ConfigureTask225.json";
+    private const string ConfigureFileAdditionalField = "ConfigureTask.json";
     private const string OutputFile = "output.txt";
 
     private static void Main()
@@ -34,32 +32,41 @@ internal class Program
         var sw = new System.Diagnostics.Stopwatch();
 
         IConfigureReader taskBuilder = new JsonConfigureReader(ConfigureFile);
+        //  IConfigureReader additionalTaskBuilder = new JsonConfigureReader(ConfigureFileAdditionalField);
 
         var problemParameters = taskBuilder.GetProblemParameters();
         var solverParameters = taskBuilder.GetSolverParameters();
         var gridParameters = taskBuilder.GetGridParameters();
 
+        //   var additionalGridParameters = additionalTaskBuilder.GetGridParameters();
 
         IGridFactory gridFactory = new GridFactory(new CubeElementFactory(), new QuadrilateralNodeFactory(), new());
         ISolverFactory solverFactory = new SolverFactory();
 
         var solver = solverFactory.CreateSolver(solverParameters);
         var grid = gridFactory.GetGrid(gridParameters);
+        //    var additionalGrid = gridFactory.GetGrid(additionalGridParameters);
 
 
         Messages.PrintSuccessMessage("The grid was built!");
 
         var problemService = new ProblemService(problemParameters);
+        //   var additionalFieldProblemService = new AdditionalFieldProblemService(problemParameters);
+        //  additionalFieldProblemService.NodesIndexes = grid.NodesIndexes;
 
         var solutionService = new SolutionService(problemService, grid);
+        //   var additionalSolutionService = new SolutionService(additionalFieldProblemService, additionalGrid);
 
         var matrixFactory = new MatrixFactory.MatrixFactory();
-
-        var collectorBase = new CollectorBase(grid, matrixFactory, problemService, new LinearHexagonsBasis(problemService));
+        var basis = new LinearCubeBasis(problemService);
+        var collectorBase = new CollectorBase(grid, matrixFactory, problemService, basis);
+        //  var additionalFieldCollectorBase = new CollectorBase(additionalGrid, matrixFactory, additionalFieldProblemService, new LinearCubeBasis(problemService));
 
         // AbstractCollector timeCollector = new TimeCollector(solutionService, collectorBase, grid, matrixFactory);
         AbstractCollector timeCollector = new EllipticCollector(collectorBase, grid, matrixFactory);
+        //   AbstractCollector additionalCollector = new EllipticCollector(additionalFieldCollectorBase, additionalGrid, matrixFactory);
         var resultsService = new ResultsService<TxtLogger>(new("results"), grid, solutionService, problemService);
+        //     var additionalResultsService = new ResultsService<TxtLogger>(new("results"), additionalGrid, additionalSolutionService, additionalFieldProblemService);
 
         resultsService.WriteGrid("grid.txt", gridParameters);
         Processes.OpenPythonScript(@"PythonScripts\grid2d.py", "C:\\Users\\hardb\\source\\repos\\FEM\\FemProducer\\bin\\Debug\\net8.0\\grid.txt",
@@ -69,25 +76,37 @@ internal class Program
             "Oxz", "red", "xz");
 
         IProblemSolver problemSolver = new TimeProblemSolver(solver, solutionService, timeCollector, resultsService, gridParameters, grid);
+        // IProblemSolver additionalProblemSolver = new TimeProblemSolver(solver, additionalSolutionService, additionalCollector, additionalResultsService, additionalGridParameters, additionalGrid);
 
         sw.Start();
 
         problemSolver.Solve(ConfigureFile, OutputFile);
 
-        resultsService.PrintResult(0, true);
+        //    additionalFieldProblemService.Q = solutionService.NumericalSolves[0];
 
-        GetVDifference(solutionService.NumericalSolves[0], grid);
+        //  additionalProblemSolver.Solve(ConfigureFile, OutputFile);
+
+        // var center = additionalGrid.NodesIndexes.Where(x => x.Key.Z == -15 && x.Key.Y >= 60 && x.Key.Y <= 90 && x.Key.X >= 60 && x.Key.X <= 90);
+        //
+        foreach (var receivingLineFiniteScheme in grid.ReceivingLines)
+        {
+            var element = grid.GetFiniteElement(receivingLineFiniteScheme);
+            var indexes = receivingLineFiniteScheme.NodesIndexes;
+            var solution = solutionService.NumericalSolves[0];
+            double[] valuesInNodes =
+            [
+                solution[indexes[0]], solution[indexes[1]], solution[indexes[2]], solution[indexes[3]], solution[indexes[4]], solution[indexes[5]], solution[indexes[6]],
+                solution[indexes[7]]
+            ];
+            Console.WriteLine(LinearCubeBasis.GetValueInElementCenter(element, valuesInNodes));
+        }
+
+        resultsService.PrintResult(0, false);
 
         Messages.PrintSuccessMessage("program work time: " + sw.ElapsedMilliseconds);
 
         Processes.OpenPythonScript(@"PythonScripts\temperature.py");
 
         Console.ReadKey();
-    }
-
-    private static void GetVDifference(Vector solution, GridModel grid)
-    {
-        foreach (var scheme in grid.ReceivingLines)
-            Console.WriteLine(Math.Abs(solution[scheme.NodesIndexes[0]] - solution[scheme.NodesIndexes[4]]));
     }
 }

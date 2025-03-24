@@ -67,9 +67,9 @@ public class ProblemService(ProblemParameters problemParameters)
         var x = node.X;
         var y = node.Y;
         var z = node.Z;
+
         return Lambda(formulaNumber) * formulaNumber switch
         {
-
             _ => throw new ArgumentException($"Гамма для формулы {formulaNumber} не задана!")
         };
     }

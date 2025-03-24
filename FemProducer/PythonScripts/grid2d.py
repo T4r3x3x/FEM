@@ -36,12 +36,12 @@ temp = []
 temp2 = []
 #boundaries = f.readline().split(' ')
 
-leftBoundary = -250
-rightBoundary = 250
+leftBoundary = -1000
+rightBoundary = 550
 ax[0].set_xlim(leftBoundary, rightBoundary)
 ax[0].set_ylim(leftBoundary, rightBoundary)
-ax[1].set_xlim(leftBoundary, rightBoundary)
-ax[1].set_ylim(leftBoundary, rightBoundary)
+ax[1].set_xlim(-1050, 1050)
+ax[1].set_ylim(-50, 350)
 # ax.set_xlim(float(boundaries[0]), float(boundaries[1]))
 # ax.set_ylim(float(boundaries[2]), float(boundaries[3]))
 #subdomainsCount = int(f.readline())

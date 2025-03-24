@@ -6,7 +6,6 @@ using Grid.Factories.NodeFactory.Interfaces;
 using Grid.Models;
 using Grid.Models.InputModels;
 
-using MathModels;
 using MathModels.Models;
 
 using static Grid.Factories.AxisFactory;
@@ -43,23 +42,36 @@ public class GridFactory(AbstractElementFactory elementFactory, INodeFactory nod
 
 
         #region wells
-        var wellDomain = new WellArea(-70, -60, -70, -60, 0, 300, 0, 50, new(0.1, false));
+        //на одно линии
+        //var wellDomain = new WellArea(-110, -100, -5, 5, 0, 300, 0, [100, 200], new(0.1, false));
+
+
+        var wellDomain = new WellArea(-110, -100, -70, -60, 0, 300, 0, [100, 200], new(0.1, false));
         var res = WellNodeFactory.BuildWellArea(wellDomain, 4, 1, coordinates.X, coordinates.Y, coordinates.Z, nodes, boundaryNodes.Item1, elements, sources);
         nodes = (List<Node>)res.nodes;
         elements.AddRange(res.finiteElements);
         boundaryNodes.Item1 = boundaryNodes.Item1.Concat(res.firstBoundaryNodes).ToArray();
-        sources.Add(res.source);
 
-        wellDomain = new(60, 70, 60, 70, 0, 300, 1, 50, new(0.1, false));
+        sources.AddRange(res.sources);
+        wellDomain = new(100, 110, 60, 70, 0, 300, 1, [50], new(0.1, false));
+        //на одной линии
+        //wellDomain = new(100, 110, -5, 5, 0, 300, 1, [50], new(0.1, false));
         res = WellNodeFactory.BuildWellArea(wellDomain, 4, 1, coordinates.X, coordinates.Y, coordinates.Z, nodes, boundaryNodes.Item1, elements, sources);
         nodes = (List<Node>)res.nodes;
         elements.AddRange(res.finiteElements);
         boundaryNodes.Item1 = boundaryNodes.Item1.Concat(res.firstBoundaryNodes).ToArray();
-        sources.Add(res.source);
+
+        var receivingLines = res.receivingLines.ToList();
+        // во второй только приёмные линии
+        //  foreach (var source in res.sources)
+        //      sources.Add(source);
+
+        //задаём второй источник с обратной по модулю силой
+        sources[1].FormulaNumber = 1;
         #endregion
 
         return new(elements, nodes ?? throw new("Nodes is null!"), boundaryNodes.Item1.Order(), boundaryNodes.Item2, boundaryNodes.Item3, realSubdomains,
-            nodesInElementCount, coordinates.X, coordinates.Y, coordinates.Z, @params.Areas, sources, nodesIndexes, res.receivingLines.ToList(), t);
+            nodesInElementCount, coordinates.X, coordinates.Y, coordinates.Z, @params.Areas, sources, nodesIndexes, receivingLines, t);
     }
 
     private static int CalculateNodesCountInElement(GridDimensional dimensional) => (int)Math.Pow(2, (int)dimensional);

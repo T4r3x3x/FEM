@@ -1,9 +1,5 @@
 ﻿using FemProducer.Models;
 
-using Grid.Models;
-
-using MathModels.Models;
-
 namespace FemProducer.Services;
 
 public class BaseProblemService(ProblemParameters problemParameters) : ProblemService(problemParameters)
